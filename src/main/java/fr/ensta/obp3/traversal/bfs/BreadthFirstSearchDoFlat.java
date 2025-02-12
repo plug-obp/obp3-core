@@ -7,10 +7,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class BreadthFirstSearch<V> {
+public class BreadthFirstSearchDoFlat<V> {
     RootedGraph<V> graph;
 
-    public BreadthFirstSearch(RootedGraph<V> graph) {
+    public BreadthFirstSearchDoFlat(RootedGraph<V> graph) {
         this.graph = graph;
     }
 
@@ -18,18 +18,19 @@ public class BreadthFirstSearch<V> {
         var known = new HashSet<V>();
         var frontier = new ArrayDeque<V>();
         Iterator<V> neighbours = this.graph.roots();
-        while (!frontier.isEmpty() || neighbours.hasNext()) {
-            for (Iterator<V> it = neighbours; it.hasNext(); ) {
-                V v = it.next();
+        do {
+            if (neighbours.hasNext()) {
+                V v = neighbours.next();
                 if (!known.contains(v)) {
                     known.add(v);
                     frontier.addLast(v);
                 }
-            }
-            if (!frontier.isEmpty()) {
+                continue;
+            } else if (!frontier.isEmpty()) {
                 neighbours = this.graph.neighbours(frontier.removeFirst());
+                continue;
             }
-        }
-        return known;
+            return known;
+        } while (true);
     }
 }
