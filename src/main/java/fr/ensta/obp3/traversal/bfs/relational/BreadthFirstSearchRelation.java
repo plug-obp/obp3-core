@@ -20,25 +20,22 @@ public class BreadthFirstSearchRelation<V>
 
     @Override
     public Optional<BreadthFirstSearchConfiguration<V>> initial() {
-        return Optional.of(new BreadthFirstSearchConfiguration<>(null, new HashSet<>(), new ArrayDeque<>()));
+        return Optional.of(new BreadthFirstSearchConfiguration<>(new PeekableIterator<>(graph.roots()), new HashSet<>(), new ArrayDeque<>()));
     }
 
     @Override
     public Optional<BreadthFirstSearchAction<V>> actions(BreadthFirstSearchConfiguration<V> configuration) {
         var neighboursIterator = configuration.neighboursIterator();
-        if (neighboursIterator == null) {
-            return Optional.of(BreadthFirstSearchAction.initializeA());
-        }
         // we have at least one more neighbour check it against the known
         if (neighboursIterator.hasNext()) {
             V vertex = neighboursIterator.peek();
             return Optional.of(configuration.known().contains(vertex) ?
-                    BreadthFirstSearchAction.inKnownA() :
-                    BreadthFirstSearchAction.notInKnownA(vertex));
+                    new KnownConfigurationAction<>(vertex) :
+                    new UnknownConfigurationAction<>(vertex));
         }
         // if no more neighbours of the previous source, get a new one from the frontier
         if (!configuration.frontier().isEmpty()) {
-            return Optional.of(BreadthFirstSearchAction.discoverA());
+            return Optional.of(new DiscoverNeighboursAction<>(configuration.frontier().peekFirst()));
         }
         // at end if the iterator is at end and the frontier is empty
         return Optional.empty();
@@ -46,35 +43,26 @@ public class BreadthFirstSearchRelation<V>
 
     @Override
     public Optional<BreadthFirstSearchConfiguration<V>> execute(BreadthFirstSearchAction<V> action, BreadthFirstSearchConfiguration<V> configuration) {
-        if (action instanceof BreadthFirstSearchAction.InitializeAction) {
-            return Optional.of(
-                    new BreadthFirstSearchConfiguration<>(
-                            new PeekableIterator<>(graph.roots()),
-                            configuration.known(),
-                            configuration.frontier()));
+        switch (action) {
+            case DiscoverNeighboursAction<V> _ -> {
+                V first = configuration.frontier().removeFirst();
+                return Optional.of(
+                        new BreadthFirstSearchConfiguration<>(
+                                new PeekableIterator<>(graph.neighbours(first)),
+                                configuration.known(),
+                                configuration.frontier()));
+            }
+            case KnownConfigurationAction<V> _ -> {
+                configuration.neighboursIterator().next();
+                return Optional.of(configuration);
+            }
+            case UnknownConfigurationAction<V> (var vertex) -> {
+                configuration.known().add(vertex);
+                configuration.frontier().addLast(vertex);
+
+                return Optional.of(configuration);
+            }
+            case EndAction<V> _ -> { return Optional.empty(); }
         }
-
-        if (action instanceof BreadthFirstSearchAction.DiscoverAction) {
-            V first = configuration.frontier().removeFirst();
-            return Optional.of(
-                    new BreadthFirstSearchConfiguration<>(
-                            new PeekableIterator<>(graph.neighbours(first)),
-                            configuration.known(),
-                            configuration.frontier()));
-        }
-
-        if (action instanceof BreadthFirstSearchAction.InKnownAction<V>) {
-            configuration.neighboursIterator().next();
-            return Optional.of(configuration);
-        }
-
-        if (action instanceof BreadthFirstSearchAction.NotInKnownAction<V> v) {
-            configuration.known().add(v.vertex);
-            configuration.frontier().addLast(v.vertex);
-
-            return Optional.of(configuration);
-        }
-
-        return Optional.empty();
     }
 }
