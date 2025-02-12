@@ -2,7 +2,7 @@ package fr.ensta;
 
 import fr.ensta.obp3.RootedGraph;
 import fr.ensta.obp3.Sequencer;
-import fr.ensta.obp3.traversal.bfs.BreadthFirstSearch;
+import fr.ensta.obp3.traversal.bfs.BreadthFirstSearchWhile;
 import fr.ensta.obp3.traversal.bfs.BreadthFirstSearchDo;
 import fr.ensta.obp3.traversal.bfs.BreadthFirstSearchDoFlat;
 import fr.ensta.obp3.traversal.bfs.relational.BreadthFirstSearchRelation;
@@ -28,7 +28,7 @@ public class Main {
         var time = timeIt((g) -> {
             var algo0 = new BreadthFirstSearchRelation<>(g);
             var sequencer0 = new Sequencer<>(algo0);
-            var configuration = sequencer0.run();
+            var configuration = sequencer0.runAlone();
             configs[0] = configuration.map(c -> c.known().size()).orElse(0);
         }, graph);
 
@@ -38,8 +38,8 @@ public class Main {
     public static long [] simpleBFS(RootedGraph<?> graph) {
         var configs = new int[1];
         var time = timeIt((g) -> {
-            var bfs = new BreadthFirstSearch<>(g);
-            var known = bfs.run();
+            var bfs = new BreadthFirstSearchWhile<>(g);
+            var known = bfs.runAlone();
             configs[0] = known.size();
         }, graph);
 
@@ -50,7 +50,7 @@ public class Main {
         var configs = new int[1];
         var time = timeIt((g) -> {
             var bfs = new BreadthFirstSearchDo<>(g);
-            var known = bfs.run();
+            var known = bfs.runAlone();
             configs[0] = known.size();
         }, graph);
 
@@ -61,7 +61,7 @@ public class Main {
         var configs = new int[1];
         var time = timeIt((g) -> {
             var bfs = new BreadthFirstSearchDoFlat<>(g);
-            var known = bfs.run();
+            var known = bfs.runAlone();
             configs[0] = known.size();
         }, graph);
 
