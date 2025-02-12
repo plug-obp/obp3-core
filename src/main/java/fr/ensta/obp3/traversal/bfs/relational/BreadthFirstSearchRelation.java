@@ -1,8 +1,8 @@
-package fr.ensta.traversal.bfs.relational;
+package fr.ensta.obp3.traversal.bfs.relational;
 
-import fr.ensta.DeterministicSemanticRelation;
+import fr.ensta.obp3.sli.core.DeterministicSemanticRelation;
 import fr.ensta.PeekableIterator;
-import fr.ensta.RootedGraph;
+import fr.ensta.obp3.RootedGraph;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;

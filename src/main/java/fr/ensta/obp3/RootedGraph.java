@@ -1,4 +1,4 @@
-package fr.ensta;
+package fr.ensta.obp3;
 
 import java.util.Iterator;
 

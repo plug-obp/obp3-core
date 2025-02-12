@@ -1,4 +1,6 @@
-package fr.ensta;
+package fr.ensta.obp3;
+
+import fr.ensta.obp3.sli.core.DeterministicSemanticRelation;
 
 import java.util.Optional;
 

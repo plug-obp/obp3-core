@@ -1,4 +1,4 @@
-package fr.ensta.traversal.bfs.relational;
+package fr.ensta.obp3.traversal.bfs.relational;
 
 // The parent abstract union type
 public abstract class BreadthFirstSearchAction<V> {

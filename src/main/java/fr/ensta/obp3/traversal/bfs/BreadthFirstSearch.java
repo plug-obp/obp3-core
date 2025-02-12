@@ -1,6 +1,6 @@
-package fr.ensta.traversal.bfs;
+package fr.ensta.obp3.traversal.bfs;
 
-import fr.ensta.RootedGraph;
+import fr.ensta.obp3.RootedGraph;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
