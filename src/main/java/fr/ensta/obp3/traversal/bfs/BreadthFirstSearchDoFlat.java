@@ -1,6 +1,6 @@
 package fr.ensta.obp3.traversal.bfs;
 
-import fr.ensta.obp3.IExecutionController;
+import fr.ensta.obp3.IExecutable;
 import fr.ensta.obp3.RootedGraph;
 
 import java.util.ArrayDeque;
@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 
-public class BreadthFirstSearchDoFlat<V> implements IExecutionController<Set<V>>  {
+public class BreadthFirstSearchDoFlat<V> implements IExecutable<Set<V>> {
     RootedGraph<V> graph;
 
     public BreadthFirstSearchDoFlat(RootedGraph<V> graph) {

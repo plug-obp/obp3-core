@@ -1,6 +1,6 @@
 package fr.ensta.obp3.traversal.bfs;
 
-import fr.ensta.obp3.IExecutionController;
+import fr.ensta.obp3.IExecutable;
 import fr.ensta.obp3.RootedGraph;
 import fr.ensta.obp3.Sequencer;
 import fr.ensta.obp3.traversal.bfs.relational.BreadthFirstSearchConfiguration;
@@ -9,7 +9,7 @@ import fr.ensta.obp3.traversal.bfs.relational.BreadthFirstSearchRelation;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 
-public class BreadthFirstSearchRelational<V> implements IExecutionController<Set<V>> {
+public class BreadthFirstSearchRelational<V> implements IExecutable<Set<V>> {
     RootedGraph<V> graph;
 
     public BreadthFirstSearchRelational(RootedGraph<V> graph) {

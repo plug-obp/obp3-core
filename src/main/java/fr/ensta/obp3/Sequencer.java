@@ -5,7 +5,7 @@ import fr.ensta.obp3.sli.core.DeterministicSemanticRelation;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
-public class Sequencer<A, C> implements IExecutionController<Optional<C>> {
+public class Sequencer<A, C> implements IExecutable<Optional<C>> {
     DeterministicSemanticRelation<A, C> operand;
 
     public Sequencer(DeterministicSemanticRelation<A, C> operand) {
