@@ -59,47 +59,18 @@ public class Main {
 
     public static void main(String[] args) {
         var seed = System.nanoTime();
-        var lrg = new LimitedRandomGraph(1000000, 30, seed);
-
-        var rel = relationalBFS(lrg);
-        out.println("rel analyzed : " + rel[1] + " configurations in " + rel[0] + " ms");
+        RootedGraph<?> lrg;
 
         lrg = new LimitedRandomGraph(1000000, 30, seed);
         var simple = simpleBFS(lrg);
         out.println("simple analyzed : " + simple[1] + " configurations in " + simple[0] + " ms");
 
+        lrg = new LimitedRandomGraph(1000000, 30, seed);
+        var doB = doBFS(lrg);
+        out.println("do analyzed : " + doB[1] + " configurations in " + doB[0] + " ms");
 
-        var graph = new HashMap<Integer, Integer[]>() {{
-            put(1, new Integer[]{1, 2});
-            put(2, new Integer[]{2, 3, 1});
-        }};
-        var drg = new DictionaryRootedGraph<>(new Integer[]{2}, graph);
-        rel = relationalBFS(drg);
+        lrg = new LimitedRandomGraph(1000000, 30, seed);
+        var rel = relationalBFS(lrg);
         out.println("rel analyzed : " + rel[1] + " configurations in " + rel[0] + " ms");
-
-        for (int i = 1; i < 10; i++) {
-
-            int finalI = i * 100000;
-            var lamrg = new RootedGraph<Integer>() {
-
-                @Override
-                public Iterator<Integer> roots() {
-                    return Arrays.stream(new Integer[]{1}).iterator();
-                }
-
-                @Override
-                public Iterator<Integer> neighbours(Integer o) {
-                    if (o > finalI) return Collections.emptyIterator();
-                    return Arrays.stream(new Integer[]{o + 1, o + 2}).iterator();
-                }
-            };
-
-            out.println(finalI);
-            rel = relationalBFS(lamrg);
-            out.println("rel analyzed : " + rel[1] + " configurations in " + rel[0] + " ms");
-
-            simple = simpleBFS(lamrg);
-            out.println("simple analyzed : " + simple[1] + " configurations in " + simple[0] + " ms");
-        }
     }
 }
