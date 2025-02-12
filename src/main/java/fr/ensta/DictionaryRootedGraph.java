@@ -7,6 +7,16 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
+/**  A dictionary-based rooted graph:
+    {@snippet :
+        var graph = new HashMap<Integer, Integer[]>() {{
+            put(1, new Integer[]{1, 2});
+            put(2, new Integer[]{2, 3, 1});
+        }};
+        var drg = new DictionaryRootedGraph<>(new Integer[]{2}, graph);
+    }
+ */
+
 public class DictionaryRootedGraph<V> implements RootedGraph<V> {
     V[] roots;
     Map<V, V[]> dictionary;
