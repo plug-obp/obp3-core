@@ -1,9 +1,9 @@
 package fr.ensta.obp3.bench;
 
-import fr.ensta.LimitedRandomGraph;
-import fr.ensta.obp3.traversal.bfs.BreadthFirstSearchDoFlat;
-import fr.ensta.obp3.traversal.bfs.BreadthFirstSearchRelational;
-import fr.ensta.obp3.traversal.bfs.BreadthFirstSearchWhile;
+import fr.ensta.LimitedRandomRootedGraph;
+import fr.ensta.obp3.traversal.bfs.BreadthFirstTraversalDoFlat;
+import fr.ensta.obp3.traversal.bfs.BreadthFirstTraversalRelational;
+import fr.ensta.obp3.traversal.bfs.BreadthFirstTraversalWhile;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
@@ -19,29 +19,29 @@ public class BFSBench {
     int width = 30;
     long seed = System.nanoTime();
 
-    LimitedRandomGraph lrg = new LimitedRandomGraph(limit, width, seed);
+    LimitedRandomRootedGraph lrg = new LimitedRandomRootedGraph(limit, width, seed);
 
     @Benchmark
     public void simpleBFS(Blackhole blackhole) {
-        var bfs = new BreadthFirstSearchWhile<>(lrg);
+        var bfs = new BreadthFirstTraversalWhile<>(lrg);
         var known = bfs.runAlone();
         blackhole.consume(known);
     }
     @Benchmark
     public void doBFS(Blackhole blackhole) {
-        var bfs = new BreadthFirstSearchDoFlat<>(lrg);
+        var bfs = new BreadthFirstTraversalDoFlat<>(lrg);
         var known = bfs.runAlone();
         blackhole.consume(known);
     }
     @Benchmark
     public void doFlatBFS(Blackhole blackhole) {
-        var bfs = new BreadthFirstSearchDoFlat<>(lrg);
+        var bfs = new BreadthFirstTraversalDoFlat<>(lrg);
         var known = bfs.runAlone();
         blackhole.consume(known);
     }
     @Benchmark
     public void relationalBFS(Blackhole blackhole) {
-        var bfs = new BreadthFirstSearchRelational<>(lrg);
+        var bfs = new BreadthFirstTraversalRelational<>(lrg);
         var known = bfs.runAlone();
         blackhole.consume(known);
     }
