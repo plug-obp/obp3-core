@@ -5,7 +5,7 @@ plugins {
     id 'org.graalvm.buildtools.native' version '0.10.5'
 }
 
-group = 'fr.ensta'
+group = 'fr.ensta-bretagne'
 version = '1.0-SNAPSHOT'
 
 repositories {
@@ -29,11 +29,8 @@ dependencies {
 }
 
 application {
-    mainClass = "fr.ensta.Main"
+    mainClass = "obp3.things.Main"
 }
-//run {
-//    jvmArgs = [   '--add-exports=jdk.internal.vm.ci/jdk.vm.ci.services=ALL-UNNAMED']
-//}
 
 test {
     useJUnitPlatform()
@@ -41,26 +38,20 @@ test {
 
 graalvmNative {
     binaries.all {
-        verbose=true
+        verbose = true
     }
     binaries.main {
         // options to configure the main binary
         imageName = 'obp3-algos'
-        mainClass = 'fr.ensta.Main'
-        buildArgs.addAll( '-march=native') // enables additional compiler optimizations
+        mainClass = 'obp3.things.Main'
+        buildArgs.addAll(
+//                '--pgo'
+                '-march=native'
+//                ,'--gc=G1' // available only on Linux AMD64 and AArch64
+                ,'--enable-preview'
+                ,'--initialize-at-build-time=all'
+                ,'--no-fallback'
+                ,'--native-compiler-options=-O3'
+        ) // enables additional compiler optimizations
     }
-//    binaries {
-//        all {
-//            buildArgs.add('--no-fallback')
-//            imageName = "obp3-algos"
-//        }
-//    }
 }
-
-//tasks.withType<JavaCompile> {
-//    options.compilerArgs.addAll(arrayOf(
-//            "--add-exports", "jdk.internal.vm.ci/jdk.vm.ci.services=ALL-UNNAMED"
-//    ))
-//}
-
-//--add-exports=jdk.internal.vm.ci/jdk.vm.ci.services=ALL-UNNAMED
