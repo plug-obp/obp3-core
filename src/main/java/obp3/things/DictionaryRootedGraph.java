@@ -36,7 +36,7 @@ public class DictionaryRootedGraph<V> implements IRootedGraph<V> {
         return Arrays.stream(neighbors).iterator();
     }
 
-    public final static DictionaryRootedGraph<Integer> example1() {
+    public static DictionaryRootedGraph<Integer> example1() {
         var graph = new HashMap<Integer, Integer[]>() {{
             put(1, new Integer[]{1, 2, 4});
             put(2, new Integer[]{3, 2});
