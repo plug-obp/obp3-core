@@ -1,7 +1,7 @@
 package obp3.traversal.dfs.relational;
 
 import obp3.things.PeekableIterator;
-import obp3.IRootedGraph;
+import obp3.sli.core.IRootedGraph;
 import obp3.sli.core.DeterministicSemanticRelation;
 import obp3.traversal.dfs.DepthFirstTraversalConfiguration;
 

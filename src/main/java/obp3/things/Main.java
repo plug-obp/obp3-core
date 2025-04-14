@@ -1,7 +1,7 @@
 package obp3.things;
 
 import obp3.IExecutable;
-import obp3.IRootedGraph;
+import obp3.sli.core.IRootedGraph;
 import obp3.traversal.bfs.BreadthFirstTraversalRelational;
 import obp3.traversal.bfs.BreadthFirstTraversalWhile;
 import obp3.traversal.bfs.BreadthFirstTraversalDo;

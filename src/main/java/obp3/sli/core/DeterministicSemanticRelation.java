@@ -7,5 +7,24 @@ public interface DeterministicSemanticRelation<A, C> {
 
     Optional<A> actions(C configuration);
 
+
     Optional<C> execute(A action, C configuration);
+
+    /**
+     * By default, we suppose that a language runtime has side effects.
+     * That is the action function modifies the input configuration.
+     *
+     * If a language semantics does not have action side effects it should override this function for less overhead.
+     * @return true, if the actions function is pure
+     * */
+    default boolean actionsIsPure() { return false; }
+
+    /**
+     * By default, we suppose that a language runtime has side effects.
+     * That is the execute function modifies the input configuration.
+     *
+     * If a language semantics does not have action side effects it should override this function for less overhead.
+     * @return true, if the execute function is pure
+     * */
+    default boolean executeIsPure() { return false; }
 }

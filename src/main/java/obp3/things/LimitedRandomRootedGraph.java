@@ -1,6 +1,6 @@
 package obp3.things;
 
-import obp3.IRootedGraph;
+import obp3.sli.core.IRootedGraph;
 
 import java.util.Collections;
 import java.util.Iterator;

@@ -3,6 +3,7 @@ plugins {
     id 'application'
     id "me.champeau.jmh" version "0.7.2"
     id 'org.graalvm.buildtools.native' version '0.10.5'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 group = 'fr.ensta-bretagne'
@@ -18,7 +19,18 @@ java {
     }
 }
 
+javafx {
+    version = "23"
+    modules = [ 'javafx.controls' ]
+}
+
 dependencies {
+
+    // Icons sets (see http://aalmiray.github.io/ikonli)
+    implementation 'org.kordamp.ikonli:ikonli-javafx:2.1.1'
+    implementation 'org.kordamp.ikonli:ikonli-material-pack:2.1.1'
+    implementation 'org.kordamp.ikonli:ikonli-typicons-pack:2.1.1'
+
     compileOnly('org.graalvm.sdk:graal-sdk:24.1.2')
     compileOnly('org.graalvm.nativeimage:svm:24.1.2')
 
@@ -29,7 +41,7 @@ dependencies {
 }
 
 application {
-    mainClass = "obp3.things.Main"
+    mainClass = "obp3.things.JFXExecutableListApp"
 }
 
 test {
@@ -52,6 +64,7 @@ graalvmNative {
                 ,'--initialize-at-build-time=all'
                 ,'--no-fallback'
                 ,'--native-compiler-options=-O3'
+                ,'-O3'
         ) // enables additional compiler optimizations
     }
 }

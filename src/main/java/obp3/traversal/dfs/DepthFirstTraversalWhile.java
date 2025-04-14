@@ -2,7 +2,7 @@ package obp3.traversal.dfs;
 
 import obp3.things.PeekableIterator;
 import obp3.IExecutable;
-import obp3.IRootedGraph;
+import obp3.sli.core.IRootedGraph;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;
