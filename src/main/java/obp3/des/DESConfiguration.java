@@ -5,10 +5,9 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 public class DESConfiguration<D> {
-    long currentTime;
+    public long currentTime;
     long endTime;
-    D data;
-
+    public D data;
     PriorityQueue<Event<D>> events = new PriorityQueue<>();
 
     public DESConfiguration(D data, long endTime, Event<D> startEvent) {
@@ -22,7 +21,7 @@ public class DESConfiguration<D> {
         this.events.add(startEvent);
     }
 
-    void schedule(Event<D> event) {
+    public void schedule(Event<D> event) {
         //don't schedule events in the past
         if (event.time() < currentTime) { return; }
         events.add(event);
@@ -53,6 +52,6 @@ public class DESConfiguration<D> {
 
     void processEvent(Event<D> event) {
         if (event == null) { return; }
-        data = event.action().apply(data);
+        event.action().accept(this);
     }
 }
