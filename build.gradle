@@ -41,7 +41,8 @@ dependencies {
 }
 
 application {
-    mainClass = "obp3.things.JFXExecutableListApp"
+    mainClass = "objectbrowser.ObjectBrowser"
+    //mainClass = "obp3.things.JFXExecutableListApp"
 }
 
 test {
