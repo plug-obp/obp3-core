@@ -1,12 +1,17 @@
 package obp3.des;
 
+import obp3.sli.core.support.Clonable;
 import obp3.sli.core.SemanticRelation;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DESSemantics<D> implements SemanticRelation<DESAction<D>, DESConfiguration<D>> {
+public class DESSemantics<D extends Clonable<D>> implements SemanticRelation<DESAction<D>, DESConfiguration<D>> {
     DESConfiguration<D> initialConfiguration;
+
+    public DESSemantics(DESConfiguration<D> initialConfiguration) {
+        this.initialConfiguration = initialConfiguration;
+    }
 
     @Override
     public List<DESConfiguration<D>> initial() {
@@ -28,7 +33,10 @@ public class DESSemantics<D> implements SemanticRelation<DESAction<D>, DESConfig
 
     @Override
     public List<DESConfiguration<D>> execute(DESAction<D> action, DESConfiguration<D> configuration) {
-        var target = action.execute(configuration);
+        var source = configuration.clone();
+        System.out.print(configuration + "--" + action + "->");
+        var target = action.execute(source);
+        System.out.println(target);
         return List.of(target);
     }
 }

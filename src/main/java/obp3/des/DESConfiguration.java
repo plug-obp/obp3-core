@@ -1,24 +1,31 @@
 package obp3.des;
 
+import obp3.sli.core.support.Clonable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class DESConfiguration<D> {
+public class DESConfiguration<D extends Clonable<D>> implements Clonable<DESConfiguration<D>> {
     public long currentTime;
     long endTime;
     public D data;
-    PriorityQueue<Event<D>> events = new PriorityQueue<>();
+    PriorityQueue<Event<D>> events;
 
     public DESConfiguration(D data, long endTime, Event<D> startEvent) {
         this(data, 0, endTime, startEvent);
     }
 
     public DESConfiguration(D data, long currentTime, long endTime, Event<D> startEvent) {
+        this(data, currentTime, endTime, new PriorityQueue<>());
+        this.events.add(startEvent);
+    }
+
+    public DESConfiguration(D data, long currentTime, long endTime, PriorityQueue<Event<D>> events) {
         this.data = data;
         this.currentTime = currentTime;
         this.endTime = endTime;
-        this.events.add(startEvent);
+        this.events = new PriorityQueue<>(events);
     }
 
     public void schedule(Event<D> event) {
@@ -53,5 +60,19 @@ public class DESConfiguration<D> {
     void processEvent(Event<D> event) {
         if (event == null) { return; }
         event.action().accept(this);
+    }
+
+    public DESConfiguration<D> clone() {
+        return new DESConfiguration<>(data.clone(), currentTime, endTime, events);
+    }
+
+    @Override
+    public String toString() {
+        return "DESConfiguration{" +
+                "currentTime=" + currentTime +
+                ", endTime=" + endTime +
+                ", data=" + data +
+                ", events=" + events +
+                '}';
     }
 }
