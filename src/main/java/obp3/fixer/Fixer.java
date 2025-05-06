@@ -1,0 +1,113 @@
+package obp3.fixer;
+
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
+/// Heavily inspired by:
+/// - FRANCOIS POTTIER,<a href="https://gallium.inria.fr/~fpottier/publis/fpottier-fix.pdf"> Lazy Least Fixed Points in ML</a>
+/// - <a href="https://gitlab.inria.fr/fpottier/fix">OCAML Code</a>
+
+
+public class Fixer<S, T> implements Function<S, T>{
+    Lattice<T> lattice;
+    BiFunction<S, Function<S, T>, T> function;
+
+    /// The permanent table maps variables that have reached a fixed point to properties. It persists forever.
+    Map<S, T> mFixed = new IdentityHashMap<>();
+
+    /// The transient table maps variables that have not yet reached a
+    /// fixed point to nodes. At the beginning of a run, it is empty.
+    /// It fills up during a run.
+    /// At the end of a run, it is copied into the permanent table and cleared.
+    Map<S, T> mTransient = new IdentityHashMap<>();
+    /// Records the observers of a node (The nodes from which reachable)
+    Map<S, List<S>> mParents = new IdentityHashMap<>();
+
+    /// The workset is based on a Queue, but it could just as well be based on a
+    ///    Stack. A textual replacement is possible. It could also be based on a
+    ///    priority queue, provided a sensible way of assigning priorities could
+    ///    be found.
+    ///
+    /// A node in the workset has no successors. (It can have predecessors.)  In
+    ///    other words, a predecessor (an observer) of some node is never in the
+    ///    workset. Furthermore, a node never appears twice in the workset
+    ///
+    /// When a variable broadcasts a signal, all of its predecessors (observers)
+    ///    receive the signal. Any variable that receives the signal loses all of its
+    ///    successors (that is, it ceases to observe anything) and is inserted into
+    ///    the workset. This preserves the above invariant.
+    Queue<S> mWorkset = new LinkedList<>();
+
+    public Fixer(BiFunction<S, Function<S, T>, T> function, Lattice<T> lattice) {
+        this.function = function;
+        this.lattice = lattice;
+    }
+
+    /// The flag 'inactive' prevents reentrant calls by the client.
+    boolean inactive = true;
+
+    /// Invocations of 'apply' trigger the fixed point computation.
+    @Override
+    public T apply(S node) {
+        var property = mFixed.get(node);
+        if (property != null) { return property; }
+        assert inactive;
+        inactive = false;
+        ensureTransient(node);
+        while (!mWorkset.isEmpty()) {
+            var current = mWorkset.poll();
+            solve(current);
+        }
+
+        // copies the transient table into the permanent table, and
+        //    empties the transient table. This allows all nodes to be reclaimed
+        //    by the garbage collector.
+        mFixed.putAll(mTransient);
+        mTransient.clear();
+        inactive = true;
+        return mFixed.get(node);
+    }
+
+    void ensureTransient(S node) {
+        if (mTransient.containsKey(node)) { return; }
+        mTransient.put(node, lattice.bottom());
+        mParents.put(node, new ArrayList<>());
+        mWorkset.add(node);
+    }
+    void solve(S current) {
+        if (mFixed.get(current) != null) return;
+        final List<S> currentChildren = new ArrayList<>();
+
+        // The flag [alive] is used to prevent the client from invoking [request]
+        //     after this interaction phase is over. In theory, this dynamic check seems
+        //      required in order to argue that [request] behaves like a pure function.
+        //      In practice, this check is not very useful: only a bizarre client would
+        //      store a [request] function and invoke it after it has become stale.
+        final boolean[] alive = {true};
+        Function<S, T> requestFunction = (S node) -> {
+            assert alive[0];
+            var property = mFixed.get(node);
+            if (property != null) { return property; }
+            ensureTransient(node);
+            currentChildren.add(node);
+            return mTransient.get(node);
+        };
+
+        var newProperty = function.apply(current, requestFunction); //current.accept(function, requestFunction);
+        alive[0] = false;
+        for (S child : currentChildren) {
+            mParents.putIfAbsent(child, new ArrayList<>()).add(current);
+        }
+
+        // If the updated value differs from the previous value, record
+        // the updated value and send a signal to all observers of [node].
+        if (!lattice.equality().test(mTransient.get(current), newProperty)) {
+            mTransient.put(current, newProperty);
+            //signal the parents because the current value changed
+            for (var observer : mParents.get(current)) {
+                mWorkset.add(observer);
+            }
+        }
+    }
+}
