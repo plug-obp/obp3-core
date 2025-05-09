@@ -14,6 +14,7 @@ repositories {
 }
 
 java {
+    modularity.inferModulePath = true
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(23))
     }
@@ -41,8 +42,8 @@ dependencies {
 }
 
 application {
-    mainClass = "objectbrowser.ObjectBrowser"
-    //mainClass = "obp3.things.JFXExecutableListApp"
+//    mainClass = "objectbrowser.ObjectBrowser"
+    mainClass = "obp3.things.JFXExecutableListApp"
 }
 
 test {

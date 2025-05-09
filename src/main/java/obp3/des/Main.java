@@ -16,7 +16,7 @@ public class Main {
 
         System.out.println("-------------------------------------");
 
-        semantics = new DESSemantics<>(PingPong.initial(5, 2));
+        semantics = new DESSemantics<>(PingPong.initial(10, 2, 1));
         var rr = new SemanticRelation2RootedGraph<>(semantics);
         var dfs = new DepthFirstTraversalRelational<>(rr);
         var r = dfs.runAlone();
