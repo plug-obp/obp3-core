@@ -8,15 +8,19 @@ import java.util.Set;
 public interface IDepthFirstTraversalConfiguration<V> {
     record StackFrame<V>(V vertex, PeekableIterator<V> neighbours) { }
 
+    //access to the inputs
     IRootedGraph<V> getGraph();
 
+    //Stack management
     StackFrame<V> peek();
     void pop();
     void push(StackFrame<V> vertex);
 
 
+    //Known management
     boolean knows(V vertex);
     void add(V vertex);
+
     default void discover(V vertex) {
         add(vertex);
         push(
@@ -25,5 +29,6 @@ public interface IDepthFirstTraversalConfiguration<V> {
                         new PeekableIterator<>(getGraph().neighbours(vertex))));
     }
 
+    //retrieve a set representation of the known if possible
     Set<V> getKnown();
 }
