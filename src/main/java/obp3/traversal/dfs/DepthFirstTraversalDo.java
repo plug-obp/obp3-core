@@ -1,6 +1,5 @@
 package obp3.traversal.dfs;
 
-import obp3.things.PeekableIterator;
 import obp3.IExecutable;
 import obp3.sli.core.IRootedGraph;
 
@@ -16,27 +15,27 @@ public class DepthFirstTraversalDo<V> implements IExecutable<Set<V>> {
 
     @Override
     public Set<V> run(BooleanSupplier hasToTerminateSupplier) {
-        var c = DepthFirstTraversalConfiguration.initial(graph.roots());
+        var configuration = DepthFirstTraversalConfiguration.initial(graph);
         do {
             //check if we have a termination request
-            if (hasToTerminateSupplier.getAsBoolean()) { return c.known; }
+            if (hasToTerminateSupplier.getAsBoolean()) { return configuration.getKnown(); }
 
-            var stackFrame = c.stack.peek();
+            var stackFrame = configuration.peek();
+            if (stackFrame == null) {
+                //at the end no stack frame is left
+                break;
+            }
             var neighboursIterator = stackFrame.neighbours();
 
             if (neighboursIterator.hasNext()) {
                 var neighbour = neighboursIterator.next();
-                if (!c.known.contains(neighbour)) {
-                    c.known.add(neighbour);
-                    c.stack.push(
-                            new DepthFirstTraversalConfiguration.StackFrame<>(
-                                    neighbour,
-                                    new PeekableIterator<>(graph.neighbours(neighbour))));
+                if (!configuration.knows(neighbour)) {
+                    configuration.discover(neighbour);
                 }
                 continue;
             }
-            c.stack.pop();
-        } while (!c.stack.isEmpty());
-        return c.known;
+            configuration.pop();
+        } while (true);
+        return configuration.getKnown();
     }
 }

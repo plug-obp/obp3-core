@@ -66,7 +66,7 @@ public class JFXExecutableListApp extends Application {
                     var executable = p.constructor.apply(graph);
                     return executable;
                 },
-                (Set<Long> r) -> "Explored: " + formater.format(r.size()) + " configurations");
+                (r) -> "Explored: " + formater.format(r.size()) + " configurations");
     }
 
     record Parameters(long limit, int width, long seed, Function<IRootedGraph<Long>, IExecutable<Set<Long>>> constructor){}
