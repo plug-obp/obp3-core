@@ -10,8 +10,8 @@ public class DepthFirstTraversalConfiguration<V> implements IDepthFirstTraversal
     //the rooted graph should be part of the equality ?
     private final IRootedGraph<V> graph;
 
-    private Set<V> known;
-    private Deque<StackFrame<V>> stack;
+    private final Set<V> known;
+    private final Deque<StackFrame<V>> stack;
 
     public DepthFirstTraversalConfiguration(IRootedGraph<V> graph, Set<V> known, Deque<StackFrame<V>> stack) {
         this.graph = graph;

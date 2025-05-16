@@ -17,11 +17,11 @@ public class DepthFirstTraversalWhile<V> implements IExecutable<Set<V>> {
     public Set<V> run(BooleanSupplier hasToTerminateSupplier) {
         var configuration = DepthFirstTraversalConfiguration.initial(graph);
         DepthFirstTraversalConfiguration.StackFrame<V> stackFrame;
-        while ((stackFrame = configuration.peek()) != null) {
+        while (     //did we finish ?
+                    (stackFrame = configuration.peek()) != null
+                    //do we have a termination request ?
+                && !hasToTerminateSupplier.getAsBoolean()) {
             var neighboursIterator = stackFrame.neighbours();
-
-            //check if we have a termination request
-            if (hasToTerminateSupplier.getAsBoolean()) { return configuration.getKnown(); }
 
             if (neighboursIterator.hasNext()) {
                 var neighbour = neighboursIterator.next();
