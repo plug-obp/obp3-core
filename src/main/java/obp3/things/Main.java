@@ -6,9 +6,7 @@ import obp3.traversal.bfs.BreadthFirstTraversalRelational;
 import obp3.traversal.bfs.BreadthFirstTraversalWhile;
 import obp3.traversal.bfs.BreadthFirstTraversalDo;
 import obp3.traversal.bfs.BreadthFirstTraversalDoFlat;
-import obp3.traversal.dfs.DepthFirstTraversalDo;
-import obp3.traversal.dfs.DepthFirstTraversalRelational;
-import obp3.traversal.dfs.DepthFirstTraversalWhile;
+import obp3.traversal.dfs.*;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -18,6 +16,25 @@ import java.util.function.Function;
 import static java.lang.System.out;
 
 public class Main {
+
+    public static <V> void traversalDFS(IRootedGraph<V> graph, Function<IDepthFirstTraversalParameters<V, V>, IExecutable<Set<V>>> constructor) {
+        var start = Instant.now();
+
+        var exe = constructor.apply(new DepthFirstTraversalParameters<>(graph, Function.identity(), null, null, null));
+        var known = exe.runAlone();
+        var size = known.size();
+
+        var finish = Instant.now();
+        var duration = Duration.between(start, finish).toMillis();
+
+        out.println("\t" + graph + " + " + exe.getClass().getSimpleName() + ": " + size + " configurations in " + duration + " ms");
+    }
+
+    public static void limitedRandomTraversalDFS(int limit, int width, long seed, Function<IDepthFirstTraversalParameters<Long, Long>, IExecutable<Set<Long>>> constructor) {
+        var graph = new LimitedRandomRootedGraph(limit, width, seed);
+        traversalDFS(graph, constructor);
+    }
+
 
     public static <V> void traversal(IRootedGraph<V> graph, Function<IRootedGraph<V>, IExecutable<Set<V>>> constructor) {
         var start = Instant.now();
@@ -43,13 +60,13 @@ public class Main {
         var seed = System.nanoTime();
 
         traversal(DictionaryRootedGraph.example1(), BreadthFirstTraversalRelational::new);
-        traversal(DictionaryRootedGraph.example1(), DepthFirstTraversalRelational::new);
+        traversalDFS(DictionaryRootedGraph.example1(), DepthFirstTraversalRelational::new);
 
         out.println("- Depth First Traversal");
 
-        limitedRandomTraversal(limit, width, seed, DepthFirstTraversalWhile::new);
-        limitedRandomTraversal(limit, width, seed, DepthFirstTraversalRelational::new);
-        limitedRandomTraversal(limit, width, seed, DepthFirstTraversalDo::new);
+        limitedRandomTraversalDFS(limit, width, seed, DepthFirstTraversalWhile::new);
+        limitedRandomTraversalDFS(limit, width, seed, DepthFirstTraversalRelational::new);
+        limitedRandomTraversalDFS(limit, width, seed, DepthFirstTraversalDo::new);
 
         out.println("- Breadth First Traversal");
 

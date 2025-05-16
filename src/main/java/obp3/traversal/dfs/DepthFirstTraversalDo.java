@@ -6,16 +6,16 @@ import obp3.sli.core.IRootedGraph;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 
-public class DepthFirstTraversalDo<V> implements IExecutable<Set<V>> {
-    IRootedGraph<V> graph;
+public class DepthFirstTraversalDo<V, A> implements IExecutable<Set<V>> {
+    IDepthFirstTraversalParameters<V, A> model;
 
-    public DepthFirstTraversalDo(IRootedGraph<V> graph) {
-        this.graph = graph;
+    public DepthFirstTraversalDo(IDepthFirstTraversalParameters<V, A> model) {
+        this.model = model;
     }
 
     @Override
     public Set<V> run(BooleanSupplier hasToTerminateSupplier) {
-        var configuration = DepthFirstTraversalConfiguration.initial(graph);
+        var configuration = DepthFirstTraversalConfiguration.initial(model);
         do {
             var stackFrame = configuration.peek();
             if (   //did we finish ?

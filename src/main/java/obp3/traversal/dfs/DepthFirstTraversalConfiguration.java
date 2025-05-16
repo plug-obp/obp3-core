@@ -5,32 +5,37 @@ import obp3.things.PeekableIterator;
 
 import java.util.*;
 
-public class DepthFirstTraversalConfiguration<V> implements IDepthFirstTraversalConfiguration<V> {
+public class DepthFirstTraversalConfiguration<V, A> implements IDepthFirstTraversalConfiguration<V, A> {
     //TODO: I put the rooted graph here, but actually, the configuration should link back to the inputs of the algorithm
     //the rooted graph should be part of the equality ?
-    private final IRootedGraph<V> graph;
+    private final IDepthFirstTraversalParameters<V, A> model;
 
     private final Set<V> known;
     private final Deque<StackFrame<V>> stack;
 
-    public DepthFirstTraversalConfiguration(IRootedGraph<V> graph, Set<V> known, Deque<StackFrame<V>> stack) {
-        this.graph = graph;
+    public DepthFirstTraversalConfiguration(IDepthFirstTraversalParameters<V, A> model, Set<V> known, Deque<StackFrame<V>> stack) {
+        this.model = model;
         this.known = known;
         this.stack = stack;
     }
 
-    public DepthFirstTraversalConfiguration(IRootedGraph<V> graph) {
-        this(graph, new HashSet<>(), new ArrayDeque<>(Collections.singleton(new StackFrame<>(null, new PeekableIterator<>(graph.roots())))));
+    public DepthFirstTraversalConfiguration(IDepthFirstTraversalParameters<V, A> model) {
+        this(model, new HashSet<>(), new ArrayDeque<>(Collections.singleton(new StackFrame<>(null, new PeekableIterator<>(model.getGraph().roots())))));
     }
 
-    public static <X> DepthFirstTraversalConfiguration<X> initial(IRootedGraph<X> graph) {
-             return new DepthFirstTraversalConfiguration<>(graph);
+    public static <X, Y> DepthFirstTraversalConfiguration<X, Y> initial(IDepthFirstTraversalParameters<X, Y> model) {
+             return new DepthFirstTraversalConfiguration<>(model);
+    }
+
+    @Override
+    public IDepthFirstTraversalParameters<V, A> getModel() {
+        return model;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DepthFirstTraversalConfiguration<?> other)) return false;
+        if (!(o instanceof DepthFirstTraversalConfiguration<?, ?> other)) return false;
         return     Objects.equals(known, other.known)
                 && Objects.equals(stack, other.stack);
     }
@@ -48,9 +53,8 @@ public class DepthFirstTraversalConfiguration<V> implements IDepthFirstTraversal
                 ')';
     }
 
-    @Override
     public IRootedGraph<V> getGraph() {
-        return graph;
+        return getModel().getGraph();
     }
 
     public StackFrame<V> peek() {

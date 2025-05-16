@@ -9,15 +9,15 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 
-public class DepthFirstTraversalRelational<V> implements IExecutable<Set<V>> {
-    IRootedGraph<V> graph;
+public class DepthFirstTraversalRelational<V, A> implements IExecutable<Set<V>> {
+    IDepthFirstTraversalParameters<V, A> model;
 
-    public DepthFirstTraversalRelational(IRootedGraph<V> graph) {
-        this.graph = graph;
+    public DepthFirstTraversalRelational(IDepthFirstTraversalParameters<V, A> model) {
+        this.model = model;
     }
 
     public Set<V> run(BooleanSupplier hasToTerminateSupplier) {
-        var relation = new DepthFirstTraversalRelation<>(graph);
+        var relation = new DepthFirstTraversalRelation<>(model);
         var sequencer = new Sequencer<>(relation);
         var configuration = sequencer.run(hasToTerminateSupplier);
         return configuration.map(DepthFirstTraversalConfiguration::getKnown).orElse(Collections.emptySet());

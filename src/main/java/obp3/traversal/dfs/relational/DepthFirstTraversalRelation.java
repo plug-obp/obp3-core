@@ -1,25 +1,25 @@
 package obp3.traversal.dfs.relational;
 
 import obp3.sli.core.DeterministicSemanticRelation;
-import obp3.sli.core.IRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversalConfiguration;
+import obp3.traversal.dfs.IDepthFirstTraversalParameters;
 
 import java.util.Optional;
 
-public class DepthFirstTraversalRelation<V> implements DeterministicSemanticRelation<DepthFirstTraversalAction<V>, DepthFirstTraversalConfiguration<V>> {
-    IRootedGraph<V> graph;
+public class DepthFirstTraversalRelation<V, A> implements DeterministicSemanticRelation<DepthFirstTraversalAction<V>, DepthFirstTraversalConfiguration<V, A>> {
+    IDepthFirstTraversalParameters<V, A> model;
 
-    public DepthFirstTraversalRelation(IRootedGraph<V> graph) {
-        this.graph = graph;
+    public DepthFirstTraversalRelation(IDepthFirstTraversalParameters<V, A> model) {
+        this.model = model;
     }
 
     @Override
-    public Optional<DepthFirstTraversalConfiguration<V>> initial() {
-        return Optional.of(DepthFirstTraversalConfiguration.initial(graph));
+    public Optional<DepthFirstTraversalConfiguration<V, A>> initial() {
+        return Optional.of(DepthFirstTraversalConfiguration.initial(model));
     }
 
     @Override
-    public Optional<DepthFirstTraversalAction<V>> actions(DepthFirstTraversalConfiguration<V> configuration) {
+    public Optional<DepthFirstTraversalAction<V>> actions(DepthFirstTraversalConfiguration<V, A> configuration) {
         var frame = configuration.peek();
         // at end if the stack is empty. Don't produce the end action
         if (frame == null) { return Optional.empty(); }
@@ -36,7 +36,7 @@ public class DepthFirstTraversalRelation<V> implements DeterministicSemanticRela
     }
 
     @Override
-    public Optional<DepthFirstTraversalConfiguration<V>> execute(DepthFirstTraversalAction<V> action, DepthFirstTraversalConfiguration<V> configuration) {
+    public Optional<DepthFirstTraversalConfiguration<V, A>> execute(DepthFirstTraversalAction<V> action, DepthFirstTraversalConfiguration<V, A> configuration) {
         switch (action) {
             case BacktrackAction<V> _ -> {
                 configuration.pop();
