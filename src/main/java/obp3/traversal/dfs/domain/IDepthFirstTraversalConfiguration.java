@@ -1,6 +1,7 @@
-package obp3.traversal.dfs;
+package obp3.traversal.dfs.domain;
 
 import obp3.things.PeekableIterator;
+import obp3.traversal.dfs.model.IDepthFirstTraversalParameters;
 
 import java.util.Set;
 
@@ -10,6 +11,8 @@ public interface IDepthFirstTraversalConfiguration<V, A> {
     //access to the inputs
     IDepthFirstTraversalParameters<V, A> getModel();
 
+    IDepthFirstTraversalConfiguration<V, A> initial();
+
     //Stack management
     StackFrame<V> peek();
     void pop();
@@ -17,11 +20,11 @@ public interface IDepthFirstTraversalConfiguration<V, A> {
 
 
     //Known management
-    boolean knows(V vertex);
-    void add(V vertex);
+    boolean knows(V vertex, A reducedVertex);
+    void add(V vertex, A reducedVertex);
 
-    default void discover(V vertex) {
-        add(vertex);
+    default void discover(V vertex, A reducedVertex) {
+        add(vertex, reducedVertex);
         push(
                 new StackFrame<>(
                         vertex,
@@ -29,5 +32,5 @@ public interface IDepthFirstTraversalConfiguration<V, A> {
     }
 
     //retrieve a set representation of the known if possible
-    Set<V> getKnown();
+    Set getKnown();
 }

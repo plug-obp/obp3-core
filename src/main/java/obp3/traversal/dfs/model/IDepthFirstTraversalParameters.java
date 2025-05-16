@@ -1,6 +1,7 @@
-package obp3.traversal.dfs;
+package obp3.traversal.dfs.model;
 
 import obp3.sli.core.IRootedGraph;
+import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 
 public interface IDepthFirstTraversalParameters<V, A> {
     IRootedGraph<V> getGraph();

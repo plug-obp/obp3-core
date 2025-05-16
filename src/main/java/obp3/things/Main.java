@@ -6,7 +6,13 @@ import obp3.traversal.bfs.BreadthFirstTraversalRelational;
 import obp3.traversal.bfs.BreadthFirstTraversalWhile;
 import obp3.traversal.bfs.BreadthFirstTraversalDo;
 import obp3.traversal.bfs.BreadthFirstTraversalDoFlat;
-import obp3.traversal.dfs.*;
+import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
+import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
+import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
+import obp3.traversal.dfs.model.IDepthFirstTraversalParameters;
+import obp3.traversal.dfs.semantics.DepthFirstTraversalDo;
+import obp3.traversal.dfs.semantics.DepthFirstTraversalRelational;
+import obp3.traversal.dfs.semantics.DepthFirstTraversalWhile;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -17,10 +23,13 @@ import static java.lang.System.out;
 
 public class Main {
 
-    public static <V> void traversalDFS(IRootedGraph<V> graph, Function<IDepthFirstTraversalParameters<V, V>, IExecutable<Set<V>>> constructor) {
+    public static <V> void traversalDFS(IRootedGraph<V> graph,
+                                        Function<IDepthFirstTraversalConfiguration<V, V>, IExecutable<Set<V>>> constructor) {
         var start = Instant.now();
 
-        var exe = constructor.apply(new DepthFirstTraversalParameters<>(graph, Function.identity(), null, null, null));
+        var exe = constructor.apply(
+                new DFTConfigurationSetDeque<>(
+                        new DepthFirstTraversalParameters<>(graph, Function.identity())));
         var known = exe.runAlone();
         var size = known.size();
 
@@ -30,7 +39,11 @@ public class Main {
         out.println("\t" + graph + " + " + exe.getClass().getSimpleName() + ": " + size + " configurations in " + duration + " ms");
     }
 
-    public static void limitedRandomTraversalDFS(int limit, int width, long seed, Function<IDepthFirstTraversalParameters<Long, Long>, IExecutable<Set<Long>>> constructor) {
+    public static void limitedRandomTraversalDFS(
+            int limit,
+            int width,
+            long seed,
+            Function<IDepthFirstTraversalConfiguration<Long, Long>, IExecutable<Set<Long>>> constructor) {
         var graph = new LimitedRandomRootedGraph(limit, width, seed);
         traversalDFS(graph, constructor);
     }

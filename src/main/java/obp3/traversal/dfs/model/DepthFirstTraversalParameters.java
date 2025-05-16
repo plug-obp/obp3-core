@@ -1,6 +1,7 @@
-package obp3.traversal.dfs;
+package obp3.traversal.dfs.model;
 
 import obp3.sli.core.IRootedGraph;
+import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -49,6 +50,7 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
 
     @Override
     public boolean onEntry(V source, V vertex, A canonical) {
+        if (onEntry == null) { return false; }
         return onEntry.apply(source, vertex, canonical);
     }
 
@@ -61,6 +63,7 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
 
     @Override
     public boolean onKnown(V source, V vertex, A canonical) {
+        if (onKnown == null) { return false; }
         return onKnown.apply(source, vertex, canonical);
     }
 
@@ -69,6 +72,7 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
 
     @Override
     public boolean onExit(V vertex, IDepthFirstTraversalConfiguration.StackFrame<V> frame) {
+        if (onExit == null) { return false; }
         return onExit.apply(vertex, frame);
     }
 

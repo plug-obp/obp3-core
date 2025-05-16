@@ -1,30 +1,38 @@
-package obp3.traversal.dfs;
+package obp3.traversal.dfs.defaults.domain;
 
 import obp3.sli.core.IRootedGraph;
 import obp3.things.PeekableIterator;
+import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
+import obp3.traversal.dfs.model.IDepthFirstTraversalParameters;
 
 import java.util.*;
 
-public class DepthFirstTraversalConfiguration<V, A> implements IDepthFirstTraversalConfiguration<V, A> {
-    //TODO: I put the rooted graph here, but actually, the configuration should link back to the inputs of the algorithm
-    //the rooted graph should be part of the equality ?
+public class DFTConfigurationSetDeque<V, A> implements IDepthFirstTraversalConfiguration<V, A> {
     private final IDepthFirstTraversalParameters<V, A> model;
 
     private final Set<V> known;
     private final Deque<StackFrame<V>> stack;
 
-    public DepthFirstTraversalConfiguration(IDepthFirstTraversalParameters<V, A> model, Set<V> known, Deque<StackFrame<V>> stack) {
+    public DFTConfigurationSetDeque(IDepthFirstTraversalParameters<V, A> model, Set<V> known, Deque<StackFrame<V>> stack) {
         this.model = model;
         this.known = known;
         this.stack = stack;
     }
 
-    public DepthFirstTraversalConfiguration(IDepthFirstTraversalParameters<V, A> model) {
-        this(model, new HashSet<>(), new ArrayDeque<>(Collections.singleton(new StackFrame<>(null, new PeekableIterator<>(model.getGraph().roots())))));
+    public DFTConfigurationSetDeque(IDepthFirstTraversalParameters<V, A> model) {
+        this(model, new HashSet<>(), new ArrayDeque<>());
     }
 
-    public static <X, Y> DepthFirstTraversalConfiguration<X, Y> initial(IDepthFirstTraversalParameters<X, Y> model) {
-             return new DepthFirstTraversalConfiguration<>(model);
+    public static <X, Y> DFTConfigurationSetDeque<X, Y> initial(IDepthFirstTraversalParameters<X, Y> model) {
+             return new DFTConfigurationSetDeque<>(model);
+    }
+
+    @Override
+    public IDepthFirstTraversalConfiguration<V, A> initial() {
+        this.known.clear();
+        this.stack.clear();
+        this.stack.push(new StackFrame<>(null, new PeekableIterator<>(model.getGraph().roots())));
+        return this;
     }
 
     @Override
@@ -35,7 +43,7 @@ public class DepthFirstTraversalConfiguration<V, A> implements IDepthFirstTraver
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DepthFirstTraversalConfiguration<?, ?> other)) return false;
+        if (!(o instanceof DFTConfigurationSetDeque<?, ?> other)) return false;
         return     Objects.equals(known, other.known)
                 && Objects.equals(stack, other.stack);
     }
@@ -47,7 +55,7 @@ public class DepthFirstTraversalConfiguration<V, A> implements IDepthFirstTraver
 
     @Override
     public String toString() {
-        return "DepthFirstTraversalConfiguration(" +
+        return this.getClass().getSimpleName() + "(" +
                 "known=" + known +
                 ", frontier=" + stack +
                 ')';
@@ -67,13 +75,14 @@ public class DepthFirstTraversalConfiguration<V, A> implements IDepthFirstTraver
         stack.push(frame);
     }
 
-    public boolean knows(V vertex) {
+    public boolean knows(V vertex, A reducedVertex) {
         return known.contains(vertex);
     }
-    public void add(V vertex) {
+    public void add(V vertex, A reducedVertex) {
         known.add(vertex);
     }
 
+    @Override
     public Set<V> getKnown() { return known; }
 
     public Deque<StackFrame<V>> getStack() { return stack; }

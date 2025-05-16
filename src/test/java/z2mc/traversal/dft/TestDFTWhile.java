@@ -2,9 +2,10 @@ package z2mc.traversal.dft;
 
 import obp3.IExecutable;
 import obp3.sli.core.IRootedGraph;
-import obp3.traversal.dfs.DepthFirstTraversalParameters;
-import obp3.traversal.dfs.DepthFirstTraversalWhile;
-import obp3.traversal.dfs.IDepthFirstTraversalParameters;
+import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
+import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
+import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
+import obp3.traversal.dfs.semantics.DepthFirstTraversalWhile;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -13,8 +14,12 @@ import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestDFTWhile {
-    <V> IExecutable<Set<V>> simpleDFS(IRootedGraph<V> graph, Function<IDepthFirstTraversalParameters<V, V>, IExecutable<Set<V>>> constructor) {
-        return constructor.apply(new DepthFirstTraversalParameters<>(graph, Function.identity()));
+    <V> IExecutable<Set<V>> simpleDFS(
+            IRootedGraph<V> graph,
+            Function<IDepthFirstTraversalConfiguration<V, V>, IExecutable<Set<V>>> constructor) {
+        return constructor.apply(
+                new DFTConfigurationSetDeque<>(
+                    new DepthFirstTraversalParameters<>(graph, Function.identity())));
     }
 
     @Test
