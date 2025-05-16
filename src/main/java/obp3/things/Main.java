@@ -24,14 +24,17 @@ import static java.lang.System.out;
 public class Main {
 
     public static <V> void traversalDFS(IRootedGraph<V> graph,
-                                        Function<IDepthFirstTraversalConfiguration<V, V>, IExecutable<Set<V>>> constructor) {
+                                        Function<
+                                                IDepthFirstTraversalConfiguration<V, V>,
+                                                IExecutable<IDepthFirstTraversalConfiguration<V, V>>
+                                                > constructor) {
         var start = Instant.now();
 
         var exe = constructor.apply(
                 new DFTConfigurationSetDeque<>(
                         new DepthFirstTraversalParameters<>(graph, Function.identity())));
-        var known = exe.runAlone();
-        var size = known.size();
+        var configuration = exe.runAlone();
+        var size = configuration.getKnown().size();
 
         var finish = Instant.now();
         var duration = Duration.between(start, finish).toMillis();
@@ -40,10 +43,10 @@ public class Main {
     }
 
     public static void limitedRandomTraversalDFS(
-            int limit,
-            int width,
-            long seed,
-            Function<IDepthFirstTraversalConfiguration<Long, Long>, IExecutable<Set<Long>>> constructor) {
+            int limit, int width, long seed,
+            Function<
+                    IDepthFirstTraversalConfiguration<Long, Long>,
+                    IExecutable<IDepthFirstTraversalConfiguration<Long, Long>>> constructor) {
         var graph = new LimitedRandomRootedGraph(limit, width, seed);
         traversalDFS(graph, constructor);
     }

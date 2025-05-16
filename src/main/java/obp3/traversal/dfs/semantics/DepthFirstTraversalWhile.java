@@ -4,10 +4,9 @@ import obp3.IExecutable;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 
-import java.util.Set;
 import java.util.function.BooleanSupplier;
 
-public class DepthFirstTraversalWhile<V, A> implements IExecutable<Set<V>> {
+public class DepthFirstTraversalWhile<V, A> implements IExecutable<IDepthFirstTraversalConfiguration<V, A>> {
     IDepthFirstTraversalConfiguration<V, A> configuration;
 
     public DepthFirstTraversalWhile(IDepthFirstTraversalConfiguration<V, A> configuration) {
@@ -15,7 +14,7 @@ public class DepthFirstTraversalWhile<V, A> implements IExecutable<Set<V>> {
     }
 
     @Override
-    public Set run(BooleanSupplier hasToTerminateSupplier) {
+    public IDepthFirstTraversalConfiguration<V, A> run(BooleanSupplier hasToTerminateSupplier) {
         configuration.initial();
         DFTConfigurationSetDeque.StackFrame<V> stackFrame;
         while (     //did we finish ?
@@ -31,19 +30,19 @@ public class DepthFirstTraversalWhile<V, A> implements IExecutable<Set<V>> {
                     configuration.discover(neighbour, reduced_neighbour);
                     //apply onEntry callback
                     var terminate = configuration.getModel().onEntry(stackFrame.vertex(), neighbour, reduced_neighbour);
-                    if (terminate) { return configuration.getKnown(); }
+                    if (terminate) { return configuration; }
                     continue;
                 }
                 //on known - is called on sharing-links and back-loops
                 var terminate = configuration.getModel().onKnown(stackFrame.vertex(), neighbour, reduced_neighbour);
-                if (terminate) { return configuration.getKnown(); }
+                if (terminate) { return configuration; }
                 continue;
             }
             configuration.pop();
             if (stackFrame.vertex() == null) continue;
             var terminate = configuration.getModel().onExit(stackFrame.vertex(), stackFrame);
-            if (terminate) return configuration.getKnown();
+            if (terminate) return configuration;
         }
-        return configuration.getKnown();
+        return configuration;
     }
 }

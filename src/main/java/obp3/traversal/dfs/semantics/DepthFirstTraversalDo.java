@@ -3,10 +3,9 @@ package obp3.traversal.dfs.semantics;
 import obp3.IExecutable;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 
-import java.util.Set;
 import java.util.function.BooleanSupplier;
 
-public class DepthFirstTraversalDo<V, A> implements IExecutable<Set<V>> {
+public class DepthFirstTraversalDo<V, A> implements IExecutable<IDepthFirstTraversalConfiguration<V, A>> {
     IDepthFirstTraversalConfiguration<V, A> configuration;
 
     public DepthFirstTraversalDo(IDepthFirstTraversalConfiguration<V, A> configuration) {
@@ -14,7 +13,7 @@ public class DepthFirstTraversalDo<V, A> implements IExecutable<Set<V>> {
     }
 
     @Override
-    public Set run(BooleanSupplier hasToTerminateSupplier) {
+    public IDepthFirstTraversalConfiguration<V, A> run(BooleanSupplier hasToTerminateSupplier) {
         configuration.initial();
         do {
             var stackFrame = configuration.peek();
@@ -34,20 +33,20 @@ public class DepthFirstTraversalDo<V, A> implements IExecutable<Set<V>> {
                     configuration.discover(neighbour, reduced_neighbour);
                     //apply onEntry callback
                     var terminate = configuration.getModel().onEntry(stackFrame.vertex(), neighbour, reduced_neighbour);
-                    if (terminate) { return configuration.getKnown(); }
+                    if (terminate) { return configuration; }
                     continue;
                 }
                 //on known - is called on sharing-links and back-loops
                 var terminate = configuration.getModel().onKnown(stackFrame.vertex(), neighbour, reduced_neighbour);
-                if (terminate) { return configuration.getKnown(); }
+                if (terminate) { return configuration; }
                 continue;
             }
             configuration.pop();
             if (stackFrame.vertex() == null) continue;
             //onExit is called when all children of a vertex are done
             var terminate = configuration.getModel().onExit(stackFrame.vertex(), stackFrame);
-            if (terminate) return configuration.getKnown();
+            if (terminate) return configuration;
         } while (true);
-        return configuration.getKnown();
+        return configuration;
     }
 }

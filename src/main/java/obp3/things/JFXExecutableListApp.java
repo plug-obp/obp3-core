@@ -19,11 +19,11 @@ import obp3.traversal.dfs.semantics.DepthFirstTraversalRelational;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.function.Function;
 
 public class JFXExecutableListApp extends Application {
-    private final ListView<Execution<Parameters, Set<Long>>> listView = new ListView<>();
+    private final ListView<Execution<Parameters, IDepthFirstTraversalConfiguration<Long, Long>>> listView =
+            new ListView<>();
 
     @Override
     public void start(Stage primaryStage) {
@@ -33,7 +33,8 @@ public class JFXExecutableListApp extends Application {
         root.setPadding(new Insets(10));
 
         populateList();
-        listView.setCellFactory(_ -> new ExecutionListCell<>());
+        listView.setCellFactory(
+                _ -> new ExecutionListCell<>());
 
         root.getChildren().add(listView);
         root.getChildren().add(new HBox(5));
@@ -42,7 +43,7 @@ public class JFXExecutableListApp extends Application {
         primaryStage.show();
     }
     private void populateList() {
-        var tasks = new ArrayList<Execution<Parameters, Set<Long>>>();
+        var tasks = new ArrayList<Execution<Parameters, IDepthFirstTraversalConfiguration<Long, Long>>>();
         tasks.add(traversal(1000, DepthFirstTraversalRelational::new));
         tasks.add(traversal(1000, DepthFirstTraversalDo::new));
         tasks.add(traversal(10000, DepthFirstTraversalRelational::new));
@@ -52,9 +53,10 @@ public class JFXExecutableListApp extends Application {
     }
 
 
-    private Execution<Parameters, Set<Long>> traversal(
+    private Execution<Parameters, IDepthFirstTraversalConfiguration<Long, Long>> traversal(
             long limit,
-            Function<IDepthFirstTraversalConfiguration<Long, Long>, IExecutable<Set<Long>>> constructor) {
+            Function<IDepthFirstTraversalConfiguration<Long, Long>,
+                    IExecutable<IDepthFirstTraversalConfiguration<Long, Long>>> constructor) {
         var width = 30;
         var seed = System.nanoTime();
 
@@ -72,14 +74,14 @@ public class JFXExecutableListApp extends Application {
                                 new DepthFirstTraversalParameters<>(graph, Function.identity())));
                     return executable;
                 },
-                (r) -> "Explored: " + formater.format(r.size()) + " configurations");
+                (r) -> "Explored: " + formater.format(r.getKnown().size()) + " configurations");
     }
 
     record Parameters(
             long limit,
             int width,
             long seed,
-            Function<IDepthFirstTraversalConfiguration<Long, Long>, IExecutable<Set<Long>>> constructor){}
+            Function<IDepthFirstTraversalConfiguration<Long, Long>, IExecutable<IDepthFirstTraversalConfiguration<Long, Long>>> constructor){}
 
     public static void main(String[] args) {
         launch(args);

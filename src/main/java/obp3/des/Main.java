@@ -27,6 +27,6 @@ public class Main {
                         new DFTConfigurationSetDeque<>(
                                 new DepthFirstTraversalParameters<>(rr, Function.identity())));
         var r = dfs.runAlone();
-        System.out.println("DFS: " + r.size() + " configurations");
+        System.out.println("DFS: " + r.getKnown().size() + " configurations");
     }
 }
