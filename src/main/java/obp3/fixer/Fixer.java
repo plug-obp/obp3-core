@@ -106,18 +106,48 @@ public class Fixer<S, T> implements Function<S, T>{
 
         var newProperty = function.apply(current, requestFunction);
         alive[0] = false;
-        for (S child : currentChildren) {
-            mParents.computeIfAbsent(child, _ -> Collections.newSetFromMap(new IdentityHashMap<>()) ).add(current);
-        }
 
-        // If the updated value differs from the previous value, record
-        // the updated value and send a signal to all observers of [node].
-        if (!lattice.equality().test(mTransient.get(current), newProperty)) {
-            mTransient.put(current, newProperty);
-            //signal the parents because the current value changed
-            for (var observer : mParents.get(current)) {
-                mWorkset.add(observer);
+        //     If we have gathered no children in the list [children], then this node must have stabilized.
+        //     If [new_property] is maximal, then this node must have stabilized.
+        //
+        //     If this node has stabilized, then it need not observe anymore, so the call to [set_successors] is skipped.
+        //     In practice, this seems to be a minor optimization. In the particular case where every node stabilizes at
+        //     the very first call to [rhs], this means that no edges are ever built.
+        //     This particular case is unlikely, as it means that we are just doing memoization,
+        //     not a true fixed point computation.
+        //
+        //     One could go further and note that, if this node has stabilized, then it
+        //     could immediately be taken out of the transient table and copied into the
+        //     permanent table. This would have the beneficial effect of allowing the
+        //     detection of further nodes that have stabilized. Furthermore, it would
+        //     enforce the property that no node in the transient table has a maximal
+        //     value, hence the call to [is_maximal] above would become useless.
+
+        var isMaximal = lattice.isMaximal(newProperty);
+        if (!isMaximal) {
+            for (S child : currentChildren) {
+                mParents.computeIfAbsent(child, _ -> Collections.newSetFromMap(new IdentityHashMap<>()) ).add(current);
+            }
+
+            // If the updated value differs from the previous value, record
+            // the updated value and send a signal to all observers of [node].
+            if (!lattice.equality().test(mTransient.get(current), newProperty)) {
+                mTransient.put(current, newProperty);
+                //signal the parents because the current value changed
+                mWorkset.addAll(mParents.get(current));
+            }
+        } else {
+            //current got at the top of the lattice
+            mFixed.put(current, newProperty);
+            var oldProperty = mTransient.remove(current);
+            if (!lattice.equality().test(oldProperty, newProperty)) {
+                //signal the parents because the current value changed
+                mWorkset.addAll(mParents.get(current));
             }
         }
+
+
+
+
     }
 }
