@@ -32,7 +32,7 @@ public class Fixer<S, T> implements Function<S, T>{
     ///    be found.
     ///
     /// A node in the workset has no successors.
-    /// NC: The idea is that when a node gets in the workset, it is like newly discovered - so we forget it's successors
+    /// NC: The idea is that when a node gets in the workset, it is like newly discovered - so we forget its successors
     ///    (It can have predecessors.)
     ///    In other words, a predecessor (an observer) of some node is never in the workset.
     ///    Furthermore, a node never appears twice in the workset.
