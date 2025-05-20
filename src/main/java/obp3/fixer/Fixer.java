@@ -24,7 +24,7 @@ public class Fixer<S, T> implements Function<S, T>{
     /// Records the observers of a node (The nodes from which reachable)
     /// NC: In the Pottier algorithm this is a graph, I just store the parents here.
     /// NC: Homework: what are the consequences ?
-    Map<S, List<S>> mParents = new IdentityHashMap<>();
+    Map<S, Set<S>> mParents = new IdentityHashMap<>();
 
     /// The workset is based on a Queue, but it could just as well be based on a
     ///    Stack. A textual replacement is possible. It could also be based on a
@@ -83,7 +83,7 @@ public class Fixer<S, T> implements Function<S, T>{
         if (mTransient.containsKey(node)) { return; }
         // create a transient node starting it at the bottom of the lattice.
         mTransient.put(node, lattice.bottom());
-        mParents.put(node, new ArrayList<>());
+        mParents.put(node, Collections.newSetFromMap(new IdentityHashMap<>()) );
         mWorkset.add(node);
     }
     void solve(S current) {
@@ -107,7 +107,7 @@ public class Fixer<S, T> implements Function<S, T>{
         var newProperty = function.apply(current, requestFunction);
         alive[0] = false;
         for (S child : currentChildren) {
-            mParents.computeIfAbsent(child, _ -> new ArrayList<>()).add(current);
+            mParents.computeIfAbsent(child, _ -> Collections.newSetFromMap(new IdentityHashMap<>()) ).add(current);
         }
 
         // If the updated value differs from the previous value, record
