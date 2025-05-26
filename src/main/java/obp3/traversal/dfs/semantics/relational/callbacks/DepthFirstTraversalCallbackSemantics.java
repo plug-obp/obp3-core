@@ -30,8 +30,8 @@ public class DepthFirstTraversalCallbackSemantics<V, A>
         if (!configuration) return Optional.empty();
         if (input.action().isEmpty()) { return Optional.empty(); }
         return switch (input.action().get()) {
-            case UnknownConfigurationAction(V v, A av) -> Optional.of(() -> callbacksModel.onEntry(null, v, av));
-            case KnownConfigurationAction(V v, A av) -> Optional.of(() -> callbacksModel.onKnown(null, v, av));
+            case UnknownConfigurationAction(V s, V v, A av) -> Optional.of(() -> callbacksModel.onEntry(s, v, av));
+            case KnownConfigurationAction(V s, V v, A av) -> Optional.of(() -> callbacksModel.onKnown(s, v, av));
             case BacktrackAction(V v, IDepthFirstTraversalConfiguration.StackFrame<V> frame) ->
                     input.end().peek() != null ?
                         Optional.of(() -> callbacksModel.onExit(v, frame)) : Optional.empty();
