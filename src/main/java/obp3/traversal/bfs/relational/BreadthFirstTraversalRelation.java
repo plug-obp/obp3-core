@@ -49,10 +49,14 @@ public class BreadthFirstTraversalRelation<V>
                 return Optional.of(configuration);
             }
             case KnownConfigurationAction<V> _ -> {
+                //only advance the neighbours iterator
                 configuration.neighbours.next();
                 return Optional.of(configuration);
             }
             case UnknownConfigurationAction<V>(var vertex) -> {
+                //advance the neighbours iterator
+                configuration.neighbours.next();
+                //discover the vertex
                 configuration.known.add(vertex);
                 configuration.frontier.addLast(vertex);
 

@@ -39,7 +39,7 @@ public interface SemanticRelation<A, C> {
             }
 
             @Override
-            public Fanout<Void, C> execute(Void input, A action, C configuration) {
+            public Fanout<Void, C> execute(A action, Void input, C configuration) {
                 return Fanout.fanout(SemanticRelation.this.execute(action, configuration));
             }
         };

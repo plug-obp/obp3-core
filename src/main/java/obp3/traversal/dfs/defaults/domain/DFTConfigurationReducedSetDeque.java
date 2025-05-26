@@ -68,8 +68,8 @@ public class DFTConfigurationReducedSetDeque<V, A> implements IDepthFirstTravers
     public StackFrame<V> peek() {
         return stack.peek();
     }
-    public void pop() {
-        stack.pop();
+    public StackFrame<V> pop() {
+        return stack.pop();
     }
     public void push(StackFrame<V> frame) {
         stack.push(frame);

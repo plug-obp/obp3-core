@@ -28,6 +28,10 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
 
     private IRootedGraph<V> graph;
 
+    final TriFunction<V, V, A, Boolean> onEntry;
+    final TriFunction<V, V, A, Boolean> onKnown;
+    final BiFunction<V, IDepthFirstTraversalConfiguration.StackFrame<V>, Boolean> onExit;
+
     @Override
     public IRootedGraph<V> getGraph() {
         return graph;
@@ -40,40 +44,37 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
         return canonize.apply(v);
     }
 
-    //source, node, canonical
-    ///{@code onKnown} called the first time the node is discovered,
-    /// the arguments are
-    /// - the source vertex, from which the current was reached
-    /// - the current vertex, which was just discovered
-    /// - the canonized vertex
-    private TriFunction<V, V, A, Boolean> onEntry;
-
     @Override
-    public boolean onEntry(V source, V vertex, A canonical) {
-        if (onEntry == null) { return false; }
-        return onEntry.apply(source, vertex, canonical);
+    public boolean hasCallbacks() {
+        return onEntry != null || onKnown != null || onExit != null;
     }
-
-    ///{@code onKnown} - is called on sharing-links and back-loops
-    /// the arguments are
-    /// - the source vertex, from which the current was reached
-    /// - the current vertex, which was just discovered
-    /// - the canonized vertex
-    private TriFunction<V, V, A, Boolean> onKnown;
-
     @Override
-    public boolean onKnown(V source, V vertex, A canonical) {
-        if (onKnown == null) { return false; }
-        return onKnown.apply(source, vertex, canonical);
-    }
+    public IDepthFirstTraversalCallbacksModel<V, A> callbacks() {
+        return new IDepthFirstTraversalCallbacksModel<>() {
+            @Override
+            public boolean onEntry(V source, V vertex, A canonical) {
+                if (onEntry == null) {
+                    return false;
+                }
+                return onEntry.apply(source, vertex, canonical);
+            }
 
-    ///{@code onExit} called when exiting a node during backtracking
-    private BiFunction<V, IDepthFirstTraversalConfiguration.StackFrame<V>, Boolean> onExit;
+            @Override
+            public boolean onKnown(V source, V vertex, A canonical) {
+                if (onKnown == null) {
+                    return false;
+                }
+                return onKnown.apply(source, vertex, canonical);
+            }
 
-    @Override
-    public boolean onExit(V vertex, IDepthFirstTraversalConfiguration.StackFrame<V> frame) {
-        if (onExit == null) { return false; }
-        return onExit.apply(vertex, frame);
+            @Override
+            public boolean onExit(V vertex, IDepthFirstTraversalConfiguration.StackFrame<V> frame) {
+                if (onExit == null) {
+                    return false;
+                }
+                return onExit.apply(vertex, frame);
+            }
+        };
     }
 
     public interface TriFunction<I1, I2, I3, O> {
@@ -85,7 +86,7 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
          * If evaluation of either function throws an exception, it is relayed to
          * the caller of the composed function.
          *
-         * @param <V> the type of output of the {@code after} function, and of the
+         * @param <X> the type of output of the {@code after} function, and of the
          *           composed function
          * @param after the function to apply after this function is applied
          * @return a composed function that first applies this function and then

@@ -2,6 +2,7 @@ package obp3.traversal.dfs.semantics.relational;
 
 import obp3.sli.core.DeterministicSemanticRelation;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
+import obp3.traversal.dfs.semantics.relational.actions.*;
 
 import java.util.Optional;
 
@@ -33,7 +34,7 @@ public class DepthFirstTraversalRelation<V, A>
                     new UnknownConfigurationAction<>(vertex, reduced_vertex));
         }
         // if no more neighbours of the previous source, backtrack to get a new one from the stack
-        return Optional.of(new BacktrackAction<>(frame.vertex()));
+        return Optional.of(new BacktrackAction<>(frame.vertex(), frame));
     }
 
     @Override
@@ -44,15 +45,16 @@ public class DepthFirstTraversalRelation<V, A>
                 return Optional.of(configuration);
             }
             case KnownConfigurationAction<V, A> _ -> {
+                //only advance the neighbours iterator
                 configuration.peek().neighbours().next();
                 return Optional.of(configuration);
             }
             case UnknownConfigurationAction<V, A> (var vertex, var reduced_vertex)  -> {
+                //advance the neighbours iterator
+                configuration.peek().neighbours().next();
+                //discover the verted
                 configuration.discover(vertex, reduced_vertex);
                 return Optional.of(configuration);
-            }
-            case EndAction<V, A> _ -> {
-                return Optional.empty();
             }
         }
     }

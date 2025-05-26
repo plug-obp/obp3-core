@@ -109,4 +109,15 @@ public class RootedGraphExamples {
                                     3, List.of(2))
                             .get(v).iterator()
             );
+    public static IRootedGraph<Integer> sharing_3 =
+            new RootedGraphFunctional<>(
+                    () -> List.of(1).iterator(),
+                    (v) -> Map.of(
+                            1, List.of(2, 4),
+                            2, List.of(3),
+                            3, List.of(1),
+                            4, List.of(5),
+                            5, List.of(3)
+                    ).get(v).iterator()
+            );
 }

@@ -5,6 +5,7 @@ import obp3.sli.core.IRootedGraph;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
+import obp3.traversal.dfs.semantics.DepthFirstTraversalDo;
 import obp3.traversal.dfs.semantics.DepthFirstTraversalWhile;
 import org.junit.jupiter.api.Test;
 
@@ -15,12 +16,12 @@ import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestDFTWhile {
+public class TestDFTDo {
     <V> IExecutable<IDepthFirstTraversalConfiguration<V, V>> simpleDFS(
             IRootedGraph<V> graph) {
-        return new DepthFirstTraversalWhile(
+        return new DepthFirstTraversalDo(
                 new DFTConfigurationSetDeque<>(
-                    new DepthFirstTraversalParameters<>(graph, Function.identity())));
+                        new DepthFirstTraversalParameters<>(graph, Function.identity())));
     }
 
     @Test
@@ -115,7 +116,7 @@ public class TestDFTWhile {
 
     @Test void sharing_onKnown() {
         var rediscoverd = new ArrayList<Integer>();
-        var dfs = new DepthFirstTraversalWhile<>(
+        var dfs = new DepthFirstTraversalDo<>(
                 new DFTConfigurationSetDeque<>(
                         new DepthFirstTraversalParameters<>(
                                 RootedGraphExamples.sharing_3,
@@ -132,7 +133,7 @@ public class TestDFTWhile {
 
     @Test void sharing_onEntry() {
         var discoverd = new ArrayList<Integer>();
-        var dfs = new DepthFirstTraversalWhile<>(
+        var dfs = new DepthFirstTraversalDo<>(
                 new DFTConfigurationSetDeque<>(
                         new DepthFirstTraversalParameters<>(
                                 RootedGraphExamples.sharing_3,
@@ -149,7 +150,7 @@ public class TestDFTWhile {
 
     @Test void sharing_onExit() {
         var exited = new ArrayList<Integer>();
-        var dfs = new DepthFirstTraversalWhile<>(
+        var dfs = new DepthFirstTraversalDo<>(
                 new DFTConfigurationSetDeque<>(
                         new DepthFirstTraversalParameters<>(
                                 RootedGraphExamples.sharing_3,

@@ -15,7 +15,7 @@ public interface IDepthFirstTraversalConfiguration<V, A> {
 
     //Stack management
     StackFrame<V> peek();
-    void pop();
+    StackFrame<V> pop();
     void push(StackFrame<V> vertex);
 
 
