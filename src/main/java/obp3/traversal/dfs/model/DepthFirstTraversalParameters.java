@@ -9,6 +9,13 @@ import java.util.function.Function;
 
 public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversalParameters<V, A> {
 
+    final boolean deterministicProduct;
+
+    @Override
+    public boolean deterministicProduct() {
+        return deterministicProduct;
+    }
+
     public DepthFirstTraversalParameters(IRootedGraph<V> graph, Function<V, A> reducer) {
         this(graph, reducer, null, null, null);
     }
@@ -19,11 +26,22 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
             TriFunction<V, V, A, Boolean> onEntry,
             TriFunction<V, V, A, Boolean> onKnown,
             BiFunction<V, IDepthFirstTraversalConfiguration.StackFrame<V>, Boolean> onExit) {
+        this(graph, canonize, onEntry, onKnown, onExit, true);
+    }
+
+    public DepthFirstTraversalParameters(
+            IRootedGraph<V> graph,
+            Function<V, A> canonize,
+            TriFunction<V, V, A, Boolean> onEntry,
+            TriFunction<V, V, A, Boolean> onKnown,
+            BiFunction<V, IDepthFirstTraversalConfiguration.StackFrame<V>, Boolean> onExit,
+            boolean deterministicProduct) {
         this.graph = graph;
         this.canonize = canonize;
         this.onEntry = onEntry;
         this.onKnown = onKnown;
         this.onExit = onExit;
+        this.deterministicProduct = deterministicProduct;
     }
 
     private IRootedGraph<V> graph;

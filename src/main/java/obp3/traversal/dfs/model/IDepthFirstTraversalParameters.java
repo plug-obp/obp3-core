@@ -10,4 +10,8 @@ public interface IDepthFirstTraversalParameters<V, A> {
     IDepthFirstTraversalCallbacksModel<V, A> callbacks();
 
     default boolean hasCallbacks() { return true; }
+
+    default boolean deterministicProduct() {
+        return true;
+    }
 }

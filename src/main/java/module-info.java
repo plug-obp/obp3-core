@@ -6,6 +6,9 @@ module obp3.algos {
     exports obp3.sli.core;
     exports obp3.sli.core.operators;
     exports obp3.sli.core.operators.product;
+    exports obp3.sli.core.operators.product.model;
+    exports obp3.sli.core.operators.product.deterministic;
+    exports obp3.sli.core.operators.product.deterministic.model;
     exports obp3.traversal.bfs;
     exports obp3.fixer;
     exports obp3.things;

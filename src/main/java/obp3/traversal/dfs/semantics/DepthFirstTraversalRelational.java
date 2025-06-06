@@ -5,6 +5,8 @@ import obp3.Sequencer;
 import obp3.sli.core.operators.ToDetermistic;
 import obp3.sli.core.operators.product.Product;
 import obp3.sli.core.operators.product.StepSynchronousProductSemantics;
+import obp3.sli.core.operators.product.deterministic.DeterministicStepSynchronousProductSemantics;
+import obp3.sli.core.operators.product.deterministic.model.DeterministicStepProductParameters;
 import obp3.sli.core.operators.product.model.StepProductParameters;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.semantics.relational.DepthFirstTraversalRelation;
@@ -25,6 +27,14 @@ public class DepthFirstTraversalRelational<V, A> implements IExecutable<IDepthFi
             var sequencer = new Sequencer<>(relation);
             var result = sequencer.run(hasToTerminateSupplier);
             return result.orElse(null);
+        }
+        if (configuration.getModel().deterministicProduct()) {
+            var lhs = new DepthFirstTraversalRelation<>(configuration);
+            var rhs = new DepthFirstTraversalCallbackSemantics<>(configuration.getModel().callbacks());
+            var synch = new DeterministicStepSynchronousProductSemantics<>(new DeterministicStepProductParameters<>(lhs, rhs));
+            var sequencer = new Sequencer<>(synch);
+            var result = sequencer.run(hasToTerminateSupplier);
+            return result.map(Product::l).orElse(null);
         }
         var lhs = new DepthFirstTraversalRelation<>(configuration).toSemanticRelation();
         var rhs = new DepthFirstTraversalCallbackSemantics<>(configuration.getModel().callbacks()).toISemanticRelation();

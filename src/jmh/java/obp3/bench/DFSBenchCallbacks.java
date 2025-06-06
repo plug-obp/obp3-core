@@ -17,7 +17,7 @@ import java.util.function.Function;
 @State(Scope.Thread)
 @Warmup(iterations = 2, time = 1, timeUnit = TimeUnit.SECONDS)
 public class DFSBenchCallbacks {
-    long limit = 10000;
+    long limit = 1000;
     int width = 30;
     long seed = System.nanoTime();
 
@@ -56,7 +56,7 @@ public class DFSBenchCallbacks {
     }
 
     @Benchmark
-    public void relationalDFS(Blackhole blackhole) {
+    public void relationalDFSDeterministicProduct(Blackhole blackhole) {
         int[] stats = new int[] { 0, 0, 0 };
         var dfs = new DepthFirstTraversalRelational<>(
                 new DFTConfigurationSetDeque<>(
@@ -66,6 +66,23 @@ public class DFSBenchCallbacks {
                                 (s, v, ab) -> { stats[0]++; return false; },
                                 (s, v, ab) -> { stats[1]++; return false; },
                                 (v, f) -> {stats[2]++; return false; })));
+        var known = dfs.runAlone();
+        blackhole.consume(known);
+        blackhole.consume(stats);
+    }
+
+    @Benchmark
+    public void relationalDFSGenericProduct(Blackhole blackhole) {
+        int[] stats = new int[] { 0, 0, 0 };
+        var dfs = new DepthFirstTraversalRelational<>(
+                new DFTConfigurationSetDeque<>(
+                        new DepthFirstTraversalParameters<>(
+                                lrg,
+                                Function.identity(),
+                                (s, v, ab) -> { stats[0]++; return false; },
+                                (s, v, ab) -> { stats[1]++; return false; },
+                                (v, f) -> {stats[2]++; return false; },
+                                false)));
         var known = dfs.runAlone();
         blackhole.consume(known);
         blackhole.consume(stats);
