@@ -80,7 +80,7 @@ public class DFTConfigurationReducedSetDeque<V, A> implements IDepthFirstTravers
     public A reducedVertex;
     @Override
     public boolean knows(V vertex) {
-        reducedVertex = model.canonize(vertex);
+        reducedVertex = model.reduce(vertex);
         return known.contains(reducedVertex);
     }
     @Override

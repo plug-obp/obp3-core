@@ -188,7 +188,7 @@ public class TestDFTDo {
                                 (Integer v) -> v % 3,
                                 (_, v, c) -> {
                                     var rv = ((DFTConfigurationReducedSetDeque<Integer, Integer>)c).reducedVertex;
-                                    assertEquals(rv, c.getModel().canonize(v));
+                                    assertEquals(rv, c.getModel().reduce(v));
                                     return false; },
                                 null,
                                 null

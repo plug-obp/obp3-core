@@ -21,22 +21,22 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
 
     public DepthFirstTraversalParameters(
             IRootedGraph<V> graph,
-            Function<V, A> canonize,
+            Function<V, A> reducer,
             TriFunction<V, V, IDepthFirstTraversalConfiguration<V, A>, Boolean> onEntry,
             TriFunction<V, V, IDepthFirstTraversalConfiguration<V, A>, Boolean> onKnown,
             TriFunction<V, IDepthFirstTraversalConfiguration.StackFrame<V>, IDepthFirstTraversalConfiguration<V, A>, Boolean> onExit) {
-        this(graph, canonize, onEntry, onKnown, onExit, true);
+        this(graph, reducer, onEntry, onKnown, onExit, true);
     }
 
     public DepthFirstTraversalParameters(
             IRootedGraph<V> graph,
-            Function<V, A> canonize,
+            Function<V, A> reducer,
             TriFunction<V, V, IDepthFirstTraversalConfiguration<V, A>, Boolean> onEntry,
             TriFunction<V, V, IDepthFirstTraversalConfiguration<V, A>, Boolean> onKnown,
             TriFunction<V, IDepthFirstTraversalConfiguration.StackFrame<V>, IDepthFirstTraversalConfiguration<V, A>, Boolean> onExit,
             boolean deterministicProduct) {
         this.graph = graph;
-        this.canonize = canonize;
+        this.reducer = reducer;
         this.onEntry = onEntry;
         this.onKnown = onKnown;
         this.onExit = onExit;
@@ -54,11 +54,11 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
         return graph;
     }
 
-    private Function<V, A> canonize;
+    private Function<V, A> reducer;
 
     @Override
-    public A canonize(V v) {
-        return canonize.apply(v);
+    public A reduce(V v) {
+        return reducer.apply(v);
     }
 
     @Override
