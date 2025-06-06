@@ -32,9 +32,9 @@ public class DFSBenchCallbacks {
                         new DepthFirstTraversalParameters<>(
                                 lrg,
                                 Function.identity(),
-                                (s, v, ab) -> { stats[0]++; return false; },
-                                (s, v, ab) -> { stats[1]++; return false; },
-                                (v, f) -> {stats[2]++; return false; })));
+                                (_, _, _) -> { stats[0]++; return false; },
+                                (_, _, _) -> { stats[1]++; return false; },
+                                (_, _, _) -> {stats[2]++; return false; })));
         var known = dfs.runAlone();
         blackhole.consume(known);
         blackhole.consume(stats);
@@ -47,9 +47,9 @@ public class DFSBenchCallbacks {
                         new DepthFirstTraversalParameters<>(
                                 lrg,
                                 Function.identity(),
-                                (s, v, ab) -> { stats[0]++; return false; },
-                                (s, v, ab) -> { stats[1]++; return false; },
-                                (v, f) -> {stats[2]++; return false; })));
+                                (_, _, _) -> { stats[0]++; return false; },
+                                (_, _, _) -> { stats[1]++; return false; },
+                                (_, _, _) -> {stats[2]++; return false; })));
         var known = dfs.runAlone();
         blackhole.consume(known);
         blackhole.consume(stats);
@@ -63,9 +63,9 @@ public class DFSBenchCallbacks {
                         new DepthFirstTraversalParameters<>(
                                 lrg,
                                 Function.identity(),
-                                (s, v, ab) -> { stats[0]++; return false; },
-                                (s, v, ab) -> { stats[1]++; return false; },
-                                (v, f) -> {stats[2]++; return false; })));
+                                (_, _, _) -> { stats[0]++; return false; },
+                                (_, _, _) -> { stats[1]++; return false; },
+                                (_, _, _) -> {stats[2]++; return false; })));
         var known = dfs.runAlone();
         blackhole.consume(known);
         blackhole.consume(stats);
@@ -79,9 +79,9 @@ public class DFSBenchCallbacks {
                         new DepthFirstTraversalParameters<>(
                                 lrg,
                                 Function.identity(),
-                                (s, v, ab) -> { stats[0]++; return false; },
-                                (s, v, ab) -> { stats[1]++; return false; },
-                                (v, f) -> {stats[2]++; return false; },
+                                (_, _, _) -> { stats[0]++; return false; },
+                                (_, _, _) -> { stats[1]++; return false; },
+                                (_, _, _) -> {stats[2]++; return false; },
                                 false)));
         var known = dfs.runAlone();
         blackhole.consume(known);

@@ -75,10 +75,12 @@ public class DFTConfigurationSetDeque<V, A> implements IDepthFirstTraversalConfi
         stack.push(frame);
     }
 
-    public boolean knows(V vertex, A reducedVertex) {
+    @Override
+    public boolean knows(V vertex) {
         return known.contains(vertex);
     }
-    public void add(V vertex, A reducedVertex) {
+    @Override
+    public void add(V vertex) {
         known.add(vertex);
     }
 

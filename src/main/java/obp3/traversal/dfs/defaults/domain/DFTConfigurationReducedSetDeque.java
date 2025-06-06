@@ -74,11 +74,17 @@ public class DFTConfigurationReducedSetDeque<V, A> implements IDepthFirstTravers
     public void push(StackFrame<V> frame) {
         stack.push(frame);
     }
-
-    public boolean knows(V vertex, A reducedVertex) {
+    /// The reductedVertex is a local-to-transition variable,
+    /// that means that is computed when selecting the transition and using when executing the transition.
+    /// it only exists as a local cache so that the canonize function is not called twice
+    public A reducedVertex;
+    @Override
+    public boolean knows(V vertex) {
+        reducedVertex = model.canonize(vertex);
         return known.contains(reducedVertex);
     }
-    public void add(V vertex, A reducedVertex) {
+    @Override
+    public void add(V vertex) {
         known.add(reducedVertex);
     }
 

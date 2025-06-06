@@ -20,11 +20,11 @@ public interface IDepthFirstTraversalConfiguration<V, A> {
 
 
     //Known management
-    boolean knows(V vertex, A reducedVertex);
-    void add(V vertex, A reducedVertex);
+    boolean knows(V vertex);
+    void add(V vertex);
 
-    default void discover(V vertex, A reducedVertex) {
-        add(vertex, reducedVertex);
+    default void discover(V vertex) {
+        add(vertex);
         push(
                 new StackFrame<>(
                         vertex,

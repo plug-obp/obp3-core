@@ -9,15 +9,15 @@ public interface IDepthFirstTraversalCallbacksModel<V, A> {
     /// - the source vertex, from which the current was reached
     /// - the current vertex, which was just discovered
     /// - the canonized vertex
-    boolean onEntry(V source, V vertex, A canonical);
+    boolean onEntry(V source, V vertex, IDepthFirstTraversalConfiguration<V, A> configuration);
 
     /// {@code onKnown} - is called on sharing-links and back-loops
     /// the arguments are
     /// - the source vertex, from which the current was reached
     /// - the current vertex, which was just discovered
     /// - the canonized vertex
-    boolean onKnown(V source, V vertex, A canonical);
+    boolean onKnown(V source, V vertex, IDepthFirstTraversalConfiguration<V, A> configuration);
 
     /// {@code onExit} called when exiting a node during backtracking
-    boolean onExit(V vertex, IDepthFirstTraversalConfiguration.StackFrame<V> frame);
+    boolean onExit(V vertex, IDepthFirstTraversalConfiguration.StackFrame<V> frame, IDepthFirstTraversalConfiguration<V, A> configuration);
 }

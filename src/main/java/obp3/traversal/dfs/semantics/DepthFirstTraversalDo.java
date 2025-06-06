@@ -28,23 +28,22 @@ public class DepthFirstTraversalDo<V, A> implements IExecutable<IDepthFirstTrave
 
             if (neighboursIterator.hasNext()) {
                 var neighbour = neighboursIterator.next();
-                var reduced_neighbour = configuration.getModel().canonize(neighbour);
-                if (!configuration.knows(neighbour, reduced_neighbour)) {
-                    configuration.discover(neighbour, reduced_neighbour);
+                if (!configuration.knows(neighbour)) {
+                    configuration.discover(neighbour);
                     //apply onEntry callback
-                    var terminate = configuration.getModel().callbacks().onEntry(stackFrame.vertex(), neighbour, reduced_neighbour);
+                    var terminate = configuration.getModel().callbacks().onEntry(stackFrame.vertex(), neighbour, configuration);
                     if (terminate) { return configuration; }
                     continue;
                 }
                 //on known - is called on sharing-links and back-loops
-                var terminate = configuration.getModel().callbacks().onKnown(stackFrame.vertex(), neighbour, reduced_neighbour);
+                var terminate = configuration.getModel().callbacks().onKnown(stackFrame.vertex(), neighbour, configuration);
                 if (terminate) { return configuration; }
                 continue;
             }
             configuration.pop();
             if (stackFrame.vertex() == null) continue;
             //onExit is called when all children of a vertex are done
-            var terminate = configuration.getModel().callbacks().onExit(stackFrame.vertex(), stackFrame);
+            var terminate = configuration.getModel().callbacks().onExit(stackFrame.vertex(), stackFrame, configuration);
             if (terminate) return configuration;
         } while (true);
         return configuration;

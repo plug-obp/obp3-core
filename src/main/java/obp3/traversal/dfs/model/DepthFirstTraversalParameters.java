@@ -4,7 +4,6 @@ import obp3.sli.core.IRootedGraph;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversalParameters<V, A> {
@@ -23,18 +22,18 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
     public DepthFirstTraversalParameters(
             IRootedGraph<V> graph,
             Function<V, A> canonize,
-            TriFunction<V, V, A, Boolean> onEntry,
-            TriFunction<V, V, A, Boolean> onKnown,
-            BiFunction<V, IDepthFirstTraversalConfiguration.StackFrame<V>, Boolean> onExit) {
+            TriFunction<V, V, IDepthFirstTraversalConfiguration<V, A>, Boolean> onEntry,
+            TriFunction<V, V, IDepthFirstTraversalConfiguration<V, A>, Boolean> onKnown,
+            TriFunction<V, IDepthFirstTraversalConfiguration.StackFrame<V>, IDepthFirstTraversalConfiguration<V, A>, Boolean> onExit) {
         this(graph, canonize, onEntry, onKnown, onExit, true);
     }
 
     public DepthFirstTraversalParameters(
             IRootedGraph<V> graph,
             Function<V, A> canonize,
-            TriFunction<V, V, A, Boolean> onEntry,
-            TriFunction<V, V, A, Boolean> onKnown,
-            BiFunction<V, IDepthFirstTraversalConfiguration.StackFrame<V>, Boolean> onExit,
+            TriFunction<V, V, IDepthFirstTraversalConfiguration<V, A>, Boolean> onEntry,
+            TriFunction<V, V, IDepthFirstTraversalConfiguration<V, A>, Boolean> onKnown,
+            TriFunction<V, IDepthFirstTraversalConfiguration.StackFrame<V>, IDepthFirstTraversalConfiguration<V, A>, Boolean> onExit,
             boolean deterministicProduct) {
         this.graph = graph;
         this.canonize = canonize;
@@ -46,9 +45,9 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
 
     private IRootedGraph<V> graph;
 
-    final TriFunction<V, V, A, Boolean> onEntry;
-    final TriFunction<V, V, A, Boolean> onKnown;
-    final BiFunction<V, IDepthFirstTraversalConfiguration.StackFrame<V>, Boolean> onExit;
+    final TriFunction<V, V, IDepthFirstTraversalConfiguration<V, A>, Boolean> onEntry;
+    final TriFunction<V, V, IDepthFirstTraversalConfiguration<V, A>, Boolean> onKnown;
+    final TriFunction<V, IDepthFirstTraversalConfiguration.StackFrame<V>, IDepthFirstTraversalConfiguration<V, A>, Boolean> onExit;
 
     @Override
     public IRootedGraph<V> getGraph() {
@@ -70,27 +69,27 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
     public IDepthFirstTraversalCallbacksModel<V, A> callbacks() {
         return new IDepthFirstTraversalCallbacksModel<>() {
             @Override
-            public boolean onEntry(V source, V vertex, A canonical) {
+            public boolean onEntry(V source, V vertex, IDepthFirstTraversalConfiguration<V, A> configuration) {
                 if (onEntry == null) {
                     return false;
                 }
-                return onEntry.apply(source, vertex, canonical);
+                return onEntry.apply(source, vertex, configuration);
             }
 
             @Override
-            public boolean onKnown(V source, V vertex, A canonical) {
+            public boolean onKnown(V source, V vertex, IDepthFirstTraversalConfiguration<V, A> configuration) {
                 if (onKnown == null) {
                     return false;
                 }
-                return onKnown.apply(source, vertex, canonical);
+                return onKnown.apply(source, vertex, configuration);
             }
 
             @Override
-            public boolean onExit(V vertex, IDepthFirstTraversalConfiguration.StackFrame<V> frame) {
+            public boolean onExit(V vertex, IDepthFirstTraversalConfiguration.StackFrame<V> frame, IDepthFirstTraversalConfiguration<V, A> configuration) {
                 if (onExit == null) {
                     return false;
                 }
-                return onExit.apply(vertex, frame);
+                return onExit.apply(vertex, frame, configuration);
             }
         };
     }

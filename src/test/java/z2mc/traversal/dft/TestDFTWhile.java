@@ -2,6 +2,7 @@ package z2mc.traversal.dft;
 
 import obp3.IExecutable;
 import obp3.sli.core.IRootedGraph;
+import obp3.traversal.dfs.defaults.domain.DFTConfigurationReducedSetDeque;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestDFTWhile {
     <V> IExecutable<IDepthFirstTraversalConfiguration<V, V>> simpleDFS(
             IRootedGraph<V> graph) {
-        return new DepthFirstTraversalWhile(
+        return new DepthFirstTraversalWhile<>(
                 new DFTConfigurationSetDeque<>(
                     new DepthFirstTraversalParameters<>(graph, Function.identity())));
     }
@@ -121,7 +122,7 @@ public class TestDFTWhile {
                                 RootedGraphExamples.sharing_3,
                                 Function.identity(),
                                 null,
-                                (s, v, ab) -> { rediscoverd.add(v); return false; },
+                                (_, v, _) -> { rediscoverd.add(v); return false; },
                                 null
                         )
                 ));
@@ -137,7 +138,7 @@ public class TestDFTWhile {
                         new DepthFirstTraversalParameters<>(
                                 RootedGraphExamples.sharing_3,
                                 Function.identity(),
-                                (s, v, ab) -> { discoverd.add(v); return false; },
+                                (_, v, _) -> { discoverd.add(v); return false; },
                                 null,
                                 null
                         )
@@ -156,11 +157,48 @@ public class TestDFTWhile {
                                 Function.identity(),
                                 null,
                                 null,
-                                (v, f) -> { exited.add(v); return false; }
+                                (v, _, _) -> { exited.add(v); return false; }
                         )
                 ));
         dfs.runAlone();
         assertEquals(5, exited.size());
         assertEquals(List.of(3, 2, 5, 4, 1), exited);
+    }
+
+
+    @Test void sharing_reduced() {
+        var dfs = new DepthFirstTraversalWhile<>(
+                new DFTConfigurationReducedSetDeque<>(
+                        new DepthFirstTraversalParameters<>(
+                                RootedGraphExamples.sharing_3,
+                                (Integer v) -> v % 3
+                        )
+                )
+        );
+        var result = dfs.runAlone();
+        assertEquals(3, result.getKnown().size());
+        //note that the known contains the reduced vertices, not the graph vertices
+        assertEquals(Set.of(0, 1, 2), result.getKnown());
+    }
+
+    @Test void sharing_reducedVertexOk() {
+        var dfs = new DepthFirstTraversalWhile<>(
+                new DFTConfigurationReducedSetDeque<>(
+                        new DepthFirstTraversalParameters<>(
+                                RootedGraphExamples.sharing_3,
+                                (Integer v) -> v % 3,
+                                (_, v, c) -> {
+                                    var rv = ((DFTConfigurationReducedSetDeque<Integer, Integer>)c).reducedVertex;
+                                    assertEquals(rv, c.getModel().canonize(v));
+                                    return false; },
+                                null,
+                                null
+                        )
+                )
+        );
+        var result = dfs.runAlone();
+        assertEquals(3, result.getKnown().size());
+        //note that the known contains the reduced vertices, not the graph vertices
+        assertEquals(Set.of(0, 1, 2), result.getKnown());
     }
 }

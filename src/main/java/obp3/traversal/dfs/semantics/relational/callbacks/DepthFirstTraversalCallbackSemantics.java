@@ -26,15 +26,18 @@ public class DepthFirstTraversalCallbackSemantics<V, A>
     }
 
     @Override
-    public Optional<Supplier<Boolean>> actions(Step<DepthFirstTraversalAction<V, A>, IDepthFirstTraversalConfiguration<V, A>> input, Boolean configuration) {
+    public Optional<Supplier<Boolean>> actions(
+                    Step<DepthFirstTraversalAction<V, A>,
+                    IDepthFirstTraversalConfiguration<V, A>> input,
+                    Boolean configuration) {
         if (!configuration) return Optional.empty();
         if (input.action().isEmpty()) { return Optional.empty(); }
         return switch (input.action().get()) {
-            case UnknownConfigurationAction(V s, V v, A av) -> Optional.of(() -> callbacksModel.onEntry(s, v, av));
-            case KnownConfigurationAction(V s, V v, A av) -> Optional.of(() -> callbacksModel.onKnown(s, v, av));
-            case BacktrackAction(V v, IDepthFirstTraversalConfiguration.StackFrame<V> frame) ->
+            case UnknownConfigurationAction(V s, V v, var conf) -> Optional.of(() -> callbacksModel.onEntry(s, v, conf));
+            case KnownConfigurationAction(V s, V v, var conf) -> Optional.of(() -> callbacksModel.onKnown(s, v, conf));
+            case BacktrackAction(V v, IDepthFirstTraversalConfiguration.StackFrame<V> frame, var conf) ->
                     input.end().peek() != null ?
-                        Optional.of(() -> callbacksModel.onExit(v, frame)) : Optional.empty();
+                        Optional.of(() -> callbacksModel.onExit(v, frame, conf)) : Optional.empty();
         };
     }
 

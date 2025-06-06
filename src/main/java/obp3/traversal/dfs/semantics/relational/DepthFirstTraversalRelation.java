@@ -28,13 +28,12 @@ public class DepthFirstTraversalRelation<V, A>
         // we have at least one more neighbour check it against the known
         if (neighboursIterator.hasNext()) {
             V vertex = neighboursIterator.peek();
-            var reduced_vertex = configuration.getModel().canonize(vertex);
-            return Optional.of(configuration.knows(vertex, reduced_vertex) ?
-                    new KnownConfigurationAction<>(frame.vertex(), vertex, reduced_vertex) :
-                    new UnknownConfigurationAction<>(frame.vertex(), vertex, reduced_vertex));
+            return Optional.of(configuration.knows(vertex) ?
+                    new KnownConfigurationAction<>(frame.vertex(), vertex, configuration) :
+                    new UnknownConfigurationAction<>(frame.vertex(), vertex, configuration));
         }
         // if no more neighbours of the previous source, backtrack to get a new one from the stack
-        return Optional.of(new BacktrackAction<>(frame.vertex(), frame));
+        return Optional.of(new BacktrackAction<>(frame.vertex(), frame, configuration));
     }
 
     @Override
@@ -49,11 +48,11 @@ public class DepthFirstTraversalRelation<V, A>
                 configuration.peek().neighbours().next();
                 return Optional.of(configuration);
             }
-            case UnknownConfigurationAction<V, A> (var _, var vertex, var reduced_vertex)  -> {
+            case UnknownConfigurationAction<V, A> (var _, var vertex, var _)  -> {
                 //advance the neighbours iterator
                 configuration.peek().neighbours().next();
                 //discover the vertex
-                configuration.discover(vertex, reduced_vertex);
+                configuration.discover(vertex);
                 return Optional.of(configuration);
             }
         }
