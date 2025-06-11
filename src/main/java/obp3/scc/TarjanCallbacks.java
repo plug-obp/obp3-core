@@ -41,9 +41,12 @@ public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V,
         }
         //postvisit
         if (wData.lead) {
-            while (!config.followers.isEmpty() && config.data.get(config.followers.peek()).low >= wData.low) {
-                var x = config.followers.pop();
+            while (!config.followers.isEmpty()) {
+                var x = config.followers.peek();
                 var xData = config.data.get(x);
+                if (xData.low < wData.low) break;
+                //remove only after confirming
+                config.followers.pop();
                 xData.ptr = w;
                 xData.low = Integer.MAX_VALUE;
             }

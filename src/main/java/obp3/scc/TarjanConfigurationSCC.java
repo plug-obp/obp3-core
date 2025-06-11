@@ -7,7 +7,7 @@ import java.util.*;
 
 public class TarjanConfigurationSCC<V> extends DFTConfigurationSetDeque<V, V> {
     Map<V, TarjanVertexData<V>> data = new IdentityHashMap<>();
-    Stack<V> followers = new Stack<>();
+    Deque<V> followers = new ArrayDeque<>();
     Integer time = 0;
 
     public TarjanConfigurationSCC(IRootedGraph<V> graph) {
