@@ -5,5 +5,10 @@ public class TarjanVertexData<V> {
     public boolean lead = false;
     public V ptr;
 
-    public static TarjanVertexData DEFAULT = new TarjanVertexData<>();
+    public static <X> TarjanVertexData<X> DEFAULT() { return new TarjanVertexData<>(); }
+
+    @Override
+    public String toString() {
+        return "VData["+ low + ", " + lead + " " + ptr + "]";
+    }
 }

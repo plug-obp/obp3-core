@@ -17,4 +17,12 @@ public class TestTarjanSCC {
         var result = dfs.runAlone();
         assertEquals(5, result.getKnown().size());
     }
+
+    @Test
+    void simpleCycleOk() {
+        var dfs = new DepthFirstTraversalWhile<>(
+                new TarjanConfigurationSCC<>(RootedGraphExamples.simpleCycle2));
+        var result = dfs.runAlone();
+        assertEquals(5, result.getKnown().size());
+    }
 }

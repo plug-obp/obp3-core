@@ -8,7 +8,7 @@ public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V,
     public boolean onEntry(V source, V vertex, IDepthFirstTraversalConfiguration<V, V> configuration) {
         TarjanConfigurationSCC<V> config = (TarjanConfigurationSCC<V>) configuration;
         config.time++;
-        var vData = config.data.computeIfAbsent(vertex, _ -> TarjanVertexData.DEFAULT);
+        var vData = config.data.computeIfAbsent(vertex, _ -> TarjanVertexData.DEFAULT());
         vData.low = config.time;
         vData.lead = true;
         return false;
@@ -17,8 +17,8 @@ public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V,
     @Override
     public boolean onKnown(V source, V vertex, IDepthFirstTraversalConfiguration<V, V> configuration) {
         TarjanConfigurationSCC<V> config = (TarjanConfigurationSCC<V>) configuration;
-        var vData = config.data.computeIfAbsent(source, _ -> TarjanVertexData.DEFAULT);
-        var wData = config.data.computeIfAbsent(vertex, _ -> TarjanVertexData.DEFAULT);
+        var vData = config.data.computeIfAbsent(source, _ -> TarjanVertexData.DEFAULT());
+        var wData = config.data.computeIfAbsent(vertex, _ -> TarjanVertexData.DEFAULT());
         //retreat on known
         if (wData.low < vData.low) {
             vData.low = wData.low;
@@ -32,8 +32,8 @@ public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V,
         TarjanConfigurationSCC<V> config = (TarjanConfigurationSCC<V>) configuration;
         var v = config.peek().vertex();
         var w = vertex;
-        var vData = config.data.computeIfAbsent(v, _ ->TarjanVertexData.DEFAULT);
-        var wData = config.data.computeIfAbsent(w, _ ->TarjanVertexData.DEFAULT);
+        var vData = config.data.computeIfAbsent(v, _ ->TarjanVertexData.DEFAULT());
+        var wData = config.data.computeIfAbsent(w, _ ->TarjanVertexData.DEFAULT());
         //retreat
         if (wData.low < vData.low) {
             vData.low = wData.low;
@@ -41,9 +41,9 @@ public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V,
         }
         //postvisit
         if (wData.lead) {
-            while (!config.followers.isEmpty() && config.data.computeIfAbsent(config.followers.peek(), _ -> TarjanVertexData.DEFAULT).low > wData.low) {
+            while (!config.followers.isEmpty() && config.data.get(config.followers.peek()).low >= wData.low) {
                 var x = config.followers.pop();
-                var xData = config.data.computeIfAbsent(x, _ -> TarjanVertexData.DEFAULT);
+                var xData = config.data.get(x);
                 xData.ptr = w;
                 xData.low = Integer.MAX_VALUE;
             }

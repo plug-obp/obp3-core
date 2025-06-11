@@ -81,6 +81,15 @@ public class RootedGraphExamples {
                             .get(v).iterator()
             );
 
+    public static IRootedGraph<Integer> simpleCycle2 =
+            new RootedGraphFunctional<>(
+                    () -> List.of(1).iterator(),
+                    (v) -> Map.of(
+                            1, List.of(2),
+                            2, List.of(1))
+                            .get(v).iterator()
+            );
+
     public static IRootedGraph<Integer> lasso_1_1 =
             new RootedGraphFunctional<>(
                     () -> List.of(1).iterator(),
