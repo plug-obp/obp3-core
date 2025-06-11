@@ -28,6 +28,12 @@ public class RootedGraphExamples {
                     (_) -> Collections.emptyIterator()
             );
 
+    public static IRootedGraph<Integer> twoIdenticalRoots =
+            new RootedGraphFunctional<>(
+                    () -> List.of(1, 1).iterator(),
+                    (_) -> Collections.emptyIterator()
+            );
+
     public static IRootedGraph<Integer> disconnectedGraph1 =
             new RootedGraphFunctional<>(
                     () -> List.of(1).iterator(),

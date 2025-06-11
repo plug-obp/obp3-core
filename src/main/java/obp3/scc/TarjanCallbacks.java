@@ -17,10 +17,10 @@ public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V,
     @Override
     public boolean onKnown(V source, V vertex, IDepthFirstTraversalConfiguration<V, V> configuration) {
         TarjanConfigurationSCC<V> config = (TarjanConfigurationSCC<V>) configuration;
-        var vData = config.data.computeIfAbsent(source, _ -> TarjanVertexData.DEFAULT());
-        var wData = config.data.computeIfAbsent(vertex, _ -> TarjanVertexData.DEFAULT());
+        var vData = config.data.get(source);
+        var wData = config.data.get(vertex);
         //retreat on known
-        if (wData.low < vData.low) {
+        if (vData != null && wData.low < vData.low) {
             vData.low = wData.low;
             vData.lead = false;
         }
@@ -32,21 +32,23 @@ public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V,
         TarjanConfigurationSCC<V> config = (TarjanConfigurationSCC<V>) configuration;
         var v = config.peek().vertex();
         var w = vertex;
-        var vData = config.data.computeIfAbsent(v, _ ->TarjanVertexData.DEFAULT());
-        var wData = config.data.computeIfAbsent(w, _ ->TarjanVertexData.DEFAULT());
+        var data = config.data;
+        var vData = data.get(v);
+        var wData = data.get(w);
         //retreat
-        if (wData.low < vData.low) {
+        if (vData != null && wData.low < vData.low) {
             vData.low = wData.low;
             vData.lead = false;
         }
         //postvisit
         if (wData.lead) {
-            while (!config.followers.isEmpty()) {
-                var x = config.followers.peek();
-                var xData = config.data.get(x);
+            var followers = config.followers;
+            while (!followers.isEmpty()) {
+                var x = followers.peek();
+                var xData = data.get(x);
                 if (xData.low < wData.low) break;
                 //remove only after confirming
-                config.followers.pop();
+                followers.pop();
                 xData.ptr = w;
                 xData.low = Integer.MAX_VALUE;
             }

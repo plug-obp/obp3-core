@@ -25,4 +25,13 @@ public class TestTarjanSCC {
         var result = dfs.runAlone();
         assertEquals(5, result.getKnown().size());
     }
+
+    //test RootedGraphExamples.twoIdenticalRoots
+    @Test void twoIdenticalRootsOk() {
+        var dfs = new DepthFirstTraversalWhile<>(
+                new TarjanConfigurationSCC<>(RootedGraphExamples.twoIdenticalRoots)
+        );
+        var result = dfs.runAlone();
+        assertEquals(5, result.getKnown().size());
+    }
 }
