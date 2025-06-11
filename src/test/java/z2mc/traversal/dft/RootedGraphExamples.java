@@ -11,23 +11,27 @@ public class RootedGraphExamples {
     public static IRootedGraph<Integer> emptyGraph =
             new RootedGraphFunctional<>(Collections::emptyIterator, (_) -> Collections.emptyIterator());
 
+    /// /// <img src="../../../../../doc-files/emptyRootGraph.png" width="300">
     public static IRootedGraph<Integer> emptyRootGraph =
             new RootedGraphFunctional<>(
                     Collections::emptyIterator,
                     (_) -> List.of(1, 2, 3).iterator());
 
+    /// <img src="../../../../../doc-files/oneRootEmptyNeighboursGraph.png" width="200">
     public static IRootedGraph<Integer> oneRootEmptyNeighboursGraph =
             new RootedGraphFunctional<>(
                     () -> List.of(1).iterator(),
                     (_) -> Collections.emptyIterator()
             );
 
+    /// <img src="../../../../../doc-files/twoRootsEmptyNeighboursGraph.png" width="300">
     public static IRootedGraph<Integer> twoRootsEmptyNeighboursGraph =
             new RootedGraphFunctional<>(
                     () -> List.of(1, 2).iterator(),
                     (_) -> Collections.emptyIterator()
             );
 
+    /// <img src="../../../../../doc-files/twoIdenticalRoots.png" width="300">
     public static IRootedGraph<Integer> twoIdenticalRoots =
             new RootedGraphFunctional<>(
                     () -> List.of(1, 1).iterator(),

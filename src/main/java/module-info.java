@@ -19,4 +19,6 @@ module obp3.algos {
     exports obp3.traversal.dfs.defaults.domain;
     exports obp3.traversal.dfs.semantics.relational.actions;
     exports obp3.traversal.dfs.semantics.relational.callbacks;
+
+    exports obp3.scc;
 }
