@@ -48,6 +48,7 @@ public class RootedGraphExamples {
                             ).get(v).iterator()
             );
 
+    /// <img src="../../../../../doc-files/disconnectedGraph1.png" width="300">
     public static IRootedGraph<Integer> disconnectedGraph1 =
             new RootedGraphFunctional<>(
                     () -> List.of(1).iterator(),
@@ -59,6 +60,8 @@ public class RootedGraphExamples {
                                         5, List.of(5))
                             .get(v).iterator()
             );
+
+    /// <img src="../../../../../doc-files/disconnectedGraph2.png" width="300">
     public static IRootedGraph<Integer> disconnectedGraph2 =
             new RootedGraphFunctional<>(
                     () -> List.of(4).iterator(),
@@ -70,6 +73,8 @@ public class RootedGraphExamples {
                                     5, List.of(5))
                             .get(v).iterator()
             );
+
+    /// <img src="../../../../../doc-files/twoRootsTwoGraphs.png" width="300">
     public static IRootedGraph<Integer> twoRootsTwoGraphs =
             new RootedGraphFunctional<>(
                     () -> List.of(1, 4).iterator(),
@@ -82,6 +87,7 @@ public class RootedGraphExamples {
                             .get(v).iterator()
             );
 
+    /// <img src="../../../../../doc-files/rootCycle.png" width="200">
     public static IRootedGraph<Integer> rootCycle =
             new RootedGraphFunctional<>(
                     () -> List.of(1).iterator(),
@@ -91,6 +97,7 @@ public class RootedGraphExamples {
                             .get(v).iterator()
             );
 
+    /// <img src="../../../../../doc-files/rootCycle3.png" width="200">
     public static IRootedGraph<Integer> rootCycle3 =
             new RootedGraphFunctional<>(
                     () -> List.of(1).iterator(),
@@ -101,6 +108,7 @@ public class RootedGraphExamples {
                             .get(v).iterator()
             );
 
+    /// <img src="../../../../../doc-files/simpleCycle2.png" width="200">
     public static IRootedGraph<Integer> simpleCycle2 =
             new RootedGraphFunctional<>(
                     () -> List.of(1).iterator(),
@@ -142,6 +150,18 @@ public class RootedGraphExamples {
                             .get(v).iterator()
             );
 
+    /// <img src="../../../../../doc-files/sharing_2.png" width="300">
+    public static IRootedGraph<Integer> sharing_2 =
+            new RootedGraphFunctional<>(
+                    () -> List.of(1).iterator(),
+                    (v) -> Map.of(
+                            1, List.of(2, 4),
+                            2, List.of(3),
+                            3, List.of(1),
+                            4, List.of(5),
+                            5, List.of(2)
+                    ).get(v).iterator()
+            );
     /// <img src="../../../../../doc-files/sharing3.png" width="300">
     public static IRootedGraph<Integer> sharing_3 =
             new RootedGraphFunctional<>(
