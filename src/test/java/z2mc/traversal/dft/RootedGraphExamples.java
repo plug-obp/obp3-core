@@ -38,6 +38,16 @@ public class RootedGraphExamples {
                     (_) -> Collections.emptyIterator()
             );
 
+    /// <img src="../../../../../doc-files/line2.png" width="300">
+    public static IRootedGraph<Integer> line2 =
+            new RootedGraphFunctional<>(
+                    () -> List.of(1).iterator(),
+                    (v) -> Map.of(
+                                1, List.of(2),
+                                2, List.<Integer>of()
+                            ).get(v).iterator()
+            );
+
     public static IRootedGraph<Integer> disconnectedGraph1 =
             new RootedGraphFunctional<>(
                     () -> List.of(1).iterator(),
@@ -100,6 +110,7 @@ public class RootedGraphExamples {
                             .get(v).iterator()
             );
 
+    /// <img src="../../../../../doc-files/lasso_1_1.png" width="300">
     public static IRootedGraph<Integer> lasso_1_1 =
             new RootedGraphFunctional<>(
                     () -> List.of(1).iterator(),
@@ -109,6 +120,7 @@ public class RootedGraphExamples {
                             .get(v).iterator()
             );
 
+    /// <img src="../../../../../doc-files/lasso_2_1.png" width="300">
     public static IRootedGraph<Integer> lasso_2_1 =
             new RootedGraphFunctional<>(
                     () -> List.of(1).iterator(),
@@ -119,6 +131,7 @@ public class RootedGraphExamples {
                             .get(v).iterator()
             );
 
+    /// <img src="../../../../../doc-files/lasso_1_2.png" width="300">
     public static IRootedGraph<Integer> lasso_1_2 =
             new RootedGraphFunctional<>(
                     () -> List.of(1).iterator(),
@@ -128,6 +141,8 @@ public class RootedGraphExamples {
                                     3, List.of(2))
                             .get(v).iterator()
             );
+
+    /// <img src="../../../../../doc-files/sharing3.png" width="300">
     public static IRootedGraph<Integer> sharing_3 =
             new RootedGraphFunctional<>(
                     () -> List.of(1).iterator(),
