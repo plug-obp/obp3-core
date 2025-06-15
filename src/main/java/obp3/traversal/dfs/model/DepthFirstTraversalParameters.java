@@ -18,6 +18,11 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
     public DepthFirstTraversalParameters(IRootedGraph<V> graph, Function<V, A> reducer) {
         this(graph, reducer, null, null, null);
     }
+    IDepthFirstTraversalCallbacksModel<V, A> callbacksModel;
+    public DepthFirstTraversalParameters(IRootedGraph<V> graph, Function<V, A> reducer, IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
+        this(graph, reducer);
+        this.callbacksModel = callbacksModel;
+    }
 
     public DepthFirstTraversalParameters(
             IRootedGraph<V> graph,
@@ -63,10 +68,13 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
 
     @Override
     public boolean hasCallbacks() {
-        return onEntry != null || onKnown != null || onExit != null;
+        return callbacksModel != null || onEntry != null || onKnown != null || onExit != null;
     }
     @Override
     public IDepthFirstTraversalCallbacksModel<V, A> callbacks() {
+        if (callbacksModel != null) {
+            return callbacksModel;
+        }
         return new IDepthFirstTraversalCallbacksModel<>() {
             @Override
             public boolean onEntry(V source, V vertex, IDepthFirstTraversalConfiguration<V, A> configuration) {

@@ -1,24 +1,25 @@
-package obp3.scc;
+package obp3.scc.tarjan2;
 
+import obp3.scc.TarjanVertexData;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.IDepthFirstTraversalCallbacksModel;
 
 public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V, V> {
+    public TarjanMemory<V> memory = new TarjanMemory<>();
+
     @Override
     public boolean onEntry(V source, V vertex, IDepthFirstTraversalConfiguration<V, V> configuration) {
-        TarjanConfigurationSCC<V> config = (TarjanConfigurationSCC<V>) configuration;
-        config.time++;
-        var vData = config.data.computeIfAbsent(vertex, _ -> TarjanVertexData.DEFAULT());
-        vData.low = config.time;
+        memory.time++;
+        var vData = memory.data.computeIfAbsent(vertex, _ -> TarjanVertexData.DEFAULT());
+        vData.low = memory.time;
         vData.lead = true;
         return false;
     }
 
     @Override
     public boolean onKnown(V source, V vertex, IDepthFirstTraversalConfiguration<V, V> configuration) {
-        TarjanConfigurationSCC<V> config = (TarjanConfigurationSCC<V>) configuration;
-        var vData = config.data.get(source);
-        var wData = config.data.get(vertex);
+        var vData = memory.data.get(source);
+        var wData = memory.data.get(vertex);
         //retreat on known
         if (vData != null && wData.low < vData.low) {
             vData.low = wData.low;
@@ -29,10 +30,9 @@ public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V,
 
     @Override
     public boolean onExit(V vertex, IDepthFirstTraversalConfiguration.StackFrame<V> frame, IDepthFirstTraversalConfiguration<V, V> configuration) {
-        TarjanConfigurationSCC<V> config = (TarjanConfigurationSCC<V>) configuration;
-        var v = config.peek().vertex();
+        var v = configuration.peek().vertex();
         var w = vertex;
-        var data = config.data;
+        var data = memory.data;
         var vData = data.get(v);
         var wData = data.get(w);
         //retreat
@@ -42,7 +42,7 @@ public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V,
         }
         //postvisit
         if (wData.lead) {
-            var followers = config.followers;
+            var followers = memory.followers;
             while (!followers.isEmpty()) {
                 var x = followers.peek();
                 var xData = data.get(x);
@@ -55,7 +55,7 @@ public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V,
             wData.ptr = w;
             wData.low = Integer.MAX_VALUE;
         } else {
-            config.followers.push(w);
+            memory.followers.push(w);
         }
         return false;
     }

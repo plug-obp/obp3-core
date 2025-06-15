@@ -9,6 +9,6 @@ public class TarjanVertexData<V> {
 
     @Override
     public String toString() {
-        return "VData["+ low + ", " + lead + " " + ptr + "]";
+        return "VData["+ low + ", " + lead + ", " + ptr + "]";
     }
 }

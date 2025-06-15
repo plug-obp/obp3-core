@@ -21,4 +21,6 @@ module obp3.algos {
     exports obp3.traversal.dfs.semantics.relational.callbacks;
 
     exports obp3.scc;
+    exports obp3.scc.tarjan1;
+    exports obp3.scc.tarjan2;
 }
