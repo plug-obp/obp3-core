@@ -12,6 +12,7 @@ module obp3.algos {
     exports obp3.traversal.bfs;
     exports obp3.fixer;
     exports obp3.things;
+    exports obp3.traversal.dfs;
     exports obp3.traversal.dfs.domain;
     exports obp3.traversal.dfs.model;
     exports obp3.traversal.dfs.semantics;

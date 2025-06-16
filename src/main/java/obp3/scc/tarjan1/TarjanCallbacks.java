@@ -4,6 +4,8 @@ import obp3.scc.TarjanVertexData;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.IDepthFirstTraversalCallbacksModel;
 
+/// Implementation of the Algorithm T from
+/// [Robert E. Tarjan, Uri Zwick, *Finding Strong Components Using Depth-First Search*](https://arxiv.org/pdf/2201.07197)
 public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V, V> {
     @Override
     public boolean onEntry(V source, V vertex, IDepthFirstTraversalConfiguration<V, V> configuration) {
