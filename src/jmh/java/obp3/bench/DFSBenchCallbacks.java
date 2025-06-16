@@ -3,6 +3,7 @@ package obp3.bench;
 import obp3.things.LimitedRandomRootedGraph;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
+import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
 import obp3.traversal.dfs.semantics.DepthFirstTraversalDo;
 import obp3.traversal.dfs.semantics.DepthFirstTraversalRelational;
 import obp3.traversal.dfs.semantics.DepthFirstTraversalWhile;
@@ -32,9 +33,13 @@ public class DFSBenchCallbacks {
                         new DepthFirstTraversalParameters<>(
                                 lrg,
                                 Function.identity(),
-                                (_, _, _) -> { stats[0]++; return false; },
-                                (_, _, _) -> { stats[1]++; return false; },
-                                (_, _, _) -> {stats[2]++; return false; })));
+                                new FunctionalDFTCallbacksModel<>(
+                                    (_, _, _) -> {
+                                        stats[0]++; return false; },
+                                    (_, _, _) -> {
+                                        stats[1]++; return false; },
+                                    (_, _, _) -> {
+                                        stats[2]++; return false; }))));
         var known = dfs.runAlone();
         blackhole.consume(known);
         blackhole.consume(stats);
@@ -47,9 +52,13 @@ public class DFSBenchCallbacks {
                         new DepthFirstTraversalParameters<>(
                                 lrg,
                                 Function.identity(),
-                                (_, _, _) -> { stats[0]++; return false; },
-                                (_, _, _) -> { stats[1]++; return false; },
-                                (_, _, _) -> {stats[2]++; return false; })));
+                                new FunctionalDFTCallbacksModel<>(
+                                    (_, _, _) -> {
+                                        stats[0]++; return false; },
+                                    (_, _, _) -> {
+                                        stats[1]++; return false; },
+                                    (_, _, _) -> {
+                                        stats[2]++; return false; }))));
         var known = dfs.runAlone();
         blackhole.consume(known);
         blackhole.consume(stats);
@@ -63,9 +72,13 @@ public class DFSBenchCallbacks {
                         new DepthFirstTraversalParameters<>(
                                 lrg,
                                 Function.identity(),
-                                (_, _, _) -> { stats[0]++; return false; },
-                                (_, _, _) -> { stats[1]++; return false; },
-                                (_, _, _) -> {stats[2]++; return false; })));
+                                new FunctionalDFTCallbacksModel<>(
+                                    (_, _, _) -> {
+                                        stats[0]++; return false; },
+                                    (_, _, _) -> {
+                                        stats[1]++; return false; },
+                                    (_, _, _) -> {
+                                        stats[2]++; return false; }))));
         var known = dfs.runAlone();
         blackhole.consume(known);
         blackhole.consume(stats);
@@ -79,9 +92,14 @@ public class DFSBenchCallbacks {
                         new DepthFirstTraversalParameters<>(
                                 lrg,
                                 Function.identity(),
-                                (_, _, _) -> { stats[0]++; return false; },
-                                (_, _, _) -> { stats[1]++; return false; },
-                                (_, _, _) -> {stats[2]++; return false; },
+                                new FunctionalDFTCallbacksModel<>(
+                                    (_, _, _) -> {
+                                        stats[0]++; return false; },
+                                    (_, _, _) -> {
+                                        stats[1]++; return false; },
+                                    (_, _, _) -> {
+                                        stats[2]++; return false; }
+                                ),
                                 false)));
         var known = dfs.runAlone();
         blackhole.consume(known);

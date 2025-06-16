@@ -4,11 +4,11 @@ import obp3.scc.TarjanVertexData;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.IDepthFirstTraversalCallbacksModel;
 
-public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V, V> {
+public class TarjanCallbacks<V, AV> implements IDepthFirstTraversalCallbacksModel<V, AV> {
     public TarjanMemory<V> memory = new TarjanMemory<>();
 
     @Override
-    public boolean onEntry(V source, V vertex, IDepthFirstTraversalConfiguration<V, V> configuration) {
+    public boolean onEntry(V source, V vertex, IDepthFirstTraversalConfiguration<V, AV> configuration) {
         memory.time++;
         var vData = memory.data.computeIfAbsent(vertex, _ -> TarjanVertexData.DEFAULT());
         vData.low = memory.time;
@@ -17,7 +17,7 @@ public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V,
     }
 
     @Override
-    public boolean onKnown(V source, V vertex, IDepthFirstTraversalConfiguration<V, V> configuration) {
+    public boolean onKnown(V source, V vertex, IDepthFirstTraversalConfiguration<V, AV> configuration) {
         var vData = memory.data.get(source);
         var wData = memory.data.get(vertex);
         //retreat on known
@@ -29,7 +29,7 @@ public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V,
     }
 
     @Override
-    public boolean onExit(V vertex, IDepthFirstTraversalConfiguration.StackFrame<V> frame, IDepthFirstTraversalConfiguration<V, V> configuration) {
+    public boolean onExit(V vertex, IDepthFirstTraversalConfiguration.StackFrame<V> frame, IDepthFirstTraversalConfiguration<V, AV> configuration) {
         var v = configuration.peek().vertex();
         var w = vertex;
         var data = memory.data;

@@ -2,10 +2,12 @@ package z2mc.traversal.dft;
 
 import obp3.IExecutable;
 import obp3.sli.core.IRootedGraph;
+import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationReducedSetDeque;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
+import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
 import obp3.traversal.dfs.semantics.DepthFirstTraversalDo;
 import org.junit.jupiter.api.Test;
 
@@ -19,9 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestDFTDo {
     <V> IExecutable<IDepthFirstTraversalConfiguration<V, V>> simpleDFS(
             IRootedGraph<V> graph) {
-        return new DepthFirstTraversalDo<>(
-                new DFTConfigurationSetDeque<>(
-                        new DepthFirstTraversalParameters<>(graph, Function.identity())));
+        return new DepthFirstTraversal<>(DepthFirstTraversal.Algorithm.DO, graph, Function.identity());
     }
 
     @Test
@@ -121,9 +121,10 @@ public class TestDFTDo {
                         new DepthFirstTraversalParameters<>(
                                 RootedGraphExamples.sharing_3,
                                 Function.identity(),
-                                null,
-                                (_, v, _) -> { rediscoverd.add(v); return false; },
-                                null
+                                FunctionalDFTCallbacksModel.onKnown(
+                                    (_, v, _) -> {
+                                        rediscoverd.add(v); return false;
+                                    })
                         )
                 ));
         dfs.runAlone();
@@ -138,9 +139,10 @@ public class TestDFTDo {
                         new DepthFirstTraversalParameters<>(
                                 RootedGraphExamples.sharing_3,
                                 Function.identity(),
-                                (_, v, _) -> { discoverd.add(v); return false; },
-                                null,
-                                null
+                                FunctionalDFTCallbacksModel.onEntry(
+                                    (_, v, _) -> {
+                                        discoverd.add(v); return false;
+                                    })
                         )
                 ));
         dfs.runAlone();
@@ -155,9 +157,10 @@ public class TestDFTDo {
                         new DepthFirstTraversalParameters<>(
                                 RootedGraphExamples.sharing_3,
                                 Function.identity(),
-                                null,
-                                null,
-                                (v, _, _) -> { exited.add(v); return false; }
+                                FunctionalDFTCallbacksModel.onExit(
+                                    (v, _, _) -> {
+                                        exited.add(v); return false;
+                                    })
                         )
                 ));
         dfs.runAlone();
@@ -186,12 +189,12 @@ public class TestDFTDo {
                         new DepthFirstTraversalParameters<>(
                                 RootedGraphExamples.sharing_3,
                                 (Integer v) -> v % 3,
-                                (_, v, c) -> {
-                                    var rv = ((DFTConfigurationReducedSetDeque<Integer, Integer>)c).reducedVertex;
-                                    assertEquals(rv, c.getModel().reduce(v));
-                                    return false; },
-                                null,
-                                null
+                                FunctionalDFTCallbacksModel.onEntry(
+                                    (_, v, c) -> {
+                                        var rv = ((DFTConfigurationReducedSetDeque<Integer, Integer>)c).reducedVertex;
+                                        assertEquals(rv, c.getModel().reduce(v));
+                                        return false;
+                                    })
                         )
                 )
         );

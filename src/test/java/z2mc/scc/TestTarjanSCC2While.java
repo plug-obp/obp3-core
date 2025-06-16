@@ -1,29 +1,20 @@
 package z2mc.scc;
 
-import obp3.scc.tarjan2.TarjanCallbacks;
 import obp3.scc.tarjan2.TarjanMemory;
+import obp3.scc.tarjan2.TarjanStronglyConnectedComponentsAlgoT;
 import obp3.sli.core.IRootedGraph;
-import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
-import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
-import obp3.traversal.dfs.semantics.DepthFirstTraversalWhile;
 import org.junit.jupiter.api.Test;
 import z2mc.traversal.dft.RootedGraphExamples;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestTarjanSCC2While {
 
     TarjanMemory<Integer> tarjan(IRootedGraph<Integer> graph) {
-        TarjanCallbacks<Integer> callbacks = new TarjanCallbacks<>();
-        var dfs = new DepthFirstTraversalWhile<>(
-                new DFTConfigurationSetDeque<>(
-                        new DepthFirstTraversalParameters<>(graph, Function.identity(), callbacks)));
-        dfs.runAlone();
-        return callbacks.memory;
+        return new TarjanStronglyConnectedComponentsAlgoT<>(graph).runAlone();
     }
     @Test void emptyGraph() {
         var result = tarjan(RootedGraphExamples.emptyGraph);
