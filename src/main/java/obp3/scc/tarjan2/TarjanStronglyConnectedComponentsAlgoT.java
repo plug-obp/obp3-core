@@ -15,6 +15,9 @@ import java.util.function.Function;
 /// While this implementation is good, it closes the traversal (it does not re-exposes the callbacks).
 /// -- a better (conceptually at least) version would use a callbacks semantics that captures the Tarjan state-components
 /// along with the callback semantics configuration, so that when composing again we can observe this part of the state also.
+/// It would be interesting to see if through another synchronous composition we can obtain an efficient
+///  buchi acceptance cycle detection, without touching the underlying Tarjan.
+/// It seems to me that the acceptance cycle detection part could act as a pruning monitor over Tarjan.
 public class TarjanStronglyConnectedComponentsAlgoT<V, A> implements IExecutable<TarjanMemory<V>> {
 
     final TarjanCallbacks<V, A> tarjanCallbacks = new TarjanCallbacks<>();
