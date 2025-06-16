@@ -1,4 +1,4 @@
-package obp3.buchi.ndfs.naive;
+package obp3.buchi.ndfs.cvwy92;
 
 import obp3.IExecutable;
 import obp3.sli.core.IRootedGraph;
@@ -13,8 +13,37 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<List<V>> {
+/***
+ * CVWY92_Algorithm2 is the algorithm 2 from [1].
+ * The recursive pseudocode seems to be:
+ {@code
+ dfs₁(s, k₁ = ∅, k₂ = ∅)
+ k₁ = k₁ ∪ { s }
+ for t ∈ next(s) do
+ if t ∉ k₁ then
+ dfs₁(t, k₁, k₂)
+ end if
+ end for
+ if s ∈ accepting then
+ dfs₂(s, s, k₂)
+ end if
 
+ dfs₂(s, seed, k₂)
+ k₂ = k₂ ∪ { s }
+ if seed ∈ next(s) then
+ report violation
+ end if
+ for t ∈ next(s) do
+ if t ∉ k₂ then
+ dfs₂ (t, k₂)
+ end if
+ end for
+ }
+ * [1] Courcoubetis, Costas, Moshe Vardi, Pierre Wolper, and Mihalis Yannakakis.
+ * "Memory-efficient algorithms for the verification of temporal properties."
+ * Formal methods in system design 1, no. 2 (1992): 275-288.
+ */
+public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <List<V>>{
     IExecutable<IDepthFirstTraversalConfiguration<V, A>> algorithm;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
@@ -24,23 +53,25 @@ public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<List<V>
 
     List<V> suffix = new ArrayList<>();
 
-    public EmptinessChecherBuchiNaiveNDFS(
+
+    public EmptinessCheckerBuchiCVWY92Algo2(
             IRootedGraph<V> graph,
             Predicate<V> acceptingPredicate
     ) {
         this(DepthFirstTraversal.Algorithm.WHILE, graph, null, acceptingPredicate);
     }
 
-    public EmptinessChecherBuchiNaiveNDFS(
+    public EmptinessCheckerBuchiCVWY92Algo2(
             DepthFirstTraversal.Algorithm traversalAlgorithm,
             IRootedGraph<V> graph,
             Function<V, A> reducer,
             Predicate<V> acceptingPredicate) {
+        //the first DFT checks the accepting predicate in postorder (on_exit)
         algorithm = new DepthFirstTraversal<>(
                 traversalAlgorithm,
                 graph,
                 reducer,
-                FunctionalDFTCallbacksModel.onEntry(this::onEntry)
+                FunctionalDFTCallbacksModel.onExit(this::onExit)
         );
         this.traversalAlgorithm = traversalAlgorithm;
         this.graph = graph;
@@ -48,29 +79,40 @@ public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<List<V>
         this.acceptingPredicate = acceptingPredicate;
     }
 
-    boolean onEntry(V source, V target, IDepthFirstTraversalConfiguration<V, A> configuration) {
+    boolean onExit(V vertex, IDepthFirstTraversalConfiguration.StackFrame<V> frame, IDepthFirstTraversalConfiguration<V, A> configuration) {
         //if not a buchi accepting-state return false
-        if (!acceptingPredicate.test(target)) {
+        if (!acceptingPredicate.test(vertex)) {
             return false;
         }
-        //if a buchi accepting state, look for a cycle
-        var rerooted = new ReRootedGraph<>(graph, graph.neighbours(target));
 
+        //the second DFS checks the accepting predicate in preorder (on_entry)
         var algo = new DepthFirstTraversal<>(
                 traversalAlgorithm,
-                rerooted,
+                graph,
                 reducer,
-                FunctionalDFTCallbacksModel.onEntry((_, t, _) -> t.equals( target ))
+                FunctionalDFTCallbacksModel.onEntry(
+                        (_, v, _) ->
+                        {
+                            //if seed ∈ next(s) then report violation
+                            var neighboursI = graph.neighbours(v);
+                            while (neighboursI.hasNext()) {
+                                var neighbour = neighboursI.next();
+                                if (neighbour.equals(vertex)) return true;
+                            }
+                            return false;
+                        })
         );
 
         var result = algo.run(hasToTerminateSupplier);
         var stackI = result.getStack();
         var returnValue = stackI.hasNext();
+        if (returnValue) suffix.add(vertex);
         while (stackI.hasNext()) {
-            var vertex = stackI.next().vertex();
-            if (vertex == null) break;
-            suffix.add(vertex);
+            var v = stackI.next().vertex();
+            if (v == null) break;
+            suffix.add(v);
         }
+
 
         return returnValue;
     }
