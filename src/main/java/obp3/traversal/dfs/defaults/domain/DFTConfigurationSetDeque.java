@@ -65,15 +65,23 @@ public class DFTConfigurationSetDeque<V, A> implements IDepthFirstTraversalConfi
         return getModel().getGraph();
     }
 
+    @Override
     public StackFrame<V> peek() {
         return stack.peek();
     }
+    @Override
     public StackFrame<V> pop() {
         return stack.pop();
     }
+    @Override
     public void push(StackFrame<V> frame) {
         stack.push(frame);
     }
+    @Override
+    public Iterator<StackFrame<V>> getStack() {
+        return stack.iterator();
+    }
+
 
     @Override
     public boolean knows(V vertex) {
@@ -86,6 +94,4 @@ public class DFTConfigurationSetDeque<V, A> implements IDepthFirstTraversalConfi
 
     @Override
     public Set<V> getKnown() { return known; }
-
-    public Deque<StackFrame<V>> getStack() { return stack; }
 }

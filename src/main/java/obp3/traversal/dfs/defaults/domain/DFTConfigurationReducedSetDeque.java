@@ -65,14 +65,21 @@ public class DFTConfigurationReducedSetDeque<V, A> implements IDepthFirstTravers
         return getModel().getGraph();
     }
 
+    @Override
     public StackFrame<V> peek() {
         return stack.peek();
     }
+    @Override
     public StackFrame<V> pop() {
         return stack.pop();
     }
+    @Override
     public void push(StackFrame<V> frame) {
         stack.push(frame);
+    }
+    @Override
+    public Iterator<StackFrame<V>> getStack() {
+        return stack.iterator();
     }
     /// The reductedVertex is a local-to-transition variable,
     /// that means that is computed when selecting the transition and using when executing the transition.
@@ -90,6 +97,4 @@ public class DFTConfigurationReducedSetDeque<V, A> implements IDepthFirstTravers
 
     @Override
     public Set<A> getKnown() { return known; }
-
-    public Deque<StackFrame<V>> getStack() { return stack; }
 }

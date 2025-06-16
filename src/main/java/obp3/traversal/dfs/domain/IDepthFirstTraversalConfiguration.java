@@ -3,6 +3,7 @@ package obp3.traversal.dfs.domain;
 import obp3.things.PeekableIterator;
 import obp3.traversal.dfs.model.IDepthFirstTraversalParameters;
 
+import java.util.Iterator;
 import java.util.Set;
 
 public interface IDepthFirstTraversalConfiguration<V, A> {
@@ -17,7 +18,7 @@ public interface IDepthFirstTraversalConfiguration<V, A> {
     StackFrame<V> peek();
     StackFrame<V> pop();
     void push(StackFrame<V> vertex);
-
+    Iterator<StackFrame<V>> getStack();
 
     //Known management
     boolean knows(V vertex);
