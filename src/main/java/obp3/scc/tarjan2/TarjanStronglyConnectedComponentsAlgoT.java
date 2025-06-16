@@ -10,6 +10,11 @@ import java.util.function.Function;
 
 /// Implementation of the Algorithm T from
 /// [Robert E. Tarjan, Uri Zwick, *Finding Strong Components Using Depth-First Search*](https://arxiv.org/pdf/2201.07197)
+/// This version isolates the state-components needed by the Tarjan T algorithm from the underlying DFT-specific state.
+/// The TarjanMemory captures the T-algorithm specific state, which is then used by the callbacks
+/// While this implementation is good, it closes the traversal (it does not re-exposes the callbacks).
+/// -- a better (conceptually at least) version would use a callbacks semantics that captures the Tarjan state-components
+/// along with the callback semantics configuration, so that when composing again we can observe this part of the state also.
 public class TarjanStronglyConnectedComponentsAlgoT<V, A> implements IExecutable<TarjanMemory<V>> {
 
     final TarjanCallbacks<V, A> tarjanCallbacks = new TarjanCallbacks<>();

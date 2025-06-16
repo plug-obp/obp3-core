@@ -6,6 +6,10 @@ import obp3.traversal.dfs.model.IDepthFirstTraversalCallbacksModel;
 
 /// Implementation of the Algorithm T from
 /// [Robert E. Tarjan, Uri Zwick, *Finding Strong Components Using Depth-First Search*](https://arxiv.org/pdf/2201.07197)
+/// This version does not fully isolate the Tarjan T-algorithm specific state. Instead, it uses inheritance to add
+/// the state-components to the DFT Configuration.
+/// This is less generic, because now the callbacks are tightly bound to a specific implementation of the DFT state.
+/// If the reduction function needs to be used, then a new subclass needs to be created.
 public class TarjanCallbacks<V> implements IDepthFirstTraversalCallbacksModel<V, V> {
     @Override
     public boolean onEntry(V source, V vertex, IDepthFirstTraversalConfiguration<V, V> configuration) {
