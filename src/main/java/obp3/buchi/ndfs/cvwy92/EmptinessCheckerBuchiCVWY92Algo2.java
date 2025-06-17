@@ -85,10 +85,13 @@ public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <List
             return false;
         }
 
+        //the second starts from the seed.
+        var rerooted = new ReRootedGraph<>(graph, List.of(vertex).iterator());
+
         //the second DFS checks the accepting predicate in preorder (on_entry)
         var algo = new DepthFirstTraversal<>(
                 traversalAlgorithm,
-                graph,
+                rerooted,
                 reducer,
                 FunctionalDFTCallbacksModel.onEntry(
                         (_, v, _) ->

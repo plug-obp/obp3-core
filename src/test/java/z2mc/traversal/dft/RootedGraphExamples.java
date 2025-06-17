@@ -150,6 +150,18 @@ public class RootedGraphExamples {
                             .get(v).iterator()
             );
 
+    /// <img src="../../../../../doc-files/lasso_1_3.png" width="300">
+    public static IRootedGraph<Integer> lasso_1_3 =
+            new RootedGraphFunctional<>(
+                    () -> List.of(1).iterator(),
+                    (v) ->  Map.of(
+                                    1, List.of(2),
+                                    2, List.of(3),
+                                    3, List.of(4),
+                                    4, List.of(2))
+                            .get(v).iterator()
+            );
+
     /// <img src="../../../../../doc-files/sharing_2.png" width="300">
     public static IRootedGraph<Integer> sharing_2 =
             new RootedGraphFunctional<>(

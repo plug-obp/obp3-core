@@ -33,7 +33,7 @@ public class TestEmptinessCheckerBuchiCVWY92Algo2 {
         assertEquals(List.of(1,2,3,1), witness);
 
         witness = ndfs(RootedGraphExamples.rootCycle3, (v) -> v.equals(2));
-        assertEquals(3, witness.size());
+        assertEquals(5, witness.size());
         assertEquals(List.of(1,2,3,1,2), witness);
 
         witness = ndfs(RootedGraphExamples.rootCycle3, (v) -> v.equals(3));
@@ -47,7 +47,25 @@ public class TestEmptinessCheckerBuchiCVWY92Algo2 {
     @Test
     void sharing_2() {
         var witness = ndfs(RootedGraphExamples.sharing_2, (v) -> v.equals(4));
-        assertEquals(3, witness.size());
+        assertEquals(7, witness.size());
         assertEquals(List.of(1,4,5,2,3,1,4), witness);
+    }
+
+    @Test
+    void lasso_1_3() {
+        var witness = ndfs(RootedGraphExamples.lasso_1_3, (v) -> v.equals(1));
+        assertEquals(0, witness.size());
+
+        witness = ndfs(RootedGraphExamples.lasso_1_3, (v) -> v.equals(2));
+        assertEquals(5, witness.size());
+        assertEquals(List.of(1,2,3,4,2), witness);
+
+        witness = ndfs(RootedGraphExamples.lasso_1_3, (v) -> v.equals(3));
+        assertEquals(6, witness.size());
+        assertEquals(List.of(1,2,3,4,2,3), witness);
+
+        witness = ndfs(RootedGraphExamples.lasso_1_3, (v) -> v.equals(4));
+        assertEquals(7, witness.size());
+        assertEquals(List.of(1,2,3,4,2,3,4), witness);
     }
 }
