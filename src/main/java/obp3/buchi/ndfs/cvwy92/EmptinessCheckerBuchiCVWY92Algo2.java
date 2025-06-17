@@ -1,13 +1,13 @@
 package obp3.buchi.ndfs.cvwy92;
 
 import obp3.IExecutable;
+import obp3.buchi.ndfs.EmptinessCheckerAnswer;
 import obp3.sli.core.IRootedGraph;
 import obp3.sli.core.operators.ReRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
@@ -43,7 +43,7 @@ import java.util.function.Predicate;
  * "Memory-efficient algorithms for the verification of temporal properties."
  * Formal methods in system design 1, no. 2 (1992): 275-288.
  */
-public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <List<V>>{
+public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <EmptinessCheckerAnswer<V>>{
     IExecutable<IDepthFirstTraversalConfiguration<V, A>> algorithm;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
@@ -51,7 +51,7 @@ public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <List
     Predicate<V> acceptingPredicate;
     BooleanSupplier hasToTerminateSupplier;
 
-    List<V> suffix = new ArrayList<>();
+    EmptinessCheckerAnswer<V> result = new EmptinessCheckerAnswer<>();
 
 
     public EmptinessCheckerBuchiCVWY92Algo2(
@@ -100,38 +100,42 @@ public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <List
                             var neighboursI = graph.neighbours(v);
                             while (neighboursI.hasNext()) {
                                 var neighbour = neighboursI.next();
-                                if (neighbour.equals(vertex)) return true;
+                                if (neighbour.equals(vertex)) {
+                                    result.holds = false;
+                                    result.witness = vertex;
+                                    return true;
+                                }
                             }
                             return false;
                         })
         );
 
-        var result = algo.run(hasToTerminateSupplier);
-        var stackI = result.getStack();
-        var returnValue = stackI.hasNext();
-        if (returnValue) suffix.add(vertex);
+        var config = algo.run(hasToTerminateSupplier);
+        if (result.holds) return false;
+        result.trace.add(vertex);
+        var stackI = config.getStack();
         while (stackI.hasNext()) {
             var v = stackI.next().vertex();
             if (v == null) break;
-            suffix.add(v);
+            result.trace.add(v);
         }
 
-
-        return returnValue;
+        return true;
     }
 
     @Override
-    public List<V> run(BooleanSupplier hasToTerminateSupplier) {
+    public EmptinessCheckerAnswer<V> run(BooleanSupplier hasToTerminateSupplier) {
         this.hasToTerminateSupplier = hasToTerminateSupplier;
 
-        var result = algorithm.run(hasToTerminateSupplier);
-        var stackI = result.getStack();
+        var config = algorithm.run(hasToTerminateSupplier);
+        if (result.holds) return result;
+        var stackI = config.getStack();
         while (stackI.hasNext()) {
             var vertex = stackI.next().vertex();
             if (vertex == null) break;
-            suffix.add(vertex);
+            result.trace.add(vertex);
         }
-
-        return suffix.reversed();
+        result.trace = result.trace.reversed();
+        return result;
     }
 }

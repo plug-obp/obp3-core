@@ -1,19 +1,18 @@
 package obp3.buchi.ndfs.naive;
 
 import obp3.IExecutable;
+import obp3.buchi.ndfs.EmptinessCheckerAnswer;
 import obp3.sli.core.IRootedGraph;
 import obp3.sli.core.operators.ReRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<List<V>> {
+public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<EmptinessCheckerAnswer<V>> {
 
     IExecutable<IDepthFirstTraversalConfiguration<V, A>> algorithm;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
@@ -22,7 +21,7 @@ public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<List<V>
     Predicate<V> acceptingPredicate;
     BooleanSupplier hasToTerminateSupplier;
 
-    List<V> suffix = new ArrayList<>();
+    EmptinessCheckerAnswer<V> result = new EmptinessCheckerAnswer<>();
 
     public EmptinessChecherBuchiNaiveNDFS(
             IRootedGraph<V> graph,
@@ -60,33 +59,45 @@ public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<List<V>
                 traversalAlgorithm,
                 rerooted,
                 reducer,
-                FunctionalDFTCallbacksModel.onEntry((_, t, _) -> t.equals( target ))
+                FunctionalDFTCallbacksModel.onEntry((_, t, _) -> {
+                    if (t.equals( target )) {
+                        result.holds = false;
+                        result.witness = target;
+                        return true;
+                    }
+                    return false;
+                })
         );
 
-        var result = algo.run(hasToTerminateSupplier);
-        var stackI = result.getStack();
-        var returnValue = stackI.hasNext();
+        var config = algo.run(hasToTerminateSupplier);
+        if (result.holds) {
+            return false;
+        }
+        var stackI = config.getStack();
         while (stackI.hasNext()) {
             var vertex = stackI.next().vertex();
             if (vertex == null) break;
-            suffix.add(vertex);
+            result.trace.add(vertex);
         }
 
-        return returnValue;
+        return true;
     }
 
     @Override
-    public List<V> run(BooleanSupplier hasToTerminateSupplier) {
+    public EmptinessCheckerAnswer<V> run(BooleanSupplier hasToTerminateSupplier) {
         this.hasToTerminateSupplier = hasToTerminateSupplier;
 
-        var result = algorithm.run(hasToTerminateSupplier);
-        var stackI = result.getStack();
+        var config = algorithm.run(hasToTerminateSupplier);
+        if (result.holds) {
+            return result;
+        }
+        var stackI = config.getStack();
         while (stackI.hasNext()) {
             var vertex = stackI.next().vertex();
             if (vertex == null) break;
-            suffix.add(vertex);
+            result.trace.add(vertex);
         }
-
-        return suffix.reversed();
+        result.trace = result.trace.reversed();
+        return result;
     }
 }
