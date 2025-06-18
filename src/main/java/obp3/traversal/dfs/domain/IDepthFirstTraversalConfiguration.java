@@ -7,7 +7,16 @@ import java.util.Iterator;
 import java.util.Set;
 
 public interface IDepthFirstTraversalConfiguration<V, A> {
-    record StackFrame<V>(V vertex, PeekableIterator<V> neighbours) { }
+    class StackFrame<V> {
+        V vertex;
+        PeekableIterator<V> neighbours;
+        public StackFrame(V vertex, PeekableIterator<V> neighbours) {
+            this.vertex = vertex;
+            this.neighbours = neighbours;
+        }
+        public V vertex() { return vertex; }
+        public PeekableIterator<V> neighbours() { return neighbours; }
+    }
 
     //access to the inputs
     IDepthFirstTraversalParameters<V, A> getModel();
