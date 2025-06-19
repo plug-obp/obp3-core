@@ -134,8 +134,8 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
     boolean onKnownBlue(V source, V target, IDepthFirstTraversalConfiguration<V, A> config) {
         var configuration = (BuchiGS09BlueConfiguration<V, A>)config;
         if (hasLoop(source, target, configuration)) {return true;}
-        //if (n) is not red,
-        //then tell its parent (s) it has at least one non red child
+        //if (target) is not red,
+        //then tell its parent (source) it has at least one non-red child
         if (!configuration.getVertexColor(target).equals(VertexColor.RED)) {
             configuration.peek().allChildrenRed = false;
         }
@@ -167,7 +167,7 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
             return true;
         }
         configuration.changeVertexColor(vertex, VertexColor.BLUE);
-        //if i'm not red, tell my parent that i'm not
+        //if I'm not red, tell my parent that I'm not
         if (!configuration.getStack().hasNext()) return false;
         configuration.peek().allChildrenRed = false;
         return false;
