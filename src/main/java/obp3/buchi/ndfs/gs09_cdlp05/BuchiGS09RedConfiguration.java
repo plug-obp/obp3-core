@@ -1,4 +1,4 @@
-package obp3.buchi.ndfs.gs09;
+package obp3.buchi.ndfs.gs09_cdlp05;
 
 import obp3.things.PeekableIterator;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
@@ -7,7 +7,7 @@ import obp3.traversal.dfs.model.IDepthFirstTraversalParameters;
 import java.util.Map;
 
 public class BuchiGS09RedConfiguration<V, A> extends BuchiGS09BlueConfiguration<V,A> {
-    public BuchiGS09RedConfiguration(IDepthFirstTraversalParameters<V, A> model, Map<V, VertexColor> known) {
+    public BuchiGS09RedConfiguration(IDepthFirstTraversalParameters<V, A> model, Map<V, WeightedColor> known) {
         super(model, known);
     }
 

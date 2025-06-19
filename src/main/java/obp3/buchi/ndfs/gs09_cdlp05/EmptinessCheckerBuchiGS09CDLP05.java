@@ -1,4 +1,4 @@
-package obp3.buchi.ndfs.gs09;
+package obp3.buchi.ndfs.gs09_cdlp05;
 
 import obp3.IExecutable;
 import obp3.buchi.ndfs.EmptinessCheckerAnswer;
@@ -16,51 +16,24 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-/***
- * The improved nested DFS algorithm from [1], Figure 1.
+/**
+ * The improved nested DFS algorithm from [1], Figure 1 with the optimization from [2] (Sec. 4.2).
+ * The number of accepting states accumulated from the source to the current node is associated with all nodes on the stack.
+ * This way dfs blue can detect all recursive loops with accepting states.
+ * Dfs red is used only to analyze cross(sharing) links.
  * [1] Gaiser, Andreas, and Stefan Schwoon.
  * "Comparison of algorithms for checking emptiness on Büchi automata."
  * arXiv preprint arXiv:0910.3766 (2009).
  * https://arxiv.org/pdf/0910.3766.pdf
  *
- * the pseudocode:
- dfs₁(s, k = ∅)
- k = k ∪ { s→cyan }
- allRed = true
- for t ∈ next(s) do
- t.color = k @ t
- if t.color = cyan ∧ (s ∈ A ∨ t ∈ A) then
- report cycle
- end if
- if t ∉ k then
- dfs₁(t, k)
- end if
- if t.color ≠ red then
- allRed = false
- end if
- end for
- if allRed then
- k = k ∪ { s→red}
- else if s ∈ A then
- dfs₂(s, k)
- k = k ∪ { s→red}
- else
- k = k ∪ { s→blue}
- end if
-
- dfs₂(s, k)
- for t ∈ next(s) do
- t.color = k @ t
- if t.color = cyan then
- report cycle
- if t.color = blue then
- k = k ∪ { t→red}
- dfs₂ (t, k)
- end if
- end for
+ * [2] Couvreur, Jean-Michel, Alexandre Duret-Lutz, and Denis Poitrenaud.
+ * "On-the-fly emptiness checks for generalized Büchi automata."
+ * In International SPIN Workshop on Model Checking of Software,
+ * pp. 169-184. Springer, Berlin, Heidelberg, 2005.
+ *
  */
 
-public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessCheckerAnswer<V>>  {
+public class EmptinessCheckerBuchiGS09CDLP05<V, A> implements IExecutable<EmptinessCheckerAnswer<V>>  {
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
     Function<V, A> reducer;
@@ -71,14 +44,14 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
 
     IExecutable<IDepthFirstTraversalConfiguration<V, A>> executable;
 
-    public EmptinessCheckerBuchiGS09(
+    public EmptinessCheckerBuchiGS09CDLP05(
             IRootedGraph<V> graph,
             Predicate<V> acceptingPredicate
     ) {
         this(DepthFirstTraversal.Algorithm.WHILE, graph, null, acceptingPredicate);
     }
 
-    public EmptinessCheckerBuchiGS09(
+    public EmptinessCheckerBuchiGS09CDLP05(
         DepthFirstTraversal.Algorithm traversalAlgorithm,
         IRootedGraph<V> graph,
         Function<V, A> reducer,
@@ -94,7 +67,7 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
                 this::onExitBlue
         );
         var model = new DepthFirstTraversalParameters<>(graph, reducer, blueCallbacks);
-        var configuration = new BuchiGS09BlueConfiguration<>(model);
+        var configuration = new BuchiGS09BlueConfiguration<>(model, acceptingPredicate);
 
         executable = switch (traversalAlgorithm) {
             case DO -> new DepthFirstTraversalDo<>(configuration);
@@ -106,10 +79,12 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
     boolean hasLoop(V source, V target, BuchiGS09BlueConfiguration<V, A> configuration) {
         //if target is not on the stack continue
         if (!configuration.getVertexColor(target).equals(VertexColor.CYAN)) return false;
-        //    source is accepting
+        // target is on the stack, check if there is an accepting state between source and target
+        // or if source is accepting
         // or target is accepting
-        if (    acceptingPredicate.test(source)
-            ||  acceptingPredicate.test(target)) {
+        if (   configuration.getVertexWeight(source) - configuration.getVertexWeight(target) != 0
+            || acceptingPredicate.test(source)
+            || acceptingPredicate.test(target)) {
             result.holds = false;
             result.witness = target;
             result.trace.add(target);
@@ -144,13 +119,14 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
 
     boolean onExitBlue(V vertex, IDepthFirstTraversalConfiguration.StackFrame<V> frameI, IDepthFirstTraversalConfiguration<V, A> config) {
         var configuration = (BuchiGS09BlueConfiguration<V, A>)config;
+        configuration.weight -= acceptingPredicate.test(vertex) ? 1 : 0;
         var frame = (BuchiGS09BlueConfiguration.StackFrame<V>)frameI;
         //if all my children are red, make myself red
         if (frame.allChildrenRed) {
             configuration.changeVertexColor(vertex, VertexColor.RED);
             return false;
         }
-        //if vertex is an accepting state dfs_red
+        //if n is an accepting state dfs_red
         if (acceptingPredicate.test(vertex)) {
             dfsRed(vertex, configuration);
             if (result.holds) {
