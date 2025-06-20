@@ -42,5 +42,5 @@ public interface IDepthFirstTraversalConfiguration<V, A> {
     }
 
     //retrieve a set representation of the known if possible
-    Set getKnown();
+    Set<Object> getKnown();
 }

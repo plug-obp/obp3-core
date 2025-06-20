@@ -16,6 +16,14 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
         return deterministicProduct;
     }
 
+    public DepthFirstTraversalParameters(IRootedGraph<V> graph) {
+        this(graph, (Function<V, A>)null);
+    }
+
+    public DepthFirstTraversalParameters(IRootedGraph<V> graph, IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
+        this(graph, null, callbacksModel);
+    }
+
     public DepthFirstTraversalParameters(IRootedGraph<V> graph, Function<V, A> reducer) {
         this(graph, reducer, FunctionalDFTCallbacksModel.none());
     }
@@ -43,6 +51,11 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
     @Override
     public A reduce(V v) {
         return reducer.apply(v);
+    }
+
+    @Override
+    public boolean hasReduction() {
+        return reducer != null && reducer != Function.identity();
     }
 
     @Override

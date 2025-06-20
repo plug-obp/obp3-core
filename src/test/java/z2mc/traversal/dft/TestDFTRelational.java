@@ -3,7 +3,6 @@ package z2mc.traversal.dft;
 import obp3.IExecutable;
 import obp3.sli.core.IRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;
-import obp3.traversal.dfs.defaults.domain.DFTConfigurationReducedSetDeque;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
@@ -187,13 +186,13 @@ public class TestDFTRelational {
 
     @Test void sharing_reducedVertexOk() {
         var dfs = new DepthFirstTraversalRelational<>(
-                new DFTConfigurationReducedSetDeque<>(
+                new DFTConfigurationSetDeque<>(
                         new DepthFirstTraversalParameters<>(
                                 RootedGraphExamples.sharing_3,
                                 (Integer v) -> v % 3,
                                 FunctionalDFTCallbacksModel.onEntry(
                                         (_, v, c) -> {
-                                            var rv = ((DFTConfigurationReducedSetDeque<Integer, Integer>)c).reducedVertex;
+                                            var rv = ((DFTConfigurationSetDeque<Integer, Integer>)c).reducedVertex;
                                             assertEquals(rv, c.getModel().reduce(v));
                                             return false;
                                         })
@@ -213,7 +212,7 @@ public class TestDFTRelational {
                         (Integer v) -> v % 3,
                         FunctionalDFTCallbacksModel.onEntry(
                                 (_, v, c) -> {
-                                    var rv = ((DFTConfigurationReducedSetDeque<Integer, Integer>)c).reducedVertex;
+                                    var rv = ((DFTConfigurationSetDeque<Integer, Integer>)c).reducedVertex;
                                     assertEquals(rv, c.getModel().reduce(v));
                                     return false;
                                 }));

@@ -140,7 +140,7 @@ public class EmptinessCheckerBuchiGS09CDLP05Separated<V, A> implements IExecutab
         Map<V, WeightedColor> colorMap;
         public DFSRedConfiguration(
                 IDepthFirstTraversalParameters<V, A> model,
-                Set<V> known,
+                Set<Object> known,
                 Map<V, WeightedColor> colorMap) {
             super(model, known, new ArrayDeque<>());
             this.colorMap = colorMap;
@@ -172,7 +172,7 @@ public class EmptinessCheckerBuchiGS09CDLP05Separated<V, A> implements IExecutab
         );
         var redConfig = new DFSRedConfiguration<>(
                 redModel,
-                (Set<V>)configuration.getKnown(),
+                configuration.getKnown(),
                 memory.colorMap
         );
         var dfsRed = switch (traversalAlgorithm) {

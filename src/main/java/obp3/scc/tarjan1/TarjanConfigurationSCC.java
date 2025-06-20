@@ -17,7 +17,7 @@ public class TarjanConfigurationSCC<V> extends DFTConfigurationSetDeque<V, V> {
     public TarjanConfigurationSCC(IRootedGraph<V> graph) {
         this(graph, new HashSet<>(), new ArrayDeque<>());
     }
-    public TarjanConfigurationSCC(IRootedGraph<V> graph, Set<V> known, Deque<StackFrame<V>> stack) {
+    public TarjanConfigurationSCC(IRootedGraph<V> graph, Set<Object> known, Deque<StackFrame<V>> stack) {
         super(new DepthFirstTraversalParameters<>(graph, Function.identity(), new TarjanCallbacks<>()), known, stack);
     }
     public Map<V, Set<V>> getStronglyConnectedComponents() {

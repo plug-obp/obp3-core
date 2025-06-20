@@ -10,10 +10,13 @@ import java.util.*;
 public class DFTConfigurationSetDeque<V, A> implements IDepthFirstTraversalConfiguration<V, A> {
     private final IDepthFirstTraversalParameters<V, A> model;
 
-    private final Set<V> known;
+    private final Set<Object> known;
     private final Deque<StackFrame<V>> stack;
 
-    public DFTConfigurationSetDeque(IDepthFirstTraversalParameters<V, A> model, Set<V> known, Deque<StackFrame<V>> stack) {
+    public DFTConfigurationSetDeque(
+            IDepthFirstTraversalParameters<V, A> model,
+            Set<Object> known,
+            Deque<StackFrame<V>> stack) {
         this.model = model;
         this.known = known;
         this.stack = stack;
@@ -82,16 +85,27 @@ public class DFTConfigurationSetDeque<V, A> implements IDepthFirstTraversalConfi
         return stack.iterator();
     }
 
-
+    /// The reductedVertex is a local-to-transition variable,
+    /// that means that is computed when selecting the transition and using when executing the transition.
+    /// it only exists as a local cache so that the canonize function is not called twice
+    public A reducedVertex;
     @Override
     public boolean knows(V vertex) {
+        if (model.hasReduction()) {
+            reducedVertex = model.reduce(vertex);
+            return known.contains(reducedVertex);
+        }
         return known.contains(vertex);
     }
     @Override
     public void add(V vertex) {
+        if (model.hasReduction()) {
+            known.add(reducedVertex);
+            return;
+        }
         known.add(vertex);
     }
 
     @Override
-    public Set<V> getKnown() { return known; }
+    public Set<Object> getKnown() { return known; }
 }

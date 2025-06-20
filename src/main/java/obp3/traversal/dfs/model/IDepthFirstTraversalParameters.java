@@ -6,6 +6,7 @@ public interface IDepthFirstTraversalParameters<V, A> {
     IRootedGraph<V> getGraph();
 
     A reduce(V v);
+    boolean hasReduction();
 
     IDepthFirstTraversalCallbacksModel<V, A> callbacks();
 
