@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TarjanConfigurationSCC<V> extends DFTConfigurationSetDeque<V, V> {
-    Map<V, TarjanVertexData<V>> data = new IdentityHashMap<>();
+    Map<V, TarjanVertexData<V>> data = new HashMap<>();
     Deque<V> followers = new ArrayDeque<>();
     Integer time = 0;
 
