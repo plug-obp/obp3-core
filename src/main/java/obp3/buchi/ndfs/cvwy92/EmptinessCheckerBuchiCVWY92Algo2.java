@@ -112,13 +112,7 @@ public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <Empt
 
         var config = algo.run(hasToTerminateSupplier);
         if (result.holds) return false;
-        result.trace.add(vertex);
-        var stackI = config.getStack();
-        while (stackI.hasNext()) {
-            var v = stackI.next().vertex();
-            if (v == null) break;
-            result.trace.add(v);
-        }
+        result.addToTrace(vertex, config.getStack());
 
         return true;
     }
@@ -129,12 +123,7 @@ public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <Empt
 
         var config = algorithm.run(hasToTerminateSupplier);
         if (result.holds) return result;
-        var stackI = config.getStack();
-        while (stackI.hasNext()) {
-            var vertex = stackI.next().vertex();
-            if (vertex == null) break;
-            result.trace.add(vertex);
-        }
+        result.addToTrace(config.getStack());
         result.trace = result.trace.reversed();
         return result;
     }

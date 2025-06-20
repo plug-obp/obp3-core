@@ -73,13 +73,7 @@ public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<Emptine
         if (result.holds) {
             return false;
         }
-        var stackI = config.getStack();
-        while (stackI.hasNext()) {
-            var vertex = stackI.next().vertex();
-            if (vertex == null) break;
-            result.trace.add(vertex);
-        }
-
+        result.addToTrace(config.getStack());
         return true;
     }
 
@@ -91,12 +85,7 @@ public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<Emptine
         if (result.holds) {
             return result;
         }
-        var stackI = config.getStack();
-        while (stackI.hasNext()) {
-            var vertex = stackI.next().vertex();
-            if (vertex == null) break;
-            result.trace.add(vertex);
-        }
+        result.addToTrace(config.getStack());
         result.trace = result.trace.reversed();
         return result;
     }

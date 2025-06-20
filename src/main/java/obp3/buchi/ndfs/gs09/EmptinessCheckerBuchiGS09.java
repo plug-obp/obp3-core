@@ -112,13 +112,7 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
             ||  acceptingPredicate.test(target)) {
             result.holds = false;
             result.witness = target;
-            result.trace.add(target);
-            var stackI = configuration.getStack();
-            while (stackI.hasNext()) {
-                var x = stackI.next().vertex();
-                if (x == null) break;
-                result.trace.add(x);
-            }
+            result.addToTrace(target, configuration.getStack());
             return true;
         }
         return false;
@@ -157,13 +151,7 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
                 configuration.changeVertexColor(vertex, VertexColor.RED);
                 return false;
             }
-            var stackI = configuration.getStack();
-            result.trace.add(vertex);
-            while (stackI.hasNext()) {
-                var x = stackI.next().vertex();
-                if (x == null) break;
-                result.trace.add(x);
-            }
+            result.addToTrace(vertex, configuration.getStack());
             return true;
         }
         configuration.changeVertexColor(vertex, VertexColor.BLUE);
@@ -194,13 +182,7 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
         if (configuration.getVertexColor(target).equals(VertexColor.CYAN)) {
             result.holds = false;
             result.witness = target;
-            result.trace.add(target);
-            var stackI = configuration.getStack();
-            while (stackI.hasNext()) {
-                var x = stackI.next().vertex();
-                if (x == null) break;
-                result.trace.add(x);
-            }
+            result.addToTrace(target, configuration.getStack());
             return true;
         }
         return false;
