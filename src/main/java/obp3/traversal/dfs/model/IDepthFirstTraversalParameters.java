@@ -5,6 +5,8 @@ import obp3.sli.core.IRootedGraph;
 public interface IDepthFirstTraversalParameters<V, A> {
     IRootedGraph<V> getGraph();
 
+    int getDepthBound();
+
     A reduce(V v);
     boolean hasReduction();
 

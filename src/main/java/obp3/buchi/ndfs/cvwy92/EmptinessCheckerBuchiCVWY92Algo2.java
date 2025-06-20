@@ -47,6 +47,7 @@ public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <Empt
     IExecutable<IDepthFirstTraversalConfiguration<V, A>> algorithm;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
+    int depthBound;
     Function<V, A> reducer;
     Predicate<V> acceptingPredicate;
     BooleanSupplier hasToTerminateSupplier;
@@ -58,23 +59,26 @@ public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <Empt
             IRootedGraph<V> graph,
             Predicate<V> acceptingPredicate
     ) {
-        this(DepthFirstTraversal.Algorithm.WHILE, graph, null, acceptingPredicate);
+        this(DepthFirstTraversal.Algorithm.WHILE, graph, -1, null, acceptingPredicate);
     }
 
     public EmptinessCheckerBuchiCVWY92Algo2(
             DepthFirstTraversal.Algorithm traversalAlgorithm,
             IRootedGraph<V> graph,
+            int depthBound,
             Function<V, A> reducer,
             Predicate<V> acceptingPredicate) {
         //the first DFT checks the accepting predicate in postorder (on_exit)
         algorithm = new DepthFirstTraversal<>(
                 traversalAlgorithm,
                 graph,
+                depthBound,
                 reducer,
                 FunctionalDFTCallbacksModel.onExit(this::onExit)
         );
         this.traversalAlgorithm = traversalAlgorithm;
         this.graph = graph;
+        this.depthBound = depthBound;
         this.reducer = reducer;
         this.acceptingPredicate = acceptingPredicate;
     }
@@ -92,6 +96,7 @@ public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <Empt
         var algo = new DepthFirstTraversal<>(
                 traversalAlgorithm,
                 rerooted,
+                depthBound,
                 reducer,
                 FunctionalDFTCallbacksModel.onEntry(
                         (_, v, _) ->

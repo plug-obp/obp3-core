@@ -33,6 +33,7 @@ public class EmptinessCheckerBuchiGS09Separated<V, A> implements IExecutable<Emp
     IExecutable<IDepthFirstTraversalConfiguration<V, A>> traversal;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
+    int depthBound;
     Function<V, A> reducer;
     Predicate<V> acceptingPredicate;
     BooleanSupplier hasToTerminateSupplier;
@@ -45,23 +46,26 @@ public class EmptinessCheckerBuchiGS09Separated<V, A> implements IExecutable<Emp
             IRootedGraph<V> graph,
             Predicate<V> acceptingPredicate
     ) {
-        this(DepthFirstTraversal.Algorithm.WHILE, graph, null, acceptingPredicate);
+        this(DepthFirstTraversal.Algorithm.WHILE, graph, -1, null, acceptingPredicate);
     }
 
     public EmptinessCheckerBuchiGS09Separated(
             DepthFirstTraversal.Algorithm traversalAlgorithm,
             IRootedGraph<V> graph,
+            int depthBound,
             Function<V, A> reducer,
             Predicate<V> acceptingPredicate) {
         //the first DFT checks the accepting predicate in postorder (on_exit)
         traversal = new DepthFirstTraversal<>(
                 traversalAlgorithm,
                 graph,
+                depthBound,
                 reducer,
                 new FunctionalDFTCallbacksModel<>(this::onEntryBlue, this::onKnownBlue, this::onExitBlue)
         );
         this.traversalAlgorithm = traversalAlgorithm;
         this.graph = graph;
+        this.depthBound = depthBound;
         this.reducer = reducer;
         this.acceptingPredicate = acceptingPredicate;
     }
@@ -144,21 +148,14 @@ public class EmptinessCheckerBuchiGS09Separated<V, A> implements IExecutable<Emp
     void dfsRed(V vertex, IDepthFirstTraversalConfiguration<V, A> configuration) {
         var rerooted = new ReRootedGraph<>(graph, graph.neighbours(vertex));
         var redModel = new DepthFirstTraversalParameters<>(
-                rerooted, reducer, FunctionalDFTCallbacksModel.onKnown(this::onKnownRed)
+                rerooted, depthBound, reducer, FunctionalDFTCallbacksModel.onKnown(this::onKnownRed)
         );
         var redConfig = new DFSRedConfiguration<>(
                 redModel,
                 configuration.getKnown(),
                 memory.colorMap
         );
-        var dfsRed = switch (traversalAlgorithm) {
-            case WHILE ->
-                    new DepthFirstTraversalWhile<>(redConfig);
-            case RELATIONAL ->
-                    new DepthFirstTraversalRelational<>(redConfig);
-            case DO ->
-                    new DepthFirstTraversalDo<>(redConfig);
-        };
+        var dfsRed = new DepthFirstTraversal<>(traversalAlgorithm, redConfig);
         dfsRed.run(hasToTerminateSupplier);
     }
 

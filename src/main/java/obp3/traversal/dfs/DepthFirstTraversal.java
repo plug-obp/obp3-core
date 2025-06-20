@@ -54,19 +54,51 @@ public class DepthFirstTraversal<V, A> implements IExecutable<IDepthFirstTravers
     public DepthFirstTraversal(
             Algorithm algorithm,
             IRootedGraph<V> graph,
-            Function<V, A> reducer,
+            int depthBound,
             IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
-        this(algorithm, graph, reducer, callbacksModel, true);
+        this(algorithm, graph, depthBound, null, callbacksModel, true);
     }
 
     public DepthFirstTraversal(
             Algorithm algorithm,
             IRootedGraph<V> graph,
             Function<V, A> reducer,
+            IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
+        this(algorithm, graph, -1, reducer, callbacksModel, true);
+    }
+
+    public DepthFirstTraversal(
+            Algorithm algorithm,
+            IRootedGraph<V> graph,
+            int depthBound,
+            Function<V, A> reducer,
+            IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
+        this(algorithm, graph, depthBound, reducer, callbacksModel, true);
+    }
+
+    public DepthFirstTraversal(
+            Algorithm algorithm,
+           IDepthFirstTraversalConfiguration<V, A> configuration) {
+        this.algorithm = switch (algorithm) {
+            case WHILE ->
+                    new DepthFirstTraversalWhile<>(configuration);
+            case RELATIONAL ->
+                    new DepthFirstTraversalRelational<>(configuration);
+            case DO ->
+                    new DepthFirstTraversalDo<>(configuration);
+        };
+    }
+
+    public DepthFirstTraversal(
+            Algorithm algorithm,
+            IRootedGraph<V> graph,
+            int depthBound,
+            Function<V, A> reducer,
             IDepthFirstTraversalCallbacksModel<V, A> callbacksModel,
             boolean deterministicProduct) {
         var model = new DepthFirstTraversalParameters<>(
                 graph,
+                depthBound,
                 reducer,
                 callbacksModel == null ? FunctionalDFTCallbacksModel.none() : callbacksModel,
                 deterministicProduct);

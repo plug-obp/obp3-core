@@ -1,15 +1,21 @@
 package obp3.traversal.dfs.model;
 
 import obp3.sli.core.IRootedGraph;
+import obp3.sli.core.operators.ReRootedGraph;
 
 import java.util.function.Function;
 
 public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversalParameters<V, A> {
 
     private final IRootedGraph<V> graph;
+    private final int depthBound;
     private final Function<V, A> reducer;
     private final IDepthFirstTraversalCallbacksModel<V, A> callbacksModel;
     private final boolean deterministicProduct;
+
+    public DepthFirstTraversalParameters(IRootedGraph<V> graph, int depthBound, Function<V,A> reducer, IDepthFirstTraversalCallbacksModel<V,A> callbacksModel) {
+        this(graph, depthBound, reducer, callbacksModel, true);
+    }
 
     @Override
     public boolean deterministicProduct() {
@@ -28,16 +34,22 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
         this(graph, reducer, FunctionalDFTCallbacksModel.none());
     }
 
+    public DepthFirstTraversalParameters(IRootedGraph<V> graph, int depthBound, IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
+        this(graph, depthBound, null, callbacksModel, true);
+    }
+
     public DepthFirstTraversalParameters(IRootedGraph<V> graph, Function<V, A> reducer, IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
-        this(graph, reducer, callbacksModel, true);
+        this(graph, -1, reducer, callbacksModel, true);
     }
 
     public DepthFirstTraversalParameters(
             IRootedGraph<V> graph,
+            int depthBound,
             Function<V, A> reducer,
             IDepthFirstTraversalCallbacksModel<V, A> callbacksModel,
             boolean deterministicProduct) {
         this.graph = graph;
+        this.depthBound = depthBound;
         this.reducer = reducer;
         this.callbacksModel = callbacksModel;
         this.deterministicProduct = deterministicProduct;
@@ -46,6 +58,11 @@ public class DepthFirstTraversalParameters<V, A> implements IDepthFirstTraversal
     @Override
     public IRootedGraph<V> getGraph() {
         return graph;
+    }
+
+    @Override
+    public int getDepthBound() {
+        return depthBound;
     }
 
     @Override

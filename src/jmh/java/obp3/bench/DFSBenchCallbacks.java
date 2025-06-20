@@ -91,6 +91,7 @@ public class DFSBenchCallbacks {
                 new DFTConfigurationSetDeque<>(
                         new DepthFirstTraversalParameters<>(
                                 lrg,
+                                -1,
                                 Function.identity(),
                                 new FunctionalDFTCallbacksModel<>(
                                     (_, _, _) -> {

@@ -200,4 +200,25 @@ public class TestDFTWhile {
         //note that the known contains the reduced vertices, not the graph vertices
         assertEquals(Set.of(0, 1, 2), result.getKnown());
     }
+
+    @Test void twoRootsTwoGraphsDepthBound0() {
+        var dfs = new DepthFirstTraversal<>(DepthFirstTraversal.Algorithm.WHILE, RootedGraphExamples.twoRootsTwoGraphs, 0, FunctionalDFTCallbacksModel.none());
+        var result = dfs.runAlone();
+        assertEquals(0, result.getKnown().size());
+        assertEquals(Set.of(), result.getKnown());
+    }
+
+    @Test void twoRootsTwoGraphsDepthBound1() {
+        var dfs = new DepthFirstTraversal<>(DepthFirstTraversal.Algorithm.WHILE, RootedGraphExamples.twoRootsTwoGraphs, 1, FunctionalDFTCallbacksModel.none());
+        var result = dfs.runAlone();
+        assertEquals(2, result.getKnown().size());
+        assertEquals(Set.of(1, 4), result.getKnown());
+    }
+
+    @Test void twoRootsTwoGraphsDepthBound2() {
+        var dfs = new DepthFirstTraversal<>(DepthFirstTraversal.Algorithm.WHILE, RootedGraphExamples.twoRootsTwoGraphs, 2, FunctionalDFTCallbacksModel.none());
+        var result = dfs.runAlone();
+        assertEquals(5, result.getKnown().size());
+        assertEquals(Set.of(1,2,3,4,5), result.getKnown());
+    }
 }

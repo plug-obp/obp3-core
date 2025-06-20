@@ -46,6 +46,7 @@ public class EmptinessCheckerBuchiGS09CDLP05Separated<V, A> implements IExecutab
     IExecutable<IDepthFirstTraversalConfiguration<V, A>> traversal;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
+    int depthBound;
     Function<V, A> reducer;
     Predicate<V> acceptingPredicate;
     BooleanSupplier hasToTerminateSupplier;
@@ -58,12 +59,13 @@ public class EmptinessCheckerBuchiGS09CDLP05Separated<V, A> implements IExecutab
             IRootedGraph<V> graph,
             Predicate<V> acceptingPredicate
     ) {
-        this(DepthFirstTraversal.Algorithm.WHILE, graph, null, acceptingPredicate);
+        this(DepthFirstTraversal.Algorithm.WHILE, graph, -1, null, acceptingPredicate);
     }
 
     public EmptinessCheckerBuchiGS09CDLP05Separated(
             DepthFirstTraversal.Algorithm traversalAlgorithm,
             IRootedGraph<V> graph,
+            int depthBound,
             Function<V, A> reducer,
             Predicate<V> acceptingPredicate) {
         //the first DFT checks the accepting predicate in postorder (on_exit)
@@ -75,6 +77,7 @@ public class EmptinessCheckerBuchiGS09CDLP05Separated<V, A> implements IExecutab
         );
         this.traversalAlgorithm = traversalAlgorithm;
         this.graph = graph;
+        this.depthBound = depthBound;
         this.reducer = reducer;
         this.acceptingPredicate = acceptingPredicate;
     }
@@ -168,7 +171,7 @@ public class EmptinessCheckerBuchiGS09CDLP05Separated<V, A> implements IExecutab
     void dfsRed(V vertex, IDepthFirstTraversalConfiguration<V, A> configuration) {
         var rerooted = new ReRootedGraph<>(graph, graph.neighbours(vertex));
         var redModel = new DepthFirstTraversalParameters<>(
-                rerooted, reducer, FunctionalDFTCallbacksModel.onKnown(this::onKnownRed)
+                rerooted, depthBound, reducer, FunctionalDFTCallbacksModel.onKnown(this::onKnownRed)
         );
         var redConfig = new DFSRedConfiguration<>(
                 redModel,

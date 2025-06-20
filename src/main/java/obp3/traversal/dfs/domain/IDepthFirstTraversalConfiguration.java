@@ -28,6 +28,7 @@ public interface IDepthFirstTraversalConfiguration<V, A> {
     StackFrame<V> pop();
     void push(StackFrame<V> vertex);
     Iterator<StackFrame<V>> getStack();
+    int stackSize();
 
     //Known management
     boolean knows(V vertex);

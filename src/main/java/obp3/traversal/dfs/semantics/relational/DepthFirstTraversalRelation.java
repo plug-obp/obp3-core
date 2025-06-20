@@ -25,8 +25,11 @@ public class DepthFirstTraversalRelation<V, A>
         // at end if the stack is empty. Don't produce the end action
         if (frame == null) { return Optional.empty(); }
         var neighboursIterator = frame.neighbours();
-        // we have at least one more neighbour check it against the known
-        if (neighboursIterator.hasNext()) {
+        // if we did not reach the depth bound, and we have at least one more neighbour check it against the known
+        var depthBound = configuration.getModel().getDepthBound();
+        if (   (depthBound < 0 || depthBound >= configuration.stackSize())
+            && neighboursIterator.hasNext())
+        {
             V vertex = neighboursIterator.peek();
             return Optional.of(configuration.knows(vertex) ?
                     new KnownConfigurationAction<>(frame.vertex(), vertex, configuration) :

@@ -23,7 +23,10 @@ public class DepthFirstTraversalWhile<V, A> implements IExecutable<IDepthFirstTr
                 && !hasToTerminateSupplier.getAsBoolean()) {
             var neighboursIterator = stackFrame.neighbours();
 
-            if (neighboursIterator.hasNext()) {
+            var depthBound = configuration.getModel().getDepthBound();
+            if (   (depthBound < 0 || depthBound >= configuration.stackSize())
+                && neighboursIterator.hasNext())
+            {
                 var neighbour = neighboursIterator.next();
                 if (!configuration.knows(neighbour)) {
                     configuration.discover(neighbour);

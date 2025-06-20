@@ -8,9 +8,6 @@ import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
 import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
-import obp3.traversal.dfs.semantics.DepthFirstTraversalDo;
-import obp3.traversal.dfs.semantics.DepthFirstTraversalRelational;
-import obp3.traversal.dfs.semantics.DepthFirstTraversalWhile;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
@@ -63,6 +60,7 @@ import java.util.function.Predicate;
 public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessCheckerAnswer<V>>  {
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
+    int depthBound;
     Function<V, A> reducer;
     Predicate<V> acceptingPredicate;
     BooleanSupplier hasToTerminateSupplier;
@@ -75,16 +73,18 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
             IRootedGraph<V> graph,
             Predicate<V> acceptingPredicate
     ) {
-        this(DepthFirstTraversal.Algorithm.WHILE, graph, null, acceptingPredicate);
+        this(DepthFirstTraversal.Algorithm.WHILE, graph, -1, null, acceptingPredicate);
     }
 
     public EmptinessCheckerBuchiGS09(
         DepthFirstTraversal.Algorithm traversalAlgorithm,
         IRootedGraph<V> graph,
+        int depthBound,
         Function<V, A> reducer,
         Predicate<V> acceptingPredicate) {
         this.traversalAlgorithm = traversalAlgorithm;
         this.graph = graph;
+        this.depthBound = depthBound;
         this.reducer = reducer;
         this.acceptingPredicate = acceptingPredicate;
 
@@ -96,11 +96,7 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
         var model = new DepthFirstTraversalParameters<>(graph, reducer, blueCallbacks);
         var configuration = new BuchiGS09BlueConfiguration<>(model);
 
-        executable = switch (traversalAlgorithm) {
-            case DO -> new DepthFirstTraversalDo<>(configuration);
-            case WHILE -> new DepthFirstTraversalWhile<>(configuration);
-            case RELATIONAL -> new DepthFirstTraversalRelational<>(configuration);
-        };
+        executable = new DepthFirstTraversal<>(traversalAlgorithm, configuration);
     }
 
     boolean hasLoop(V source, V target, BuchiGS09BlueConfiguration<V, A> configuration) {
@@ -164,16 +160,9 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
     void dfsRed(V vertex, BuchiGS09BlueConfiguration<V, A> configuration) {
         var redCallbacks = FunctionalDFTCallbacksModel.onKnown(this::onKnownRed);
         var rerooted = new ReRootedGraph<>(graph, graph.neighbours(vertex));
-        var model = new DepthFirstTraversalParameters<>(rerooted, reducer, redCallbacks);
+        var model = new DepthFirstTraversalParameters<>(rerooted, depthBound, reducer, redCallbacks);
         var redConfig = new BuchiGS09RedConfiguration<>(model, configuration.known);
-        var dfsRed = switch (traversalAlgorithm) {
-            case WHILE ->
-                    new DepthFirstTraversalWhile<>(redConfig);
-            case RELATIONAL ->
-                    new DepthFirstTraversalRelational<>(redConfig);
-            case DO ->
-                    new DepthFirstTraversalDo<>(redConfig);
-        };
+        var dfsRed = new DepthFirstTraversal<>(traversalAlgorithm, redConfig);
         dfsRed.run(hasToTerminateSupplier);
     }
 

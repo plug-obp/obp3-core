@@ -24,19 +24,19 @@ public class TarjanStronglyConnectedComponentsAlgoT<V, A> implements IExecutable
     final IExecutable<IDepthFirstTraversalConfiguration<V, A>> algorithm;
 
     public TarjanStronglyConnectedComponentsAlgoT(IRootedGraph<V> graph) {
-        this(DepthFirstTraversal.Algorithm.WHILE, graph, null);
+        this(DepthFirstTraversal.Algorithm.WHILE, graph, -1, null);
     }
 
-    public TarjanStronglyConnectedComponentsAlgoT(IRootedGraph<V> graph, Function<V, A> reducer) {
-        this(DepthFirstTraversal.Algorithm.WHILE, graph, reducer);
+    public TarjanStronglyConnectedComponentsAlgoT(IRootedGraph<V> graph, int depthBound, Function<V, A> reducer) {
+        this(DepthFirstTraversal.Algorithm.WHILE, graph, depthBound, reducer);
     }
 
     public TarjanStronglyConnectedComponentsAlgoT(DepthFirstTraversal.Algorithm traversalAlgorithm, IRootedGraph<V> graph) {
-        this(traversalAlgorithm, graph, null);
+        this(traversalAlgorithm, graph, -1, null);
     }
 
-    public TarjanStronglyConnectedComponentsAlgoT(DepthFirstTraversal.Algorithm traversalAlgorithm, IRootedGraph<V> graph, Function<V, A> reducer) {
-        algorithm = new DepthFirstTraversal<>(traversalAlgorithm, graph, reducer, tarjanCallbacks);
+    public TarjanStronglyConnectedComponentsAlgoT(DepthFirstTraversal.Algorithm traversalAlgorithm, IRootedGraph<V> graph, int depthBound, Function<V, A> reducer) {
+        algorithm = new DepthFirstTraversal<>(traversalAlgorithm, graph, depthBound, reducer, tarjanCallbacks);
     }
 
     @Override

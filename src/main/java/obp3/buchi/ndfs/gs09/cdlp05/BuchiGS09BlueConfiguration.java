@@ -72,6 +72,11 @@ public class BuchiGS09BlueConfiguration<V, A> implements IDepthFirstTraversalCon
     }
 
     @Override
+    public int stackSize() {
+        return stack.size();
+    }
+
+    @Override
     public boolean knows(V vertex) {
         return known.containsKey(vertex);
     }

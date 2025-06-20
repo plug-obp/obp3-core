@@ -17,6 +17,7 @@ public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<Emptine
     IExecutable<IDepthFirstTraversalConfiguration<V, A>> algorithm;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
+    int depthBound;
     Function<V, A> reducer;
     Predicate<V> acceptingPredicate;
     BooleanSupplier hasToTerminateSupplier;
@@ -27,22 +28,25 @@ public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<Emptine
             IRootedGraph<V> graph,
             Predicate<V> acceptingPredicate
     ) {
-        this(DepthFirstTraversal.Algorithm.WHILE, graph, null, acceptingPredicate);
+        this(DepthFirstTraversal.Algorithm.WHILE, graph, -1, null, acceptingPredicate);
     }
 
     public EmptinessChecherBuchiNaiveNDFS(
             DepthFirstTraversal.Algorithm traversalAlgorithm,
             IRootedGraph<V> graph,
+            int depthBound,
             Function<V, A> reducer,
             Predicate<V> acceptingPredicate) {
         algorithm = new DepthFirstTraversal<>(
                 traversalAlgorithm,
                 graph,
+                depthBound,
                 reducer,
                 FunctionalDFTCallbacksModel.onEntry(this::onEntry)
         );
         this.traversalAlgorithm = traversalAlgorithm;
         this.graph = graph;
+        this.depthBound = depthBound;
         this.reducer = reducer;
         this.acceptingPredicate = acceptingPredicate;
     }
@@ -58,6 +62,7 @@ public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<Emptine
         var algo = new DepthFirstTraversal<>(
                 traversalAlgorithm,
                 rerooted,
+                depthBound,
                 reducer,
                 FunctionalDFTCallbacksModel.onEntry((_, t, _) -> {
                     if (t.equals( target )) {

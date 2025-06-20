@@ -84,6 +84,10 @@ public class DFTConfigurationSetDeque<V, A> implements IDepthFirstTraversalConfi
     public Iterator<StackFrame<V>> getStack() {
         return stack.iterator();
     }
+    @Override
+    public int stackSize() {
+        return stack.size();
+    }
 
     /// The reductedVertex is a local-to-transition variable,
     /// that means that is computed when selecting the transition and using when executing the transition.
