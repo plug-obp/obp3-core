@@ -1,7 +1,8 @@
-package obp3.buchi.ndfs.gs09_cdlp05;
+package obp3.buchi.ndfs.gs09.cdlp05;
 
 import obp3.IExecutable;
 import obp3.buchi.ndfs.EmptinessCheckerAnswer;
+import obp3.buchi.ndfs.gs09.VertexColor;
 import obp3.sli.core.IRootedGraph;
 import obp3.sli.core.operators.ReRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;

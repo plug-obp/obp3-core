@@ -1,5 +1,6 @@
-package obp3.buchi.ndfs.gs09_cdlp05;
+package obp3.buchi.ndfs.gs09.cdlp05;
 
+import obp3.buchi.ndfs.gs09.VertexColor;
 import obp3.things.PeekableIterator;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.IDepthFirstTraversalParameters;
@@ -8,13 +9,6 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class BuchiGS09BlueConfiguration<V, A> implements IDepthFirstTraversalConfiguration<V, A> {
-    public static class WeightedColor {
-        VertexColor color; int weight;
-        WeightedColor(VertexColor color, int weight) {
-            this.color = color;
-            this.weight = weight;
-        }
-    }
     public static class StackFrame<V> extends IDepthFirstTraversalConfiguration.StackFrame<V> {
         public boolean allChildrenRed = false;
         public StackFrame(V vertex, PeekableIterator<V> neighbours) {
