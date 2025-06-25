@@ -2,6 +2,7 @@ package obp3.traversal.dfs;
 
 import obp3.IExecutable;
 import obp3.sli.core.IRootedGraph;
+import obp3.traversal.dfs.defaults.domain.DFTConfiguration4TreeDeque;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
@@ -102,7 +103,12 @@ public class DepthFirstTraversal<V, A> implements IExecutable<IDepthFirstTravers
                 reducer,
                 callbacksModel == null ? FunctionalDFTCallbacksModel.none() : callbacksModel,
                 deterministicProduct);
-        IDepthFirstTraversalConfiguration<V, A> configuration = new DFTConfigurationSetDeque<>(model);
+        IDepthFirstTraversalConfiguration<V, A> configuration = null;
+        if (graph.isTree()) {
+            configuration = new DFTConfiguration4TreeDeque<>(model);
+        } else {
+            configuration = new DFTConfigurationSetDeque<>(model);
+        }
         this.algorithm = switch (algorithm) {
             case WHILE ->
                     new DepthFirstTraversalWhile<>(configuration);

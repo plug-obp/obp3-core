@@ -186,4 +186,17 @@ public class RootedGraphExamples {
                             5, List.of(3)
                     ).get(v).iterator()
             );
+
+    public static IRootedGraph<Integer> tree4 =
+            new RootedGraphFunctional<>(
+                    () -> List.of(1).iterator(),
+                    (v) -> Map.of(
+                            1, List.of(2, 3),
+                            2, List.<Integer>of(),
+                            3, List.<Integer>of(4),
+                            4, List.<Integer>of()
+                    ).get(v).iterator(),
+                    false,
+                    false
+            );
 }
