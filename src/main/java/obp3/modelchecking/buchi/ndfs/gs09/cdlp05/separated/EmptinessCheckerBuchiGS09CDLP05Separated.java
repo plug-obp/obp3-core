@@ -72,6 +72,7 @@ public class EmptinessCheckerBuchiGS09CDLP05Separated<V, A> implements IExecutab
         traversal = new DepthFirstTraversal<>(
                 traversalAlgorithm,
                 graph,
+                depthBound,
                 reducer,
                 new FunctionalDFTCallbacksModel<>(this::onEntryBlue, this::onKnownBlue, this::onExitBlue)
         );
