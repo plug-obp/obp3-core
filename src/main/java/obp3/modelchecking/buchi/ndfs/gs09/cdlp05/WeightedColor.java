@@ -1,6 +1,6 @@
-package obp3.buchi.ndfs.gs09.cdlp05;
+package obp3.modelchecking.buchi.ndfs.gs09.cdlp05;
 
-import obp3.buchi.ndfs.gs09.VertexColor;
+import obp3.modelchecking.buchi.ndfs.gs09.VertexColor;
 
 public class WeightedColor {
     public VertexColor color;

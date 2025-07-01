@@ -1,8 +1,7 @@
 package z2mc.buchi.ndfs.gs09.cdlp05.separated;
 
-import obp3.buchi.ndfs.EmptinessCheckerAnswer;
-import obp3.buchi.ndfs.gs09.cdlp05.EmptinessCheckerBuchiGS09CDLP05;
-import obp3.buchi.ndfs.gs09.cdlp05.separated.EmptinessCheckerBuchiGS09CDLP05Separated;
+import obp3.modelchecking.EmptinessCheckerAnswer;
+import obp3.modelchecking.buchi.ndfs.gs09.cdlp05.separated.EmptinessCheckerBuchiGS09CDLP05Separated;
 import obp3.sli.core.IRootedGraph;
 import org.junit.jupiter.api.Test;
 import z2mc.traversal.dft.RootedGraphExamples;

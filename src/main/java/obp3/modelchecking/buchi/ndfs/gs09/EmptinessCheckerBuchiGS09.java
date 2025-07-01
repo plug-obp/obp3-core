@@ -1,7 +1,7 @@
-package obp3.buchi.ndfs.gs09;
+package obp3.modelchecking.buchi.ndfs.gs09;
 
 import obp3.IExecutable;
-import obp3.buchi.ndfs.EmptinessCheckerAnswer;
+import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.sli.core.IRootedGraph;
 import obp3.sli.core.operators.ReRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;

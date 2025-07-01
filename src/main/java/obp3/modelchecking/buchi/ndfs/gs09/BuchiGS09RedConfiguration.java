@@ -1,4 +1,4 @@
-package obp3.buchi.ndfs.gs09;
+package obp3.modelchecking.buchi.ndfs.gs09;
 
 import obp3.things.PeekableIterator;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;

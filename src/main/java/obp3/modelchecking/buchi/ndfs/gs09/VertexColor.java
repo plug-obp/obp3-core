@@ -1,4 +1,4 @@
-package obp3.buchi.ndfs.gs09;
+package obp3.modelchecking.buchi.ndfs.gs09;
 
 /// possible transitions: (white ⟶ cyan), (cyan ⟶ blue), (blue ⟶ red), (cyan ⟶ red)
 public enum VertexColor {
