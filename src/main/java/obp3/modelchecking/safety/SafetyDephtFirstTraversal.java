@@ -48,7 +48,7 @@ public class SafetyDephtFirstTraversal<V, A> implements IExecutable<EmptinessChe
         if (acceptingPredicate.test(target)) {
             result.holds = false;
             result.witness = target;
-            result.addToTrace(target, configuration.getStack());
+            result.addToTrace(configuration.getStack());
             return true;
         }
         return false;
@@ -58,6 +58,7 @@ public class SafetyDephtFirstTraversal<V, A> implements IExecutable<EmptinessChe
     public EmptinessCheckerAnswer<V> run(BooleanSupplier hasToTerminateSupplier) {
         this.hasToTerminateSupplier = hasToTerminateSupplier;
         algorithm.run(hasToTerminateSupplier);
+        result.trace = result.trace.reversed();
         return result;
     }
 }
