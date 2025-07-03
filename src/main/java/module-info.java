@@ -1,4 +1,4 @@
-module obp3.algos {
+module obp.algos {
     requires javafx.controls;
     requires org.kordamp.ikonli.core;
     requires org.kordamp.ikonli.javafx;
