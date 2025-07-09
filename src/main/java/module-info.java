@@ -24,4 +24,7 @@ module obp.algos {
     exports obp3.scc;
     exports obp3.scc.tarjan1;
     exports obp3.scc.tarjan2;
+    exports obp3.modelchecking;
+    exports obp3.modelchecking.buchi.ndfs.gs09.cdlp05.separated;
+    exports obp3.modelchecking.safety;
 }
