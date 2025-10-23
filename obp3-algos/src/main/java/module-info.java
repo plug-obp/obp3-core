@@ -1,4 +1,5 @@
 module obp.algos {
+    requires obp.sli.runtime;
     requires javafx.controls;
     requires org.kordamp.ikonli.core;
     requires org.kordamp.ikonli.javafx;

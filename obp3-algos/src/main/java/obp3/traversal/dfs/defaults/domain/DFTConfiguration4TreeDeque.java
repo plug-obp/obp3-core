@@ -1,6 +1,6 @@
 package obp3.traversal.dfs.defaults.domain;
 
-import obp3.sli.core.IRootedGraph;
+import obp3.runtime.sli.IRootedGraph;
 import obp3.things.PeekableIterator;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.IDepthFirstTraversalParameters;

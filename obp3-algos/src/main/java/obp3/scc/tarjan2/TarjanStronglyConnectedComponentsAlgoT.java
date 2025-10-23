@@ -1,7 +1,7 @@
 package obp3.scc.tarjan2;
 
-import obp3.IExecutable;
-import obp3.sli.core.IRootedGraph;
+import obp3.runtime.IExecutable;
+import obp3.runtime.sli.IRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 

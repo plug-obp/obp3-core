@@ -1,7 +1,7 @@
 package obp3.scc.tarjan1;
 
 import obp3.scc.TarjanVertexData;
-import obp3.sli.core.IRootedGraph;
+import obp3.runtime.sli.IRootedGraph;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
 

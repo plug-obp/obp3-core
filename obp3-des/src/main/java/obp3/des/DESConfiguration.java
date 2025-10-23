@@ -1,7 +1,5 @@
 package obp3.des;
 
-import obp3.sli.core.support.Clonable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;

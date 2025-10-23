@@ -1,6 +1,6 @@
 package z2mc.traversal.dft;
 
-import obp3.sli.core.IRootedGraph;
+import obp3.runtime.sli.IRootedGraph;
 import obp3.sli.core.RootedGraphFunctional;
 
 import java.util.Collections;

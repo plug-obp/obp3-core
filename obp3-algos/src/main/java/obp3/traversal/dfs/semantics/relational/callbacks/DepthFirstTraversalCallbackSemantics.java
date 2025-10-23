@@ -1,7 +1,7 @@
 package obp3.traversal.dfs.semantics.relational.callbacks;
 
-import obp3.sli.core.IDeterministicSematicRelation;
-import obp3.sli.core.operators.product.Step;
+import obp3.runtime.sli.IDeterministicSematicRelation;
+import obp3.runtime.sli.Step;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.IDepthFirstTraversalCallbacksModel;
 import obp3.traversal.dfs.semantics.relational.actions.BacktrackAction;

@@ -1,6 +1,6 @@
 package obp3.des.exemples.pingpong;
 
-import obp3.sli.core.support.Clonable;
+import obp3.des.Clonable;
 
 import java.util.ArrayList;
 import java.util.List;

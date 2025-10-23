@@ -2,7 +2,7 @@ package z2mc.scc;
 
 import obp3.scc.tarjan2.TarjanMemory;
 import obp3.scc.tarjan2.TarjanStronglyConnectedComponentsAlgoT;
-import obp3.sli.core.IRootedGraph;
+import obp3.runtime.sli.IRootedGraph;
 import org.junit.jupiter.api.Test;
 import z2mc.traversal.dft.RootedGraphExamples;
 

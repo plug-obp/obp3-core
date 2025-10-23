@@ -1,8 +1,8 @@
 package obp3.sli.core.operators.product.deterministic;
 
-import obp3.sli.core.DeterministicSemanticRelation;
+import obp3.runtime.sli.DeterministicSemanticRelation;
 import obp3.sli.core.operators.product.Product;
-import obp3.sli.core.operators.product.Step;
+import obp3.runtime.sli.Step;
 import obp3.sli.core.operators.product.deterministic.model.DeterministicStepProductParameters;
 
 import java.util.Optional;

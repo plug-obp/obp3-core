@@ -1,7 +1,7 @@
 package obp3.sli.core.operators;
 
-import obp3.sli.core.IRootedGraph;
-import obp3.sli.core.SemanticRelation;
+import obp3.runtime.sli.IRootedGraph;
+import obp3.runtime.sli.SemanticRelation;
 
 import java.util.Collections;
 import java.util.Iterator;

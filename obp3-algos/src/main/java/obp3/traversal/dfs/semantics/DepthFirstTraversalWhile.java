@@ -1,6 +1,6 @@
 package obp3.traversal.dfs.semantics;
 
-import obp3.IExecutable;
+import obp3.runtime.IExecutable;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 

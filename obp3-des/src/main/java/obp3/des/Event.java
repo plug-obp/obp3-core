@@ -1,7 +1,5 @@
 package obp3.des;
 
-import obp3.sli.core.support.Clonable;
-
 import java.util.function.Consumer;
 
 public record Event<D extends Clonable<D>> (String name, long time, Consumer<DESConfiguration<D>> action) implements Comparable<Event<D>> {

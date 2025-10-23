@@ -1,6 +1,6 @@
 package obp3.traversal.dfs.semantics.relational;
 
-import obp3.sli.core.DeterministicSemanticRelation;
+import obp3.runtime.sli.DeterministicSemanticRelation;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.semantics.relational.actions.*;
 

@@ -1,6 +1,6 @@
 package obp3.traversal.dfs.semantics;
 
-import obp3.IExecutable;
+import obp3.runtime.IExecutable;
 import obp3.Sequencer;
 import obp3.sli.core.operators.ToDetermistic;
 import obp3.sli.core.operators.product.Product;

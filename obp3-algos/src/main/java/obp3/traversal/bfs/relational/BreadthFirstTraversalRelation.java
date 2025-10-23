@@ -1,8 +1,8 @@
 package obp3.traversal.bfs.relational;
 
 import obp3.things.PeekableIterator;
-import obp3.sli.core.IRootedGraph;
-import obp3.sli.core.DeterministicSemanticRelation;
+import obp3.runtime.sli.IRootedGraph;
+import obp3.runtime.sli.DeterministicSemanticRelation;
 import obp3.traversal.bfs.BreadthFirstTraversalConfiguration;
 
 import java.util.Optional;

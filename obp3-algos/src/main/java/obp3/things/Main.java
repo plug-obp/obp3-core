@@ -1,7 +1,7 @@
 package obp3.things;
 
-import obp3.IExecutable;
-import obp3.sli.core.IRootedGraph;
+import obp3.runtime.IExecutable;
+import obp3.runtime.sli.IRootedGraph;
 import obp3.traversal.bfs.BreadthFirstTraversalRelational;
 import obp3.traversal.bfs.BreadthFirstTraversalWhile;
 import obp3.traversal.bfs.BreadthFirstTraversalDo;
@@ -9,7 +9,6 @@ import obp3.traversal.bfs.BreadthFirstTraversalDoFlat;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
-import obp3.traversal.dfs.model.IDepthFirstTraversalParameters;
 import obp3.traversal.dfs.semantics.DepthFirstTraversalDo;
 import obp3.traversal.dfs.semantics.DepthFirstTraversalRelational;
 import obp3.traversal.dfs.semantics.DepthFirstTraversalWhile;

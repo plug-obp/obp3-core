@@ -1,7 +1,6 @@
 package obp3.des;
 
-import obp3.sli.core.support.Clonable;
-import obp3.sli.core.SemanticRelation;
+import obp3.runtime.sli.SemanticRelation;
 
 import java.util.List;
 import java.util.stream.Collectors;

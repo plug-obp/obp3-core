@@ -1,7 +1,8 @@
 package obp3.sli.core.operators.product;
 
-import obp3.sli.core.SemanticRelation;
+import obp3.runtime.sli.SemanticRelation;
 import obp3.sli.core.operators.product.model.StepProductParameters;
+import obp3.runtime.sli.Step;
 
 import java.util.ArrayList;
 import java.util.List;

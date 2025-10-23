@@ -1,8 +1,8 @@
 package obp3.traversal.bfs;
 
 import obp3.things.PeekableIterator;
-import obp3.IExecutable;
-import obp3.sli.core.IRootedGraph;
+import obp3.runtime.IExecutable;
+import obp3.runtime.sli.IRootedGraph;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;

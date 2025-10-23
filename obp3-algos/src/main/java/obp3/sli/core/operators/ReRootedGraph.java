@@ -1,6 +1,6 @@
 package obp3.sli.core.operators;
 
-import obp3.sli.core.IRootedGraph;
+import obp3.runtime.sli.IRootedGraph;
 
 import java.util.Iterator;
 

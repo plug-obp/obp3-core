@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+}
+
+group = 'fr.ensta'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+//    modularity.inferModulePath = true
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(23))
+    }
+}
+
+
+dependencies {
+    implementation ('fr.ensta:obp3-runtime:1.0.0')
+    implementation ('fr.ensta:obp3-algos:1.0.0')
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -1,6 +1,7 @@
 package obp3;
 
-import obp3.sli.core.DeterministicSemanticRelation;
+import obp3.runtime.sli.DeterministicSemanticRelation;
+import obp3.runtime.IExecutable;
 
 import java.util.Optional;
 import java.util.function.BooleanSupplier;

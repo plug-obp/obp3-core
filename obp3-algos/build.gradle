@@ -26,7 +26,7 @@ javafx {
 }
 
 dependencies {
-
+    implementation project(':obp3-runtime')
     // Icons sets (see http://aalmiray.github.io/ikonli)
     implementation 'org.kordamp.ikonli:ikonli-core:2.1.1'
     implementation 'org.kordamp.ikonli:ikonli-javafx:2.1.1'

@@ -1,4 +1,4 @@
-package obp3.sli.core;
+package obp3.runtime.sli;
 
 import java.util.List;
 

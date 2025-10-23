@@ -1,7 +1,6 @@
 package obp3.scc.tarjan2;
 
 import obp3.scc.TarjanVertexData;
-import obp3.sli.core.IRootedGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;

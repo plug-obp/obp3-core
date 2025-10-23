@@ -1,9 +1,8 @@
 package z2mc.scc;
 
 import obp3.scc.tarjan1.TarjanConfigurationSCC;
-import obp3.sli.core.IRootedGraph;
+import obp3.runtime.sli.IRootedGraph;
 import obp3.traversal.dfs.semantics.DepthFirstTraversalRelational;
-import obp3.traversal.dfs.semantics.DepthFirstTraversalWhile;
 import org.junit.jupiter.api.Test;
 import z2mc.traversal.dft.RootedGraphExamples;
 

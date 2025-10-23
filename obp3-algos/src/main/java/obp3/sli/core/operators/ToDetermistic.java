@@ -1,7 +1,7 @@
 package obp3.sli.core.operators;
 
-import obp3.sli.core.DeterministicSemanticRelation;
-import obp3.sli.core.SemanticRelation;
+import obp3.runtime.sli.DeterministicSemanticRelation;
+import obp3.runtime.sli.SemanticRelation;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,3 +1,6 @@
 rootProject.name = 'obp3-core'
 
+
+include 'obp3-runtime'
 include 'obp3-algos'
+include 'obp3-des'

@@ -1,8 +1,8 @@
 package obp3.modelchecking.buchi.ndfs.naive;
 
-import obp3.IExecutable;
+import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
-import obp3.sli.core.IRootedGraph;
+import obp3.runtime.sli.IRootedGraph;
 import obp3.sli.core.operators.ReRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;

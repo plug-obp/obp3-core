@@ -1,4 +1,4 @@
-package obp3.sli.core.support;
+package obp3.des;
 
 public interface Clonable<T> {
     T clone();
