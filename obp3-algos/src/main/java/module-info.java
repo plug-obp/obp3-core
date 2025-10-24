@@ -1,8 +1,5 @@
 module obp.algos {
     requires obp.sli.runtime;
-    requires javafx.controls;
-    requires org.kordamp.ikonli.core;
-    requires org.kordamp.ikonli.javafx;
     exports obp3;
     exports obp3.sli.core;
     exports obp3.sli.core.operators;
@@ -28,4 +25,5 @@ module obp.algos {
     exports obp3.modelchecking;
     exports obp3.modelchecking.buchi.ndfs.gs09.cdlp05.separated;
     exports obp3.modelchecking.safety;
+    exports obp3.modelchecking.tools;
 }

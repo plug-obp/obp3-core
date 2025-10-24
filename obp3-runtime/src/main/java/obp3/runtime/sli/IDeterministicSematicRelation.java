@@ -8,8 +8,8 @@ public interface IDeterministicSematicRelation<I, A, C> {
     Optional<A> actions(I input, C configuration);
     Optional<C> execute(A action, I input, C configuration);
 
-    default ISemanticRelation<I, A, C> toISemanticRelation() {
-        return new ISemanticRelation<>() {
+    default DependentSemanticRelation<I, A, C> toISemanticRelation() {
+        return new DependentSemanticRelation<>() {
 
             @Override
             public List<C> initial() {

@@ -1,9 +1,6 @@
 plugins {
     id 'java'
     id 'application'
-    id "me.champeau.jmh" version "0.7.2"
-    id 'org.graalvm.buildtools.native' version '0.10.5'
-    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 group = 'fr.ensta'
@@ -14,65 +11,24 @@ repositories {
 }
 
 java {
-    modularity.inferModulePath = true
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(23))
     }
 }
 
-javafx {
-    version = "23"
-    modules = [ 'javafx.controls' ]
-}
-
 dependencies {
     implementation project(':obp3-runtime')
-    // Icons sets (see http://aalmiray.github.io/ikonli)
-    implementation 'org.kordamp.ikonli:ikonli-core:2.1.1'
-    implementation 'org.kordamp.ikonli:ikonli-javafx:2.1.1'
-    implementation 'org.kordamp.ikonli:ikonli-material-pack:2.1.1'
-    implementation 'org.kordamp.ikonli:ikonli-typicons-pack:2.1.1'
-
-    compileOnly('org.graalvm.sdk:graal-sdk:24.1.2')
-    compileOnly('org.graalvm.nativeimage:svm:24.1.2')
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    jmh 'org.openjdk.jmh:jmh-core:1.37'
-    jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
-}
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-application {
-//    mainClass = "objectbrowser.ObjectBrowser"
-    mainClass = "obp3.things.JFXExecutableListApp"
 }
 
 test {
     useJUnitPlatform()
 }
 
-graalvmNative {
-    binaries.all {
-        verbose = true
-    }
-    binaries.main {
-        // options to configure the main binary
-        imageName = 'obp3-algos'
-        mainClass = 'obp3.things.Main'
-        buildArgs.addAll(
-//                '--pgo'
-                '-march=native'
-//                ,'--gc=G1' // available only on Linux AMD64 and AArch64
-                ,'--enable-preview'
-                ,'--initialize-at-build-time=all'
-                ,'--no-fallback'
-                ,'--native-compiler-options=-O3'
-                ,'-O3'
-        ) // enables additional compiler optimizations
-    }
-}
-
-jmh {
-    includes = ["DFSBenchCallbacks"]
-    // remaining JMH options go here...
+application {
+    mainClass.set("obp3.things.Main")
 }
