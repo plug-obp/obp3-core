@@ -1,4 +1,4 @@
-package obp3.things;
+package obp3.fx;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -10,6 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import obp3.Execution;
 import obp3.runtime.IExecutable;
+import obp3.things.LimitedRandomRootedGraph;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.DepthFirstTraversalParameters;

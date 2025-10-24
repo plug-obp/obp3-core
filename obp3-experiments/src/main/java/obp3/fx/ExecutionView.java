@@ -1,4 +1,4 @@
-package obp3.things;
+package obp3.fx;
 
 import javafx.application.Platform;
 import javafx.geometry.HPos;
