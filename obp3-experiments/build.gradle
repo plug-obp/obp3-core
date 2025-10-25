@@ -6,7 +6,7 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
-group = 'fr.ensta'
+group = 'org.obpcdl'
 version = '1.0.0'
 
 repositories {
@@ -26,8 +26,8 @@ javafx {
 }
 
 dependencies {
-    implementation 'fr.ensta:obp3-runtime:1.0.0'
-    implementation 'fr.ensta:obp3-algos:1.0.0'
+    implementation project(':obp3-runtime')
+    implementation project(':obp3-algos')
     // Icons sets (see http://aalmiray.github.io/ikonli)
     implementation 'org.kordamp.ikonli:ikonli-core:2.1.1'
     implementation 'org.kordamp.ikonli:ikonli-javafx:2.1.1'

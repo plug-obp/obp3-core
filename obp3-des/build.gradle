@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'fr.ensta'
+group = 'org.obpcdl'
 version = '1.0.0'
 
 repositories {
@@ -18,8 +18,8 @@ java {
 
 
 dependencies {
-    implementation ('fr.ensta:obp3-runtime:1.0.0')
-    implementation ('fr.ensta:obp3-algos:1.0.0')
+    implementation project(':obp3-runtime')
+    implementation project(':obp3-algos')
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
