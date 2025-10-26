@@ -1,9 +1,7 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
-
-group = 'org.obpcdl'
-version = '1.0.0'
 
 repositories {
     mavenCentral()
@@ -25,4 +23,16 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+// Publishing metadata (configuration inherited from root project)
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'OBP3 Runtime'
+                description = 'OBP3 runtime'
+            }
+        }
+    }
 }

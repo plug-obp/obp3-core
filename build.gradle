@@ -1,8 +1,169 @@
+// Dynamic versioning based on git context
+def getVersionSuffix() {
+    def gitTag = System.getenv("GITHUB_REF_NAME")
+    def isTaggedRelease = System.getenv("GITHUB_REF_TYPE") == "tag"
+    def runNumber = System.getenv("GITHUB_RUN_NUMBER")
+    def branchName = System.getenv("GITHUB_REF_NAME")
+    
+    if (isTaggedRelease) {
+        // Tagged release: use clean version (no suffix)
+        return ""
+    }
+    
+    // Local build (no CI environment)
+    if (runNumber == null) {
+        try {
+            def gitBranch = "git rev-parse --abbrev-ref HEAD".execute().text.trim()
+            def gitHash = "git rev-parse --short HEAD".execute().text.trim()
+            def sanitizedBranch = gitBranch
+                .replaceAll(/[\/\\]/, '-')
+                .replaceAll(/[^a-zA-Z0-9\-.]/, '-')
+                .replaceAll(/--+/, '-')
+                .toLowerCase()
+            return "-${sanitizedBranch}.${gitHash}"
+        } catch (Exception e) {
+            return "-local.dev"
+        }
+    }
+    
+    // CI build: use branch name + run number + commit hash
+    def gitHash = System.getenv("GITHUB_SHA")?.substring(0, 7) ?: "unknown"
+    def sanitizedBranch = branchName
+        .replaceAll(/[\/\\]/, '-')
+        .replaceAll(/[^a-zA-Z0-9\-.]/, '-')
+        .replaceAll(/--+/, '-')
+        .toLowerCase()
+    
+    return "-${sanitizedBranch}.${runNumber}.${gitHash}"
+}
 
+// Get GitHub repository from git config or environment
+def getGitHubRepository() {
+    // Try environment variable first (CI/CD)
+    def envRepo = System.getenv("GITHUB_REPOSITORY")
+    if (envRepo) return envRepo
+    
+    // Fall back to git config
+    try {
+        def origin = 'git config --get remote.origin.url'.execute().text.trim()
+        // Handle both HTTPS and SSH URLs
+        // HTTPS: https://github.com/plug-obp/rege-java.git
+        // SSH: git@github.com:plug-obp/rege-java.git
+        def matcher = origin =~ /github\.com[:\/](.+?)(?:\.git)?$/
+        return matcher ? matcher[0][1] : 'plug-obp/obp3-core'
+    } catch (Exception e) {
+        return 'plug-obp/obp3-core'
+    }
+}
 
-group = 'org.obpcdl'
-version = '1.0.0'
+// Apply dynamic version to all projects
+def baseVersion = project.findProperty('version') ?: '1.0.0'
+def fullVersion = "${baseVersion}${getVersionSuffix()}"
+
+allprojects {
+    group = 'org.obpcdl'
+    version = fullVersion
+}
+
+// Make GitHub repository available to all projects
+ext.githubRepo = getGitHubRepository()
+
+// Configure publishing for all subprojects
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+    
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+    
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId = 'org.obpcdl'
+                artifactId = project.name
+                
+                from components.java
+                
+                pom {
+                    // name and description set in each subproject
+                    url = "https://github.com/${rootProject.ext.githubRepo}"
+                    
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+                    
+                    developers {
+                        developer {
+                            id = 'plug-obp'
+                            name = 'OBPCDL'
+                        }
+                    }
+                    
+                    scm {
+                        connection = "scm:git:git://github.com/${rootProject.ext.githubRepo}.git"
+                        developerConnection = "scm:git:ssh://github.com/${rootProject.ext.githubRepo}.git"
+                        url = "https://github.com/${rootProject.ext.githubRepo}"
+                    }
+                }
+            }
+        }
+        
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/${rootProject.ext.githubRepo}")
+                credentials {
+                    username = System.getenv("GITHUB_ACTOR")
+                    password = System.getenv("GITHUB_TOKEN")
+                }
+            }
+        }
+    }
+}
+
+// Display computed version
+gradle.projectsLoaded {
+    println("")
+    println("═══════════════════════════════════════════════════════════")
+    println("  📦 Project: ${rootProject.name}")
+    println("  🏷️  Version: ${fullVersion}")
+    println("═══════════════════════════════════════════════════════════")
+    println("")
+}
 
 repositories {
     mavenCentral()
+}
+
+// Version validation task for tagged releases
+tasks.register('validateTagVersion') {
+    doLast {
+        def gitTag = System.getenv("GITHUB_REF_NAME")
+        def isTaggedRelease = System.getenv("GITHUB_REF_TYPE") == "tag"
+        
+        if (isTaggedRelease) {
+            // Extract version from tag (e.g., v1.0.0 → 1.0.0)
+            def tagVersion = gitTag.startsWith('v') ? gitTag.substring(1) : gitTag
+            def gradleVersion = baseVersion
+            
+            if (tagVersion != gradleVersion) {
+                throw new GradleException(
+                    "\n❌ Version mismatch!\n" +
+                    "   Git tag version:    ${tagVersion}\n" +
+                    "   Gradle version:     ${gradleVersion}\n" +
+                    "   \n" +
+                    "   Please ensure tag matches version in gradle.properties\n"
+                )
+            }
+            
+            println("✅ Version validation passed: ${tagVersion}")
+        } else {
+            println("ℹ️  Not a tagged release, skipping version validation")
+        }
+    }
 }

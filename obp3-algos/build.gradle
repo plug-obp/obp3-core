@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'maven-publish'
 }
 
 group = 'org.obpcdl'
@@ -31,4 +32,16 @@ test {
 
 application {
     mainClass.set("obp3.things.Main")
+}
+
+// Publishing metadata (configuration inherited from root project)
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'OBP3 Algos'
+                description = 'OBP3 analysis algorithms'
+            }
+        }
+    }
 }

@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
     id 'application'
     id "me.champeau.jmh" version "0.7.2"
     id 'org.graalvm.buildtools.native' version '0.10.5'
@@ -76,4 +77,16 @@ graalvmNative {
 jmh {
     includes = ["DFSBenchCallbacks"]
     // remaining JMH options go here...
+}
+
+// Publishing metadata (configuration inherited from root project)
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'OBP3 Experiments'
+                description = 'OBP3 experimental module'
+            }
+        }
+    }
 }
