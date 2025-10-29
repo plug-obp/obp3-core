@@ -76,6 +76,11 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
         return this;
     }
 
+    public ModelCheckerBuilder<MA, MC, PA, PC> depthBound(int bound) {
+        this.depthBound = bound;
+        return this;
+    }
+
     public ModelCheckerBuilder<MA, MC, PA, PC> reducer(Function reducer) {
         this.reducer = reducer;
         return this;
