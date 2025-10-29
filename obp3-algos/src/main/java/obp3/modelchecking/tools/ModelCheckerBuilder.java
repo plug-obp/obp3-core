@@ -1,5 +1,7 @@
 package obp3.modelchecking.tools;
 
+import obp3.modelchecking.EmptinessCheckerAnswer;
+import obp3.runtime.IExecutable;
 import obp3.runtime.sli.DependentSemanticRelation;
 import obp3.runtime.sli.SemanticRelation;
 import obp3.runtime.sli.Step;
@@ -154,5 +156,27 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
                 depthBound,
                 reducer
         );
+    }
+
+    public IExecutable<EmptinessCheckerAnswer<?>> modelChecker() {
+        if (modelSemantics == null) {
+            throw new IllegalStateException("modelSemantics is required for [Safety|Buchi]ModelChecker");
+        }
+        if (this.propertySemantics == null) {
+            if (this.acceptingPredicateForModel == null) {
+                throw new IllegalStateException("acceptingPredicateForModel is required for StatePredicateModelChecker");
+            }
+            var mcModel = this.buildSafety();
+            return (IExecutable)mcModel.modelChecker();
+        }
+        if (acceptingPredicateForProduct == null) {
+            throw new IllegalStateException("acceptingPredicateForProduct is required for [Safety|Buchi]ModelChecker");
+        }
+        if (isBuchi) {
+            var mcModel = this.buildBuchi();
+            return (IExecutable)mcModel.modelChecker();
+        }
+        var mcModel = this.buildSafetyWithProperty();
+        return (IExecutable)mcModel.modelChecker();
     }
 }
