@@ -3,6 +3,7 @@ package obp3.modelchecking.tools;
 import obp3.runtime.sli.DependentSemanticRelation;
 import obp3.runtime.sli.SemanticRelation;
 import obp3.runtime.sli.Step;
+import obp3.sli.core.operators.product.Product;
 import obp3.traversal.dfs.DepthFirstTraversal;
 
 import java.util.function.Function;
@@ -19,7 +20,7 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
     private SemanticRelation<MA, MC> modelSemantics;
     private DependentSemanticRelation<Step<MA, MC>, PA, PC> propertySemantics;
     private Predicate<MC> acceptingPredicateForModel;
-    private Predicate acceptingPredicateForProduct;
+    private Predicate<Product<MC, PC>> acceptingPredicateForProduct;
     BuchiModelCheckerModel.BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm = BuchiModelCheckerModel.BuchiEmptinessCheckerAlgorithm.GS09_CDLP05_SEPARATED;
     private DepthFirstTraversal.Algorithm traversalStrategy = DepthFirstTraversal.Algorithm.WHILE;
     private boolean isBuchi = false;
@@ -45,7 +46,7 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
         return this;
     }
 
-    public ModelCheckerBuilder<MA, MC, PA, PC> acceptingPredicateForProduct(Predicate acceptingPredicate) {
+    public ModelCheckerBuilder<MA, MC, PA, PC> acceptingPredicateForProduct(Predicate<Product<MC, PC>> acceptingPredicate) {
         this.acceptingPredicateForProduct = acceptingPredicate;
         return this;
     }
