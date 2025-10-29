@@ -53,6 +53,11 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
         return this;
     }
 
+    public ModelCheckerBuilder<MA, MC, PA, PC> emptinessCheckerAlgorithm(BuchiModelCheckerModel.BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm) {
+        this.emptinessCheckerAlgorithm = emptinessCheckerAlgorithm;
+        return this;
+    }
+
     public ModelCheckerBuilder<MA, MC, PA, PC> traversalStrategy(DepthFirstTraversal.Algorithm traversalStrategy) {
         this.traversalStrategy = traversalStrategy;
         return this;
