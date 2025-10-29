@@ -11,7 +11,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class SafetyDephtFirstTraversal<V, A> implements IExecutable<EmptinessCheckerAnswer<V>> {
+public class SafetyDepthFirstTraversal<V, A> implements IExecutable<EmptinessCheckerAnswer<V>> {
     IExecutable<IDepthFirstTraversalConfiguration<V, A>> algorithm;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
@@ -22,7 +22,7 @@ public class SafetyDephtFirstTraversal<V, A> implements IExecutable<EmptinessChe
 
     EmptinessCheckerAnswer<V> result = new EmptinessCheckerAnswer<>();
 
-    public SafetyDephtFirstTraversal(
+    public SafetyDepthFirstTraversal(
             DepthFirstTraversal.Algorithm traversalAlgorithm,
             IRootedGraph<V> graph,
             int depthBound,

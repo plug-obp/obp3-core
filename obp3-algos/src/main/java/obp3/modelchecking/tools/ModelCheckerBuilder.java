@@ -3,6 +3,7 @@ package obp3.modelchecking.tools;
 import obp3.runtime.sli.DependentSemanticRelation;
 import obp3.runtime.sli.SemanticRelation;
 import obp3.runtime.sli.Step;
+import obp3.traversal.dfs.DepthFirstTraversal;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -19,6 +20,8 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
     private DependentSemanticRelation<Step<MA, MC>, PA, PC> propertySemantics;
     private Predicate<MC> acceptingPredicateForModel;
     private Predicate acceptingPredicateForProduct;
+    BuchiModelCheckerModel.BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm;
+    private DepthFirstTraversal.Algorithm traversalStrategy;
     private boolean isBuchi = false;
     private int depthBound = -1;
     private Function reducer = Function.identity();
@@ -44,6 +47,11 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
 
     public ModelCheckerBuilder<MA, MC, PA, PC> acceptingPredicateForProduct(Predicate acceptingPredicate) {
         this.acceptingPredicateForProduct = acceptingPredicate;
+        return this;
+    }
+
+    public ModelCheckerBuilder<MA, MC, PA, PC> traversalStrategy(DepthFirstTraversal.Algorithm traversalStrategy) {
+        this.traversalStrategy = traversalStrategy;
         return this;
     }
 
@@ -90,6 +98,7 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
         return new StatePredicateModelCheckerModel<>(
                 modelSemantics,
                 acceptingPredicateForModel,
+                traversalStrategy,
                 depthBound,
                 reducer
         );
@@ -114,6 +123,7 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
                 modelSemantics,
                 propertySemantics,
                 acceptingPredicateForProduct,
+                traversalStrategy,
                 depthBound,
                 reducer
         );
@@ -138,6 +148,8 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
                 modelSemantics,
                 propertySemantics,
                 acceptingPredicateForProduct,
+                emptinessCheckerAlgorithm,
+                traversalStrategy,
                 depthBound,
                 reducer
         );
