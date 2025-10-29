@@ -20,8 +20,8 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
     private DependentSemanticRelation<Step<MA, MC>, PA, PC> propertySemantics;
     private Predicate<MC> acceptingPredicateForModel;
     private Predicate acceptingPredicateForProduct;
-    BuchiModelCheckerModel.BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm;
-    private DepthFirstTraversal.Algorithm traversalStrategy;
+    BuchiModelCheckerModel.BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm = BuchiModelCheckerModel.BuchiEmptinessCheckerAlgorithm.GS09_CDLP05_SEPARATED;
+    private DepthFirstTraversal.Algorithm traversalStrategy = DepthFirstTraversal.Algorithm.WHILE;
     private boolean isBuchi = false;
     private int depthBound = -1;
     private Function reducer = Function.identity();
