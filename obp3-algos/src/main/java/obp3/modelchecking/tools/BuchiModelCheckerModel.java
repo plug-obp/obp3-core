@@ -7,7 +7,6 @@ import obp3.modelchecking.buchi.ndfs.gs09.cdlp05.EmptinessCheckerBuchiGS09CDLP05
 import obp3.modelchecking.buchi.ndfs.gs09.cdlp05.separated.EmptinessCheckerBuchiGS09CDLP05Separated;
 import obp3.modelchecking.buchi.ndfs.gs09.separated.EmptinessCheckerBuchiGS09Separated;
 import obp3.modelchecking.buchi.ndfs.naive.EmptinessChecherBuchiNaiveNDFS;
-import obp3.modelchecking.safety.SafetyDepthFirstTraversal;
 import obp3.runtime.IExecutable;
 import obp3.runtime.sli.DependentSemanticRelation;
 import obp3.runtime.sli.SemanticRelation;
@@ -18,6 +17,7 @@ import obp3.sli.core.operators.product.StepSynchronousProductSemantics;
 import obp3.sli.core.operators.product.model.StepProductParameters;
 import obp3.traversal.dfs.DepthFirstTraversal;
 
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -27,8 +27,9 @@ import java.util.function.Predicate;
  */
 public record BuchiModelCheckerModel<MA, MC, PA, PC>(
         SemanticRelation<MA, MC> modelSemantics,
-        DependentSemanticRelation<Step<MA, MC>, PA, PC> propertySemantics,
-        Predicate<Product<MC, PC>> acceptingPredicateForProduct,
+        BiPredicate<String, Step<MA,MC>> atomicPropositionEvaluator,
+        Function<BiPredicate<String, Step<MA,MC>>, DependentSemanticRelation<Step<MA, MC>, PA, PC>> propertySemanticsProvider,
+        BiPredicate<Product<MC, PC>, Product<SemanticRelation<MA, MC>, DependentSemanticRelation<Step<MA, MC>, PA, PC>>> acceptingPredicateForProduct,
         BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm,
         DepthFirstTraversal.Algorithm traversalStrategy,
         int depthBound,
@@ -45,8 +46,10 @@ public record BuchiModelCheckerModel<MA, MC, PA, PC>(
 
     @Override
     public IExecutable<EmptinessCheckerAnswer<Product<MC, PC>>> modelChecker() {
+        var propertySemantics = this.propertySemanticsProvider.apply(this.atomicPropositionEvaluator);
         var product = new StepSynchronousProductSemantics<>(new StepProductParameters<>(modelSemantics, propertySemantics));
         var rootedGraph = new SemanticRelation2RootedGraph<>(product);
+        Predicate<Product<MC, PC>> acceptingPredicate = (c) -> this.acceptingPredicateForProduct.test(c, new Product<>(modelSemantics, propertySemantics));
 
         switch (this.emptinessCheckerAlgorithm) {
             case NAIVE:
@@ -55,42 +58,42 @@ public record BuchiModelCheckerModel<MA, MC, PA, PC>(
                         rootedGraph,
                         this.depthBound,
                         this.reducer,
-                        this.acceptingPredicateForProduct);
+                        acceptingPredicate);
             case GS09:
                 return new EmptinessCheckerBuchiGS09<>(
                         this.traversalStrategy,
                         rootedGraph,
                         this.depthBound,
                         this.reducer,
-                        this.acceptingPredicateForProduct);
+                        acceptingPredicate);
             case GS09_SEPARATED:
                 return new EmptinessCheckerBuchiGS09Separated<>(
                     this.traversalStrategy,
                     rootedGraph,
                     this.depthBound,
                     this.reducer,
-                    this.acceptingPredicateForProduct);
+                    acceptingPredicate);
             case GS09_CDLP05:
                 return new EmptinessCheckerBuchiGS09CDLP05<>(
                         this.traversalStrategy,
                         rootedGraph,
                         this.depthBound,
                         this.reducer,
-                        this.acceptingPredicateForProduct);
+                        acceptingPredicate);
             case GS09_CDLP05_SEPARATED:
                 return new EmptinessCheckerBuchiGS09CDLP05Separated<>(
                         this.traversalStrategy,
                         rootedGraph,
                         this.depthBound,
                         this.reducer,
-                        this.acceptingPredicateForProduct);
+                        acceptingPredicate);
             case CVWY92Algo2:
                 return new EmptinessCheckerBuchiCVWY92Algo2<>(
                         this.traversalStrategy,
                         rootedGraph,
                         this.depthBound,
                         this.reducer,
-                        this.acceptingPredicateForProduct);
+                        acceptingPredicate);
         }
         return null;
     }
@@ -101,10 +104,11 @@ public record BuchiModelCheckerModel<MA, MC, PA, PC>(
 
     public static class BuchiBuilder<MA, MC, PA, PC> {
         private SemanticRelation<MA, MC> modelSemantics;
-        private DependentSemanticRelation<Step<MA, MC>, PA, PC> propertySemantics;
-        private Predicate<Product<MC, PC>> acceptingPredicateForProduct;
-        BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm;
-        DepthFirstTraversal.Algorithm traversalStrategy;
+        private BiPredicate<String, Step<MA,MC>> atomicPropositionEvaluator;
+        private Function<BiPredicate<String, Step<MA,MC>>, DependentSemanticRelation<Step<MA, MC>, PA, PC>> propertySemanticsProvider;
+        BiPredicate<Product<MC, PC>, Product<SemanticRelation<MA, MC>, DependentSemanticRelation<Step<MA, MC>, PA, PC>>> acceptingPredicateForProduct;
+        private BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm;
+        private DepthFirstTraversal.Algorithm traversalStrategy;
         private int depthBound = -1;
         private Function<Product<MC, PC>, ?> reducer = Function.identity();
 
@@ -113,13 +117,19 @@ public record BuchiModelCheckerModel<MA, MC, PA, PC>(
             return this;
         }
 
-        public BuchiBuilder<MA, MC, PA, PC> propertySemantics(DependentSemanticRelation<Step<MA, MC>, PA, PC> propertySemantics) {
-            this.propertySemantics = propertySemantics;
+        public BuchiBuilder<MA, MC, PA, PC> atomicPropositionEvaluator(BiPredicate<String, Step<MA,MC>> atomicPropositionEvaluator) {
+            this.atomicPropositionEvaluator = atomicPropositionEvaluator;
             return this;
         }
 
-        public BuchiBuilder<MA, MC, PA, PC> acceptingPredicateForProduct(Predicate<Product<MC, PC>> acceptingPredicate) {
-            this.acceptingPredicateForProduct = acceptingPredicate;
+        public BuchiBuilder<MA, MC, PA, PC> propertySemantics(
+                Function<BiPredicate<String, Step<MA,MC>>, DependentSemanticRelation<Step<MA, MC>, PA, PC>> propertySemanticsProvider) {
+            this.propertySemanticsProvider = propertySemanticsProvider;
+            return this;
+        }
+
+        public BuchiBuilder<MA, MC, PA, PC> acceptingPredicateForProduct(BiPredicate<Product<MC, PC>, Product<SemanticRelation<MA, MC>, DependentSemanticRelation<Step<MA, MC>, PA, PC>>> acceptingPredicateForProduct) {
+            this.acceptingPredicateForProduct = acceptingPredicateForProduct;
             return this;
         }
 
@@ -158,7 +168,7 @@ public record BuchiModelCheckerModel<MA, MC, PA, PC>(
 
         public BuchiModelCheckerModel<MA, MC, PA, PC> build() {
             return new BuchiModelCheckerModel<>(
-                    modelSemantics, propertySemantics, acceptingPredicateForProduct,
+                    modelSemantics, atomicPropositionEvaluator, propertySemanticsProvider, acceptingPredicateForProduct,
                     emptinessCheckerAlgorithm, traversalStrategy, depthBound, reducer);
         }
     }

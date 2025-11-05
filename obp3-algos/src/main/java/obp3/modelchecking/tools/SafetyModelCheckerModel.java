@@ -12,8 +12,8 @@ import obp3.sli.core.operators.product.StepSynchronousProductSemantics;
 import obp3.sli.core.operators.product.model.StepProductParameters;
 import obp3.traversal.dfs.DepthFirstTraversal;
 
+import java.util.function.BiPredicate;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * Safety model checker with property semantics - checks product of model and property states.
@@ -21,14 +21,16 @@ import java.util.function.Predicate;
  */
 public record SafetyModelCheckerModel<MA, MC, PA, PC>(
         SemanticRelation<MA, MC> modelSemantics,
-        DependentSemanticRelation<Step<MA, MC>, PA, PC> propertySemantics,
-        Predicate<Product<MC, PC>> acceptingPredicateForProduct,
+        BiPredicate<String, Step<MA,MC>> atomicPropositionEvaluator,
+        Function<BiPredicate<String, Step<MA,MC>>, DependentSemanticRelation<Step<MA, MC>, PA, PC>> propertySemanticsProvider,
+        BiPredicate<Product<MC, PC>, Product<SemanticRelation<MA, MC>, DependentSemanticRelation<Step<MA, MC>, PA, PC>>> acceptingPredicateForProduct,
         DepthFirstTraversal.Algorithm traversalStrategy,
         int depthBound,
         Function<Product<MC, PC>, ?> reducer) implements ModelCheckerModel<Product<MC, PC>> {
 
     @Override
     public IExecutable<EmptinessCheckerAnswer<Product<MC, PC>>> modelChecker() {
+        var propertySemantics = this.propertySemanticsProvider.apply(this.atomicPropositionEvaluator);
         var product = new StepSynchronousProductSemantics<>(new StepProductParameters<>(modelSemantics, propertySemantics));
         var rootedGraph = new SemanticRelation2RootedGraph<>(product);
 
@@ -37,7 +39,7 @@ public record SafetyModelCheckerModel<MA, MC, PA, PC>(
                 rootedGraph,
                 this.depthBound,
                 this.reducer,
-                this.acceptingPredicateForProduct);
+                (c) -> this.acceptingPredicateForProduct.test(c, new Product<>(modelSemantics, propertySemantics)));
     }
 
     public static <MA, MC, PA, PC> SafetyModelCheckerBuilder<MA, MC, PA, PC> builder() {
@@ -47,8 +49,9 @@ public record SafetyModelCheckerModel<MA, MC, PA, PC>(
     public static class SafetyModelCheckerBuilder<MA, MC, PA, PC> {
         DepthFirstTraversal.Algorithm traversalStrategy;
         private SemanticRelation<MA, MC> modelSemantics;
-        private DependentSemanticRelation<Step<MA, MC>, PA, PC> propertySemantics;
-        private Predicate<Product<MC, PC>> acceptingPredicateForProduct;
+        private BiPredicate<String, Step<MA,MC>> atomicPropositionEvaluator;
+        private Function<BiPredicate<String, Step<MA,MC>>, DependentSemanticRelation<Step<MA, MC>, PA, PC>> propertySemanticsProvider;
+        BiPredicate<Product<MC, PC>, Product<SemanticRelation<MA, MC>, DependentSemanticRelation<Step<MA, MC>, PA, PC>>> acceptingPredicateForProduct;
         private int depthBound = -1;
         private Function<Product<MC, PC>, ?> reducer = Function.identity();
 
@@ -57,13 +60,19 @@ public record SafetyModelCheckerModel<MA, MC, PA, PC>(
             return this;
         }
 
-        public SafetyModelCheckerBuilder<MA, MC, PA, PC> propertySemantics(DependentSemanticRelation<Step<MA, MC>, PA, PC> propertySemantics) {
-            this.propertySemantics = propertySemantics;
+        public SafetyModelCheckerBuilder<MA, MC, PA, PC> atomicPropositionEvaluator(BiPredicate<String, Step<MA,MC>> atomicPropositionEvaluator) {
+            this.atomicPropositionEvaluator = atomicPropositionEvaluator;
             return this;
         }
 
-        public SafetyModelCheckerBuilder<MA, MC, PA, PC> acceptingPredicateForProduct(Predicate<Product<MC, PC>> acceptingPredicate) {
-            this.acceptingPredicateForProduct = acceptingPredicate;
+        public SafetyModelCheckerBuilder<MA, MC, PA, PC> propertySemantics(
+                Function<BiPredicate<String, Step<MA,MC>>, DependentSemanticRelation<Step<MA, MC>, PA, PC>> propertySemanticsProvider) {
+            this.propertySemanticsProvider = propertySemanticsProvider;
+            return this;
+        }
+
+        public SafetyModelCheckerBuilder<MA, MC, PA, PC> acceptingPredicateForProduct(BiPredicate<Product<MC, PC>, Product<SemanticRelation<MA, MC>, DependentSemanticRelation<Step<MA, MC>, PA, PC>>> acceptingPredicateForProduct) {
+            this.acceptingPredicateForProduct = acceptingPredicateForProduct;
             return this;
         }
 
@@ -97,7 +106,7 @@ public record SafetyModelCheckerModel<MA, MC, PA, PC>(
 
         public SafetyModelCheckerModel<MA, MC, PA, PC> build() {
             return new SafetyModelCheckerModel<>(
-                    modelSemantics, propertySemantics, acceptingPredicateForProduct,
+                    modelSemantics, atomicPropositionEvaluator, propertySemanticsProvider, acceptingPredicateForProduct,
                     traversalStrategy, depthBound, reducer);
         }
     }

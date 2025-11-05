@@ -8,6 +8,7 @@ import obp3.runtime.sli.Step;
 import obp3.sli.core.operators.product.Product;
 import obp3.traversal.dfs.DepthFirstTraversal;
 
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -20,9 +21,10 @@ import java.util.function.Predicate;
  */
 public class ModelCheckerBuilder<MA, MC, PA, PC> {
     private SemanticRelation<MA, MC> modelSemantics;
-    private DependentSemanticRelation<Step<MA, MC>, PA, PC> propertySemantics;
+    BiPredicate<String, Step<MA,MC>> atomicPropositionEvaluator;
+    private Function<BiPredicate<String, Step<MA,MC>>, DependentSemanticRelation<Step<MA, MC>, PA, PC>> propertySemanticsProvider;
     private Predicate<MC> acceptingPredicateForModel;
-    private Predicate<Product<MC, PC>> acceptingPredicateForProduct;
+    BiPredicate<Product<MC, PC>, Product<SemanticRelation<MA, MC>, DependentSemanticRelation<Step<MA, MC>, PA, PC>>> acceptingPredicateForProduct;
     BuchiModelCheckerModel.BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm = BuchiModelCheckerModel.BuchiEmptinessCheckerAlgorithm.GS09_CDLP05_SEPARATED;
     private DepthFirstTraversal.Algorithm traversalStrategy = DepthFirstTraversal.Algorithm.WHILE;
     private boolean isBuchi = false;
@@ -38,8 +40,14 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
         return this;
     }
 
-    public ModelCheckerBuilder<MA, MC, PA, PC> propertySemantics(DependentSemanticRelation<Step<MA, MC>, PA, PC> propertySemantics) {
-        this.propertySemantics = propertySemantics;
+    public ModelCheckerBuilder<MA, MC, PA, PC> atomicPropositionEvaluator(BiPredicate<String, Step<MA,MC>> atomicPropositionEvaluator) {
+        this.atomicPropositionEvaluator = atomicPropositionEvaluator;
+        return this;
+    }
+
+    public ModelCheckerBuilder<MA, MC, PA, PC> propertySemantics(
+            Function<BiPredicate<String, Step<MA,MC>>, DependentSemanticRelation<Step<MA, MC>, PA, PC>> propertySemanticsProvider) {
+        this.propertySemanticsProvider = propertySemanticsProvider;
         return this;
     }
 
@@ -48,7 +56,8 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
         return this;
     }
 
-    public ModelCheckerBuilder<MA, MC, PA, PC> acceptingPredicateForProduct(Predicate<Product<MC, PC>> acceptingPredicate) {
+    public ModelCheckerBuilder<MA, MC, PA, PC> acceptingPredicateForProduct(
+            BiPredicate<Product<MC, PC>, Product<SemanticRelation<MA, MC>, DependentSemanticRelation<Step<MA, MC>, PA, PC>>> acceptingPredicate) {
         this.acceptingPredicateForProduct = acceptingPredicate;
         return this;
     }
@@ -102,7 +111,7 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public StatePredicateModelCheckerModel<MA, MC> buildSafety() {
-        if (propertySemantics != null) {
+        if (propertySemanticsProvider != null) {
             throw new IllegalStateException("Cannot build SafetyModelCheckerModel when propertySemantics is set. Use buildSafetyWithProperty() instead.");
         }
         if (acceptingPredicateForModel == null) {
@@ -123,7 +132,7 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public SafetyModelCheckerModel<MA, MC, PA, PC> buildSafetyWithProperty() {
-        if (propertySemantics == null) {
+        if (propertySemanticsProvider == null) {
             throw new IllegalStateException("propertySemantics is required for SafetyWithPropertyModelCheckerModel");
         }
         if (acceptingPredicateForProduct == null) {
@@ -134,7 +143,8 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
         }
         return new SafetyModelCheckerModel<>(
                 modelSemantics,
-                propertySemantics,
+                atomicPropositionEvaluator,
+                propertySemanticsProvider,
                 acceptingPredicateForProduct,
                 traversalStrategy,
                 depthBound,
@@ -148,7 +158,7 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public BuchiModelCheckerModel<MA, MC, PA, PC> buildBuchi() {
-        if (propertySemantics == null) {
+        if (propertySemanticsProvider == null) {
             throw new IllegalStateException("propertySemantics is required for BuchiModelCheckerModel");
         }
         if (acceptingPredicateForProduct == null) {
@@ -159,7 +169,8 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
         }
         return new BuchiModelCheckerModel<>(
                 modelSemantics,
-                propertySemantics,
+                atomicPropositionEvaluator,
+                propertySemanticsProvider,
                 acceptingPredicateForProduct,
                 emptinessCheckerAlgorithm,
                 traversalStrategy,
@@ -172,7 +183,7 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
         if (modelSemantics == null) {
             throw new IllegalStateException("modelSemantics is required for [Safety|Buchi]ModelChecker");
         }
-        if (this.propertySemantics == null) {
+        if (this.propertySemanticsProvider == null) {
             if (this.acceptingPredicateForModel == null) {
                 throw new IllegalStateException("acceptingPredicateForModel is required for StatePredicateModelChecker");
             }
