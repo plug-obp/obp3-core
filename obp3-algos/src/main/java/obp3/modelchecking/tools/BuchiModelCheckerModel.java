@@ -46,7 +46,8 @@ public record BuchiModelCheckerModel<MA, MC, PA, PC>(
 
     @Override
     public IExecutable<EmptinessCheckerAnswer<Product<MC, PC>>> modelChecker() {
-        var propertySemantics = this.propertySemanticsProvider.apply(this.atomicPropositionEvaluator);
+        BiPredicate<String, Step<MA, MC>> atomEvaluator = (s, step) -> StepSynchronousProductSemantics.evaluateAtom(s, step, this.atomicPropositionEvaluator);
+        var propertySemantics = this.propertySemanticsProvider.apply(atomEvaluator);
         var product = new StepSynchronousProductSemantics<>(new StepProductParameters<>(modelSemantics, propertySemantics));
         var rootedGraph = new SemanticRelation2RootedGraph<>(product);
         Predicate<Product<MC, PC>> acceptingPredicate = (c) -> this.acceptingPredicateForProduct.test(c, new Product<>(modelSemantics, propertySemantics));

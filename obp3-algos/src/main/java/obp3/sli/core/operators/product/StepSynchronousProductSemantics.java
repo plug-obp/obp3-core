@@ -7,6 +7,7 @@ import obp3.runtime.sli.Step;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 public class StepSynchronousProductSemantics<LA, LC, RA, RC> implements SemanticRelation<Product<Step<LA, LC>, RA>, Product<LC, RC>> {
@@ -65,6 +66,13 @@ public class StepSynchronousProductSemantics<LA, LC, RA, RC> implements Semantic
         return r_targets.stream()
                 .map(target -> new Product<>(l_step.end(), target))
                 .collect(Collectors.toList());
+    }
+
+    public static <LA, LC> boolean evaluateAtom(String atom, Step<LA, LC> step, BiPredicate<String, Step<LA, LC>> baseEvaluator) {
+        if (atom.equals("deadlock")) {
+            return step.action().isEmpty() && step.end() == step.start();
+        }
+        return baseEvaluator.test(atom, step);
     }
 }
 
