@@ -99,71 +99,15 @@ public record BuchiModelCheckerModel<MA, MC, PA, PC>(
         return null;
     }
 
-    public static <MA, MC, PA, PC> BuchiBuilder<MA, MC, PA, PC> builder() {
-        return new BuchiBuilder<>();
+    public <MA, MC, PA, PC> BuchiModelCheckerBuilder<MA, MC, PA, PC> builder() {
+        return new BuchiModelCheckerBuilder<>();
     }
 
-    public static class BuchiBuilder<MA, MC, PA, PC> {
-        private SemanticRelation<MA, MC> modelSemantics;
-        private BiPredicate<String, Step<MA,MC>> atomicPropositionEvaluator;
-        private Function<BiPredicate<String, Step<MA,MC>>, DependentSemanticRelation<Step<MA, MC>, PA, PC>> propertySemanticsProvider;
-        BiPredicate<Product<MC, PC>, Product<SemanticRelation<MA, MC>, DependentSemanticRelation<Step<MA, MC>, PA, PC>>> acceptingPredicateForProduct;
+    public static class BuchiModelCheckerBuilder<MA, MC, PA, PC> extends ModelCheckerBuilderWithPropertyBase<MA, MC, PA, PC> {
         private BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm;
-        private DepthFirstTraversal.Algorithm traversalStrategy;
-        private int depthBound = -1;
-        private Function<Product<MC, PC>, ?> reducer = Function.identity();
 
-        public BuchiBuilder<MA, MC, PA, PC> modelSemantics(SemanticRelation<MA, MC> modelSemantics) {
-            this.modelSemantics = modelSemantics;
-            return this;
-        }
-
-        public BuchiBuilder<MA, MC, PA, PC> atomicPropositionEvaluator(BiPredicate<String, Step<MA,MC>> atomicPropositionEvaluator) {
-            this.atomicPropositionEvaluator = atomicPropositionEvaluator;
-            return this;
-        }
-
-        public BuchiBuilder<MA, MC, PA, PC> propertySemantics(
-                Function<BiPredicate<String, Step<MA,MC>>, DependentSemanticRelation<Step<MA, MC>, PA, PC>> propertySemanticsProvider) {
-            this.propertySemanticsProvider = propertySemanticsProvider;
-            return this;
-        }
-
-        public BuchiBuilder<MA, MC, PA, PC> acceptingPredicateForProduct(BiPredicate<Product<MC, PC>, Product<SemanticRelation<MA, MC>, DependentSemanticRelation<Step<MA, MC>, PA, PC>>> acceptingPredicateForProduct) {
-            this.acceptingPredicateForProduct = acceptingPredicateForProduct;
-            return this;
-        }
-
-        public BuchiBuilder<MA, MC, PA, PC> emptinessCheckerAlgorithm(BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm) {
+        public BuchiModelCheckerBuilder<MA, MC, PA, PC> emptinessCheckerAlgorithm(BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm) {
             this.emptinessCheckerAlgorithm = emptinessCheckerAlgorithm;
-            return this;
-        }
-
-        public BuchiBuilder<MA, MC, PA, PC> traversalStrategy(DepthFirstTraversal.Algorithm traversalStrategy) {
-            this.traversalStrategy = traversalStrategy;
-            return this;
-        }
-
-        public BuchiBuilder<MA, MC, PA, PC> unbounded() {
-            this.depthBound = -1;
-            return this;
-        }
-
-        public BuchiBuilder<MA, MC, PA, PC> bounded(int bound) {
-            if (bound <= 0) {
-                throw new IllegalArgumentException("Bound must be greater than 0, got: " + bound);
-            }
-            this.depthBound = bound;
-            return this;
-        }
-
-        public BuchiBuilder<MA, MC, PA, PC> reducer(Function<Product<MC, PC>, ?> reducer) {
-            this.reducer = reducer;
-            return this;
-        }
-
-        public BuchiBuilder<MA, MC, PA, PC> identityReducer() {
-            this.reducer = Function.identity();
             return this;
         }
 

@@ -47,69 +47,13 @@ public record SafetyModelCheckerModel<MA, MC, PA, PC>(
         return new SafetyModelCheckerBuilder<>();
     }
 
-    public static class SafetyModelCheckerBuilder<MA, MC, PA, PC> {
-        DepthFirstTraversal.Algorithm traversalStrategy;
-        private SemanticRelation<MA, MC> modelSemantics;
-        private BiPredicate<String, Step<MA,MC>> atomicPropositionEvaluator;
-        private Function<BiPredicate<String, Step<MA,MC>>, DependentSemanticRelation<Step<MA, MC>, PA, PC>> propertySemanticsProvider;
-        BiPredicate<Product<MC, PC>, Product<SemanticRelation<MA, MC>, DependentSemanticRelation<Step<MA, MC>, PA, PC>>> acceptingPredicateForProduct;
-        private int depthBound = -1;
-        private Function<Product<MC, PC>, ?> reducer = Function.identity();
-
-        public SafetyModelCheckerBuilder<MA, MC, PA, PC> modelSemantics(SemanticRelation<MA, MC> modelSemantics) {
-            this.modelSemantics = modelSemantics;
-            return this;
-        }
-
-        public SafetyModelCheckerBuilder<MA, MC, PA, PC> atomicPropositionEvaluator(BiPredicate<String, Step<MA,MC>> atomicPropositionEvaluator) {
-            this.atomicPropositionEvaluator = atomicPropositionEvaluator;
-            return this;
-        }
-
-        public SafetyModelCheckerBuilder<MA, MC, PA, PC> propertySemantics(
-                Function<BiPredicate<String, Step<MA,MC>>, DependentSemanticRelation<Step<MA, MC>, PA, PC>> propertySemanticsProvider) {
-            this.propertySemanticsProvider = propertySemanticsProvider;
-            return this;
-        }
-
-        public SafetyModelCheckerBuilder<MA, MC, PA, PC> acceptingPredicateForProduct(BiPredicate<Product<MC, PC>, Product<SemanticRelation<MA, MC>, DependentSemanticRelation<Step<MA, MC>, PA, PC>>> acceptingPredicateForProduct) {
-            this.acceptingPredicateForProduct = acceptingPredicateForProduct;
-            return this;
-        }
-
-        public SafetyModelCheckerBuilder<MA, MC, PA, PC> traversalStrategy(DepthFirstTraversal.Algorithm traversalStrategy) {
-            this.traversalStrategy = traversalStrategy;
-            return this;
-        }
-
-        public SafetyModelCheckerBuilder<MA, MC, PA, PC> unbounded() {
-            this.depthBound = -1;
-            return this;
-        }
-
-        public SafetyModelCheckerBuilder<MA, MC, PA, PC> bounded(int bound) {
-            if (bound <= 0) {
-                throw new IllegalArgumentException("Bound must be greater than 0, got: " + bound);
-            }
-            this.depthBound = bound;
-            return this;
-        }
-
-        public SafetyModelCheckerBuilder<MA, MC, PA, PC> reducer(Function<Product<MC, PC>, ?> reducer) {
-            this.reducer = reducer;
-            return this;
-        }
-
-        public SafetyModelCheckerBuilder<MA, MC, PA, PC> identityReducer() {
-            this.reducer = Function.identity();
-            return this;
-        }
-
+    public static class SafetyModelCheckerBuilder<MA, MC, PA, PC> extends ModelCheckerBuilderWithPropertyBase<MA, MC, PA, PC> {
         public SafetyModelCheckerModel<MA, MC, PA, PC> build() {
             return new SafetyModelCheckerModel<>(
                     modelSemantics, atomicPropositionEvaluator, propertySemanticsProvider, acceptingPredicateForProduct,
                     traversalStrategy, depthBound, reducer);
         }
     }
+
 }
 

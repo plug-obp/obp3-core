@@ -35,52 +35,7 @@ public record StatePredicateModelCheckerModel<MA, MC>(
     public static <MA, MC> StatePredicateModelBuilder<MA, MC> builder() {
         return new StatePredicateModelBuilder<>();
     }
-
-    public static class StatePredicateModelBuilder<MA, MC> {
-        private SemanticRelation<MA, MC> modelSemantics;
-        private Predicate<MC> acceptingPredicate;
-        DepthFirstTraversal.Algorithm traversalStrategy;
-        private int depthBound = -1;
-        private Function<MC, MC> reducer = Function.identity();
-
-        public StatePredicateModelBuilder<MA, MC> modelSemantics(SemanticRelation<MA, MC> modelSemantics) {
-            this.modelSemantics = modelSemantics;
-            return this;
-        }
-
-        public StatePredicateModelBuilder<MA, MC> acceptingPredicate(Predicate<MC> acceptingPredicate) {
-            this.acceptingPredicate = acceptingPredicate;
-            return this;
-        }
-
-        public StatePredicateModelBuilder<MA, MC> traversalStrategy(DepthFirstTraversal.Algorithm traversalStrategy) {
-            this.traversalStrategy = traversalStrategy;
-            return this;
-        }
-
-        public StatePredicateModelBuilder<MA, MC> unbounded() {
-            this.depthBound = -1;
-            return this;
-        }
-
-        public StatePredicateModelBuilder<MA, MC> bounded(int bound) {
-            if (bound <= 0) {
-                throw new IllegalArgumentException("Bound must be greater than 0, got: " + bound);
-            }
-            this.depthBound = bound;
-            return this;
-        }
-
-        public StatePredicateModelBuilder<MA, MC> reducer(Function<MC, MC> reducer) {
-            this.reducer = reducer;
-            return this;
-        }
-
-        public StatePredicateModelBuilder<MA, MC> identityReducer() {
-            this.reducer = Function.identity();
-            return this;
-        }
-
+    public static class StatePredicateModelBuilder<MA, MC> extends ModelCheckerBuilderBase<MA, MC, MC>{
         public StatePredicateModelCheckerModel<MA, MC> build() {
             return new StatePredicateModelCheckerModel<>(
                     modelSemantics, acceptingPredicate,
