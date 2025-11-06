@@ -3,11 +3,13 @@ package obp3.modelchecking.buchi.ndfs.naive;
 import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.runtime.sli.IRootedGraph;
+import obp3.runtime.sli.Step;
 import obp3.sli.core.operators.ReRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
 
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -64,10 +66,10 @@ public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<Emptine
                 rerooted,
                 depthBound,
                 reducer,
-                FunctionalDFTCallbacksModel.onEntry((_, t, _) -> {
+                FunctionalDFTCallbacksModel.onEntry((s, t, _) -> {
                     if (t.equals( target )) {
                         result.holds = false;
-                        result.witness = target;
+                        result.witness = new Step<>(s==null ? target : s, Optional.empty(), t);
                         return true;
                     }
                     return false;

@@ -3,10 +3,12 @@ package z2mc.buchi.ndfs.gs09.separated;
 import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.modelchecking.buchi.ndfs.gs09.separated.EmptinessCheckerBuchiGS09Separated;
 import obp3.runtime.sli.IRootedGraph;
+import obp3.runtime.sli.Step;
 import org.junit.jupiter.api.Test;
 import z2mc.traversal.dft.RootedGraphExamples;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,6 +26,7 @@ public class TestEmptinessCheckerBuchiGS09Separated {
         witness = ndfs(RootedGraphExamples.twoRootsTwoGraphs, (v) -> v.equals(4));
         assertTrue(witness.holds);
         witness = ndfs(RootedGraphExamples.twoRootsTwoGraphs, (v) -> v.equals(5));
+        assertEquals(new Step<>(5, Optional.empty(), 5), witness.witness);
         assertEquals(3, witness.trace.size());
         assertEquals(List.of(4,5,5), witness.trace);
     }
@@ -31,6 +34,7 @@ public class TestEmptinessCheckerBuchiGS09Separated {
     @Test
     void rootCycle3_1() {
         var witness = ndfs(RootedGraphExamples.rootCycle3, (v) -> v.equals(1));
+        assertEquals(new Step<>(3, Optional.empty(), 1), witness.witness);
         assertEquals(4, witness.trace.size());
         assertEquals(List.of(1, 2, 3, 1), witness.trace);
     }
@@ -38,6 +42,7 @@ public class TestEmptinessCheckerBuchiGS09Separated {
     @Test
     void rootCycle3_2() {
         var witness = ndfs(RootedGraphExamples.rootCycle3, (v) -> v.equals(2));
+        assertEquals(new Step<>(3, Optional.empty(), 1), witness.witness);
         assertEquals(4, witness.trace.size());
         assertEquals(List.of(1,2,3,1), witness.trace);
     }
@@ -45,6 +50,7 @@ public class TestEmptinessCheckerBuchiGS09Separated {
     @Test
     void rootCycle3_3() {
         var witness = ndfs(RootedGraphExamples.rootCycle3, (v) -> v.equals(3));
+        assertEquals(new Step<>(3, Optional.empty(), 1), witness.witness);
         assertEquals(4, witness.trace.size());
         assertEquals(List.of(1,2,3,1), witness.trace);
     }
@@ -58,6 +64,7 @@ public class TestEmptinessCheckerBuchiGS09Separated {
     @Test
     void sharing_2() {
         var witness = ndfs(RootedGraphExamples.sharing_2, (v) -> v.equals(4));
+        assertEquals(new Step<>(3, Optional.empty(), 1), witness.witness);
         assertEquals(6, witness.trace.size());
         assertEquals(List.of(1,4,5,2,3,1), witness.trace);
     }
@@ -68,14 +75,17 @@ public class TestEmptinessCheckerBuchiGS09Separated {
         assertTrue(witness.holds);
 
         witness = ndfs(RootedGraphExamples.lasso_1_3, (v) -> v.equals(2));
+        assertEquals(new Step<>(4, Optional.empty(), 2), witness.witness);
         assertEquals(5, witness.trace.size());
         assertEquals(List.of(1,2,3,4,2), witness.trace);
 
         witness = ndfs(RootedGraphExamples.lasso_1_3, (v) -> v.equals(3));
+        assertEquals(new Step<>(4, Optional.empty(), 2), witness.witness);
         assertEquals(5, witness.trace.size());
         assertEquals(List.of(1,2,3,4,2), witness.trace);
 
         witness = ndfs(RootedGraphExamples.lasso_1_3, (v) -> v.equals(4));
+        assertEquals(new Step<>(4, Optional.empty(), 2), witness.witness);
         assertEquals(5, witness.trace.size());
         assertEquals(List.of(1,2,3,4,2), witness.trace);
     }

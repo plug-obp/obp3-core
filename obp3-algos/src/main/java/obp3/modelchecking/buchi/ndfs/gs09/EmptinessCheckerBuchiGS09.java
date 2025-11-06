@@ -3,12 +3,14 @@ package obp3.modelchecking.buchi.ndfs.gs09;
 import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.runtime.sli.IRootedGraph;
+import obp3.runtime.sli.Step;
 import obp3.sli.core.operators.ReRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
 import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
 
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -107,7 +109,7 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
         if (    acceptingPredicate.test(source)
             ||  acceptingPredicate.test(target)) {
             result.holds = false;
-            result.witness = target;
+            result.witness = new Step<>(source, Optional.empty(), target);
             result.addToTrace(target, configuration.getStack());
             return true;
         }
@@ -170,7 +172,7 @@ public class EmptinessCheckerBuchiGS09<V, A> implements IExecutable<EmptinessChe
         var configuration = (BuchiGS09RedConfiguration<V, A>)config;
         if (configuration.getVertexColor(target).equals(VertexColor.CYAN)) {
             result.holds = false;
-            result.witness = target;
+            result.witness = new Step<>(source, Optional.empty(), target);
             result.addToTrace(target, configuration.getStack());
             return true;
         }

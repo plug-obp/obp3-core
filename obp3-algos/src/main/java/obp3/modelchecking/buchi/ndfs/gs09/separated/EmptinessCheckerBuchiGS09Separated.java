@@ -4,6 +4,7 @@ import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.modelchecking.buchi.ndfs.gs09.VertexColor;
 import obp3.runtime.sli.IRootedGraph;
+import obp3.runtime.sli.Step;
 import obp3.sli.core.operators.ReRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
@@ -81,7 +82,7 @@ public class EmptinessCheckerBuchiGS09Separated<V, A> implements IExecutable<Emp
         if (    acceptingPredicate.test(source)
                 ||  acceptingPredicate.test(target)) {
             result.holds = false;
-            result.witness = target;
+            result.witness = new Step<>(source, Optional.empty(), target);
             result.addToTrace(target, configuration.getStack());
             return true;
         }
@@ -159,7 +160,7 @@ public class EmptinessCheckerBuchiGS09Separated<V, A> implements IExecutable<Emp
     boolean onKnownRed(V source, V target, IDepthFirstTraversalConfiguration<V, A> configuration) {
         if (getColor(target).equals(VertexColor.CYAN)) {
             result.holds = false;
-            result.witness = target;
+            result.witness = new Step<>(source, Optional.empty(), target);
             result.addToTrace(target, configuration.getStack());
             return true;
         }

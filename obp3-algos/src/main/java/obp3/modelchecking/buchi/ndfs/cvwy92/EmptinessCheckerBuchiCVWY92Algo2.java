@@ -3,12 +3,14 @@ package obp3.modelchecking.buchi.ndfs.cvwy92;
 import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.runtime.sli.IRootedGraph;
+import obp3.runtime.sli.Step;
 import obp3.sli.core.operators.ReRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -107,7 +109,7 @@ public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <Empt
                                 var neighbour = neighboursI.next();
                                 if (neighbour.equals(vertex)) {
                                     result.holds = false;
-                                    result.witness = vertex;
+                                    result.witness = new Step<>(v, Optional.empty(), neighbour);
                                     return true;
                                 }
                             }
