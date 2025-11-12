@@ -37,11 +37,11 @@ public class HashConsTable<T> {
 
         return table.compute(
                 key, (k, existing) -> {
+                    // if we already have an element, return it.
                     if (existing != null && hashable.equal(existing.node(), value)) {
                         return existing;
-                    } else {
-                        return maker.create(value, tagger.getAndIncrement(), hashKey);
                     }
+                    return maker.create(value, tagger.getAndIncrement(), hashKey);
                 }
         );
     }

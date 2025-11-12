@@ -1,5 +1,6 @@
 package obp3.hashcons.example.lambda;
 
+import obp3.hashcons.example.lambda.hashcons.expando.ExpandoTermHashConsedFactory;
 import obp3.hashcons.example.lambda.hashcons.nowrapper.DirectTermHashConsedFactory;
 import obp3.hashcons.example.lambda.hashcons.nowrapper.syntax.Var;
 import obp3.hashcons.example.lambda.hashcons.wrapper.TermHashConsed;
@@ -17,7 +18,7 @@ public class LambdaHashConsTest {
         var y = factory.var(1);
         var lambda = factory.lambda(factory.app(x, y));
 
-        System.out.println(lambda);
+        System.out.println("No HashCons:\t" + lambda);
 
         assertEquals(x, y);
         assertNotSame(x, y);
@@ -30,7 +31,7 @@ public class LambdaHashConsTest {
         var y = factory.var(1);
         var lambda = factory.lambda(factory.app(x, y));
 
-        System.out.println(lambda);
+        System.out.println("Wrapper:\t\t" + lambda);
 
         assertEquals(x, y);
         assertSame(x, y);
@@ -45,11 +46,27 @@ public class LambdaHashConsTest {
         var y = factory.var(1);
         var lambda = factory.lambda(factory.app(x, y));
 
-        System.out.println(lambda);
+        System.out.println("Direct:\t\t\t" + lambda);
 
         assertEquals(x, y);
         assertSame(x, y);
         assertInstanceOf(Lambda.class, lambda);
         assertInstanceOf(Var.class, x);
+    }
+
+    @Test
+    void testHashConsExpando() {
+        var factory = new ExpandoTermHashConsedFactory();
+        var x = factory.var(1);
+        var y = factory.var(1);
+        var lambda = factory.lambda(factory.app(x, y));
+
+        System.out.println("Expando:\t\t" + lambda);
+        System.out.println("Expando data:" + factory.getHashConsMap());
+
+        assertEquals(x, y);
+        assertSame(x, y);
+        assertInstanceOf(obp3.hashcons.example.lambda.syntax.Lambda.class, lambda);
+        assertInstanceOf(obp3.hashcons.example.lambda.syntax.Var.class, x);
     }
 }
