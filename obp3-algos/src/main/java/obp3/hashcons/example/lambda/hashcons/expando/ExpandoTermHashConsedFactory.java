@@ -29,7 +29,7 @@ public class ExpandoTermHashConsedFactory extends TermFactory {
     }
 
     public ExpandoTermHashConsedFactory() {
-        this.table = new HashConsTable<>(new Hashable<>(){}, this::associate);
+        this.table = new HashConsTable<>(Hashable.standard(), this::associate);
     }
     public ExpandoTermHashConsedFactory(HashConsTable<Term> table) {
         this.table = table;
