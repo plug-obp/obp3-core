@@ -1,7 +1,7 @@
 package obp3.hashcons;
 
-import obp3.datastructures.LinearScanHashSet;
-import obp3.datastructures.LinearScanHashMap;
+import obp3.datastructures.collections.linearscan.LinearScanHashSet;
+import obp3.datastructures.collections.linearscan.LinearScanHashMap;
 
 /**
  * Examples demonstrating the improved Hashable interface and its usage.
