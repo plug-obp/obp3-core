@@ -1,4 +1,4 @@
-package obp3.unification.syntax;
+package obp3.unification;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -275,7 +275,39 @@ public sealed interface UnificationAnswer<T>
     static <T> UnificationAnswer<T> bottom() {
         return unknown();
     }
-    
+
+
+    /**
+     * Folds over this UnificationAnswer by applying one of three functions based on its state.
+     * This is the catamorphism (universal fold) for the UnificationAnswer sum type.
+     *
+     * <p>This method allows you to handle all three cases in a single expression:
+     * <pre>{@code
+     * String result = answer.fold(
+     *     solution -> "Success: " + solution,
+     *     failure -> "Error: " + failure,
+     *     () -> "Unknown state"
+     * );
+     * }</pre>
+     *
+     * @param <R> the result type
+     * @param onSolution function to apply if this is a Solution
+     * @param onFailure function to apply if this is a Failure
+     * @param onUnknown supplier to call if this is Unknown
+     * @return the result of applying the appropriate function
+     */
+    default <R> R fold(
+            Function<? super T, ? extends R> onSolution,
+            Function<Object, ? extends R> onFailure,
+            Supplier<? extends R> onUnknown
+    ) {
+        return switch (this) {
+            case Solution<T> sol -> onSolution.apply(sol.solution());
+            case Failure<T> fail -> onFailure.apply(fail.reason());
+            case Unknown<T> _ -> onUnknown.get();
+        };
+    }
+
     // ========== Case Classes ==========
     
     /**
@@ -388,6 +420,11 @@ public sealed interface UnificationAnswer<T>
                 case Failure<?> _ -> false; // Solution and Failure are incomparable
                 case Unknown<?> _ -> false; // Nothing is ⊑ Unknown except Unknown itself
             };
+        }
+
+        @Override
+        public String toString() {
+            return "Solution[" + solution + ']';
         }
     }
     

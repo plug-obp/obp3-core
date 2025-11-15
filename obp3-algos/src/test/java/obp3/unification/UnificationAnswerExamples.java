@@ -1,4 +1,4 @@
-package obp3.unification.syntax;
+package obp3.unification;
 
 /**
  * Examples demonstrating the UnificationAnswer monad usage patterns.
@@ -234,6 +234,44 @@ public class UnificationAnswerExamples {
     private static UnificationAnswer<String> generateCode(String validated) {
         return UnificationAnswer.of("code(" + validated + ")");
     }
+
+    /**
+     * Example 12: Using fold for concise state handling
+     */
+    public static void example12_FoldPattern() {
+        System.out.println("=== Example 12: Fold Pattern ===");
+
+        var solution = UnificationAnswer.of("x: Int");
+        var failure = UnificationAnswer.<String>failure("type error");
+        var unknown = UnificationAnswer.<String>unknown();
+
+        // Fold solution
+        String result1 = solution.fold(
+                sol -> "✓ Unified: " + sol,
+                fail -> "✗ Error: " + fail,
+                () -> "? Unknown"
+        );
+        System.out.println(result1);
+
+        // Fold failure
+        String result2 = failure.fold(
+                sol -> "✓ Unified: " + sol,
+                fail -> "✗ Error: " + fail,
+                () -> "? Unknown"
+        );
+        System.out.println(result2);
+
+        // Fold unknown
+        String result3 = unknown.fold(
+                sol -> "✓ Unified: " + sol,
+                fail -> "✗ Error: " + fail,
+                () -> "? Unknown"
+        );
+        System.out.println(result3);
+
+        System.out.println();
+    }
+
     
     // === Main method to run all examples ===
     
@@ -249,5 +287,6 @@ public class UnificationAnswerExamples {
         example9_MeetLattice();
         example10_PartialOrder();
         example11_BottomElement();
+        example12_FoldPattern();
     }
 }

@@ -1,4 +1,4 @@
-package obp3.unification.syntax;
+package obp3.unification;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
