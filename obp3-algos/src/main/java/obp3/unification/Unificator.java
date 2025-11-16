@@ -19,7 +19,7 @@ public class Unificator {
 
     public static void main(String[] args) {
         Unificator unificator = new Unificator();
-        Map<Var, Term> constraints = Map.of(
+        Map<Term, Term> constraints = Map.of(
                 new Var("X"), new App("f", new Var("Y")),
                 new Var("Y"), new App("m", new Var("Z"), new Var("Z")),
                 new Var("Z"), new App("a")
@@ -53,63 +53,47 @@ public class Unificator {
         System.out.println("X occurs in: " + no + ", " + yes);
     }
 
-    Function<Var, UnificationAnswer<Term>> solveTop(Map<Var, Term> constraints) {
+    Function<Var, UnificationAnswer<Term>> solveTop(Map<Term, Term> constraints) {
         this.constraints = constraints;
         return fixer;
     }
 
-    Map<Var, Term> constraints;
+    Map<Term, Term> constraints;
     SubstitutionMaker substitutionMaker = new SubstitutionMaker();
 
     UnificationAnswer<Term> solve(Var v, Function<Var, UnificationAnswer<Term>> mapper) {
-        // for each constraint do:
-        // process equation A = B
+        // Look up the direct constraint for this variable
+        var directTerm = constraints.get(v);
+        
+        if (directTerm == null) {
+            // Variable is not constrained - it remains unknown (free variable)
+            return UnificationAnswer.unknown();
+        }
+        
+        // Apply substitution to the right-hand side
+        var substituted = directTerm.accept(substitutionMaker, mapper);
+        
+        // Simple syntactic occurs check
+        if (occursIn(v, substituted, mapper)) {
+            return UnificationAnswer.failure("Occurs check: " + v + " occurs in " + substituted);
+        }
+        
+        return UnificationAnswer.of(substituted);
+    }
 
-//        var candidates = new HashSet<Term>();
-//
-//        constraints.forEach((lhs, rhs) -> {
-//            var s = lhs.accept(substitutionMaker, mapper);
-//            var t = rhs.accept(substitutionMaker, mapper);
-//
-//
-//            if (!termEq(s, t)) {
-//                if (s instanceof Var && s.equals(v)) {
-//                    //candidates add t
-//                    candidates.add(t);
-//                } else if (t instanceof Var && t.equals(v)) {
-//                    candidates.add(s);
-//                } else if (s instanceof App(String sName, Term[] sArgs) && t instanceof App(String tName, Term[] tArgs)) {
-//                    if (! (sName.equals(tName) && sArgs.length == tArgs.length)) {
-//                        throw new RuntimeException("Structural mismatch, incompatible applications: " + sName + " " + tName);
-//                    }
-//                }
-//            }
-//
-//            UnificationAnswer<Term> answer;
-//            if (candidates.isEmpty()) {
-//                answer = UnificationAnswer.<Term>unknown();
-//                return answer;
-//            }
-//            var term = candidates.stream().findAny().get();
-//            var allEqual = candidates.stream().allMatch((p) -> termEq(term, p));
-//            if (!allEqual) {
-//                answer = UnificationAnswer.<Term>failure("Incompatible equations: " + s + " != " + t);
-//                return answer;
-//            }
-//
-//            if (occursIn(v, rhs, mapper))
-//                answer = UnificationAnswer.<Term>failure("Term occurs in RHS: " + rhs);
-//            answer = UnificationAnswer.of(rhs);
-//
-//        });
-
-
-
-
-
-        var term = constraints.get(v);
-        if (term == null) return UnificationAnswer.failure("Unknown var: " + v + ")");
-        return UnificationAnswer.of( term.accept(substitutionMaker, mapper) );
+    // Simple syntactic occurs check that doesn't use mapper (avoids infinite loops)
+    private boolean simpleOccursCheckx(Var v, Term t) {
+        if (t instanceof Var tv) {
+            return tv.equals(v);
+        }
+        if (t instanceof App(String name, Term[] args)) {
+            for (Term arg : args) {
+                if (simpleOccursCheckx(v, arg)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
@@ -131,8 +115,17 @@ public class Unificator {
     private static class SubstitutionMaker implements Visitor<Function<Var, UnificationAnswer<Term>>, Term> {
         @Override
         public Term visit(Var node, Function<Var, UnificationAnswer<Term>> mapper) {
-            return mapper.apply(node)
-                    .map(e -> e.accept(this, mapper))
+            var answer = mapper.apply(node);
+            // Only substitute if we have a solution AND it's not the same variable
+            // This prevents infinite loops
+            return answer
+                    .map(e -> {
+                        // Avoid infinite recursion: don't re-substitute if we got the same var back
+                        if (e instanceof Var ve && ve.equals(node)) {
+                            return node;
+                        }
+                        return e.accept(this, mapper);
+                    })
                     .solutionOrElse(node);
         }
 
