@@ -534,42 +534,42 @@ class UnificationAnswerTest {
         @DisplayName("getOrElse() returns solution value")
         void testGetOrElseReturnsSolution() {
             var answer = UnificationAnswer.of("value");
-            assertEquals("value", answer.getOrElse("fallback"));
+            assertEquals("value", answer.solutionOrElse("fallback"));
         }
         
         @Test
         @DisplayName("getOrElse() returns fallback for Failure")
         void testGetOrElseReturnsFallbackForFailure() {
             var answer = UnificationAnswer.<String>failure("error");
-            assertEquals("fallback", answer.getOrElse("fallback"));
+            assertEquals("fallback", answer.solutionOrElse("fallback"));
         }
         
         @Test
         @DisplayName("getOrElse() returns fallback for Unknown")
         void testGetOrElseReturnsFallbackForUnknown() {
             var answer = UnificationAnswer.<String>unknown();
-            assertEquals("fallback", answer.getOrElse("fallback"));
+            assertEquals("fallback", answer.solutionOrElse("fallback"));
         }
         
         @Test
         @DisplayName("getOrElse(Supplier) returns solution value")
         void testGetOrElseSupplierReturnsSolution() {
             var answer = UnificationAnswer.of("value");
-            assertEquals("value", answer.getOrElse(() -> "fallback"));
+            assertEquals("value", answer.solutionOrElse(() -> "fallback"));
         }
         
         @Test
         @DisplayName("getOrElse(Supplier) returns supplied value for Failure")
         void testGetOrElseSupplierForFailure() {
             var answer = UnificationAnswer.<String>failure("error");
-            assertEquals("supplied", answer.getOrElse(() -> "supplied"));
+            assertEquals("supplied", answer.solutionOrElse(() -> "supplied"));
         }
         
         @Test
         @DisplayName("getOrElse(Supplier) returns supplied value for Unknown")
         void testGetOrElseSupplierForUnknown() {
             var answer = UnificationAnswer.<String>unknown();
-            assertEquals("supplied", answer.getOrElse(() -> "supplied"));
+            assertEquals("supplied", answer.solutionOrElse(() -> "supplied"));
         }
         
         @Test
@@ -577,7 +577,7 @@ class UnificationAnswerTest {
         void testGetOrElseSupplierIsLazy() {
             var answer = UnificationAnswer.of("value");
             var called = new AtomicInteger(0);
-            answer.getOrElse(() -> {
+            answer.solutionOrElse(() -> {
                 called.incrementAndGet();
                 return "fallback";
             });
@@ -1133,6 +1133,314 @@ class UnificationAnswerTest {
             // All paths lead to Unknown when incompatible
             var result3 = sol1.meet(sol2).meet(fail);
             assertTrue(result3.isUnknown());
+        }
+    }
+    
+    // ========== Fold (Catamorphism) Tests ==========
+    
+    @Nested
+    @DisplayName("Fold Operations")
+    class FoldTests {
+        
+        @Test
+        @DisplayName("fold() on Solution applies onSolution function")
+        void testFoldOnSolution() {
+            var answer = UnificationAnswer.of(42);
+            
+            String result = answer.fold(
+                val -> "Success: " + val,
+                reason -> "Failed: " + reason,
+                () -> "Unknown"
+            );
+            
+            assertEquals("Success: 42", result);
+        }
+        
+        @Test
+        @DisplayName("fold() on Failure applies onFailure function")
+        void testFoldOnFailure() {
+            var answer = UnificationAnswer.<Integer>failure("error");
+            
+            String result = answer.fold(
+                val -> "Success: " + val,
+                reason -> "Failed: " + reason,
+                () -> "Unknown"
+            );
+            
+            assertEquals("Failed: error", result);
+        }
+        
+        @Test
+        @DisplayName("fold() on Unknown applies onUnknown supplier")
+        void testFoldOnUnknown() {
+            var answer = UnificationAnswer.<Integer>unknown();
+            
+            String result = answer.fold(
+                val -> "Success: " + val,
+                reason -> "Failed: " + reason,
+                () -> "Unknown"
+            );
+            
+            assertEquals("Unknown", result);
+        }
+        
+        @Test
+        @DisplayName("fold() allows different result types")
+        void testFoldWithDifferentResultType() {
+            var answer = UnificationAnswer.of("test");
+            
+            Integer result = answer.fold(
+                String::length,
+                reason -> -1,
+                () -> 0
+            );
+            
+            assertEquals(4, result);
+        }
+        
+        @Test
+        @DisplayName("fold() is exhaustive - covers all cases")
+        void testFoldExhaustive() {
+            var solution = UnificationAnswer.of(10);
+            var failure = UnificationAnswer.<Integer>failure("err");
+            var unknown = UnificationAnswer.<Integer>unknown();
+            
+            var counter = new AtomicInteger(0);
+            
+            solution.fold(
+                v -> { counter.incrementAndGet(); return null; },
+                r -> { counter.incrementAndGet(); return null; },
+                () -> { counter.incrementAndGet(); return null; }
+            );
+            assertEquals(1, counter.get(), "Solution should call only onSolution");
+            
+            counter.set(0);
+            failure.fold(
+                v -> { counter.incrementAndGet(); return null; },
+                r -> { counter.incrementAndGet(); return null; },
+                () -> { counter.incrementAndGet(); return null; }
+            );
+            assertEquals(1, counter.get(), "Failure should call only onFailure");
+            
+            counter.set(0);
+            unknown.fold(
+                v -> { counter.incrementAndGet(); return null; },
+                r -> { counter.incrementAndGet(); return null; },
+                () -> { counter.incrementAndGet(); return null; }
+            );
+            assertEquals(1, counter.get(), "Unknown should call only onUnknown");
+        }
+        
+        @Test
+        @DisplayName("fold() throws NPE if onSolution is null")
+        void testFoldRejectsNullOnSolution() {
+            var answer = UnificationAnswer.of("test");
+            
+            assertThrows(NullPointerException.class, () ->
+                answer.fold(null, r -> "fail", () -> "unknown")
+            );
+        }
+        
+        @Test
+        @DisplayName("fold() throws NPE if onFailure is null")
+        void testFoldRejectsNullOnFailure() {
+            var answer = UnificationAnswer.<String>failure("error");
+            
+            assertThrows(NullPointerException.class, () ->
+                answer.fold(s -> "success", null, () -> "unknown")
+            );
+        }
+        
+        @Test
+        @DisplayName("fold() throws NPE if onUnknown is null")
+        void testFoldRejectsNullOnUnknown() {
+            var answer = UnificationAnswer.<String>unknown();
+            
+            assertThrows(NullPointerException.class, () ->
+                answer.fold(s -> "success", r -> "fail", null)
+            );
+        }
+        
+        @Test
+        @DisplayName("fold() enables concise conditional logic")
+        void testFoldConditionalLogic() {
+            Function<UnificationAnswer<String>, String> describe = answer ->
+                answer.fold(
+                    val -> "Got value: " + val,
+                    reason -> "Error: " + reason,
+                    () -> "Not computed yet"
+                );
+            
+            assertEquals("Got value: hello", describe.apply(UnificationAnswer.of("hello")));
+            assertEquals("Error: oops", describe.apply(UnificationAnswer.failure("oops")));
+            assertEquals("Not computed yet", describe.apply(UnificationAnswer.unknown()));
+        }
+        
+        @Test
+        @DisplayName("fold() can perform side effects")
+        void testFoldSideEffects() {
+            var sideEffect = new StringBuilder();
+            
+            UnificationAnswer.of("data").fold(
+                val -> { sideEffect.append("solution:").append(val); return null; },
+                reason -> { sideEffect.append("failure:").append(reason); return null; },
+                () -> { sideEffect.append("unknown"); return null; }
+            );
+            
+            assertEquals("solution:data", sideEffect.toString());
+        }
+        
+        @Test
+        @DisplayName("fold() composes with map")
+        void testFoldComposesWithMap() {
+            var answer = UnificationAnswer.of(5);
+            
+            String result = answer
+                .map(x -> x * 2)
+                .fold(
+                    val -> "Result: " + val,
+                    reason -> "Error",
+                    () -> "None"
+                );
+            
+            assertEquals("Result: 10", result);
+        }
+        
+        @Test
+        @DisplayName("fold() composes with flatMap")
+        void testFoldComposesWithFlatMap() {
+            var answer = UnificationAnswer.of(5);
+            
+            String result = answer
+                .flatMap(x -> UnificationAnswer.of(x * 2))
+                .fold(
+                    val -> "Result: " + val,
+                    reason -> "Error",
+                    () -> "None"
+                );
+            
+            assertEquals("Result: 10", result);
+        }
+    }
+    
+    // ========== Stream Operations Tests ==========
+    
+    @Nested
+    @DisplayName("Stream Operations")
+    class StreamTests {
+        
+        @Test
+        @DisplayName("stream() on Solution returns single element stream")
+        void testStreamOnSolution() {
+            var answer = UnificationAnswer.of("test");
+            
+            var list = answer.stream().toList();
+            
+            assertEquals(1, list.size());
+            assertEquals("test", list.get(0));
+        }
+        
+        @Test
+        @DisplayName("stream() on Failure returns empty stream")
+        void testStreamOnFailure() {
+            var answer = UnificationAnswer.<String>failure("error");
+            
+            var list = answer.stream().toList();
+            
+            assertTrue(list.isEmpty());
+        }
+        
+        @Test
+        @DisplayName("stream() on Unknown returns empty stream")
+        void testStreamOnUnknown() {
+            var answer = UnificationAnswer.<String>unknown();
+            
+            var list = answer.stream().toList();
+            
+            assertTrue(list.isEmpty());
+        }
+        
+        @Test
+        @DisplayName("stream() integrates with Stream API")
+        void testStreamIntegration() {
+            var answers = java.util.List.of(
+                UnificationAnswer.of("a"),
+                UnificationAnswer.<String>failure("error"),
+                UnificationAnswer.of("b"),
+                UnificationAnswer.<String>unknown(),
+                UnificationAnswer.of("c")
+            );
+            
+            var solutions = answers.stream()
+                .flatMap(UnificationAnswer::stream)
+                .toList();
+            
+            assertEquals(3, solutions.size());
+            assertEquals(java.util.List.of("a", "b", "c"), solutions);
+        }
+        
+        @Test
+        @DisplayName("stream() can be used for filtering")
+        void testStreamFiltering() {
+            var answers = java.util.List.of(
+                UnificationAnswer.of(1),
+                UnificationAnswer.of(2),
+                UnificationAnswer.<Integer>failure("error"),
+                UnificationAnswer.of(3),
+                UnificationAnswer.<Integer>unknown()
+            );
+            
+            var evenSolutions = answers.stream()
+                .flatMap(UnificationAnswer::stream)
+                .filter(x -> x % 2 == 0)
+                .toList();
+            
+            assertEquals(java.util.List.of(2), evenSolutions);
+        }
+        
+        @Test
+        @DisplayName("stream() can be mapped")
+        void testStreamMapping() {
+            var answer = UnificationAnswer.of(5);
+            
+            var result = answer.stream()
+                .map(x -> x * 2)
+                .findFirst();
+            
+            assertTrue(result.isPresent());
+            assertEquals(10, result.get());
+        }
+        
+        @Test
+        @DisplayName("stream() supports flatMap")
+        void testStreamFlatMap() {
+            var answer = UnificationAnswer.of("hello");
+            
+            var chars = answer.stream()
+                .flatMap(s -> s.chars().mapToObj(c -> (char) c))
+                .toList();
+            
+            assertEquals(5, chars.size());
+        }
+        
+        @Test
+        @DisplayName("stream() count matches optional behavior")
+        void testStreamCount() {
+            assertEquals(1, UnificationAnswer.of("test").stream().count());
+            assertEquals(0, UnificationAnswer.failure("error").stream().count());
+            assertEquals(0, UnificationAnswer.unknown().stream().count());
+        }
+        
+        @Test
+        @DisplayName("stream() can be converted to iterator")
+        void testStreamToIterator() {
+            var answer = UnificationAnswer.of("data");
+            
+            var iterator = answer.stream().iterator();
+            
+            assertTrue(iterator.hasNext());
+            assertEquals("data", iterator.next());
+            assertFalse(iterator.hasNext());
         }
     }
 }

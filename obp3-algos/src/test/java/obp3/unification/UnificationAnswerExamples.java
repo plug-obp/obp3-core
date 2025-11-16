@@ -61,7 +61,7 @@ public class UnificationAnswerExamples {
             .flatMap(type -> checkConstraints(type))
             .flatMap(validated -> generateCode(validated));
         
-        System.out.println("Result: " + result.getOrElse("Failed to unify"));
+        System.out.println("Result: " + result.solutionOrElse("Failed to unify"));
         System.out.println();
     }
     
@@ -100,7 +100,7 @@ public class UnificationAnswerExamples {
             })
             .flatMap(validated -> generateCode(validated));
         
-        System.out.println("Final result: " + result.getOrElse("Complete failure"));
+        System.out.println("Final result: " + result.solutionOrElse("Complete failure"));
         System.out.println();
     }
     
@@ -272,6 +272,58 @@ public class UnificationAnswerExamples {
         System.out.println();
     }
 
+    /**
+     * Example 13: Using stream() for Stream API integration
+     */
+    public static void example13_StreamIntegration() {
+        System.out.println("=== Example 13: Stream Integration ===");
+
+        // Create a list of unification answers
+        var answers = java.util.List.of(
+            UnificationAnswer.of("x: Int"),
+            UnificationAnswer.<String>failure("type mismatch"),
+            UnificationAnswer.of("y: String"),
+            UnificationAnswer.<String>unknown(),
+            UnificationAnswer.of("z: Bool")
+        );
+
+        // Extract all successful solutions using stream()
+        System.out.println("All successful solutions:");
+        answers.stream()
+            .flatMap(UnificationAnswer::stream)
+            .forEach(sol -> System.out.println("  - " + sol));
+
+        // Transform solutions
+        System.out.println("\nTransformed solutions:");
+        var transformed = answers.stream()
+            .flatMap(UnificationAnswer::stream)
+            .map(String::toUpperCase)
+            .toList();
+        transformed.forEach(s -> System.out.println("  - " + s));
+
+        // Count solutions
+        long count = answers.stream()
+            .flatMap(UnificationAnswer::stream)
+            .count();
+        System.out.println("\nTotal solutions: " + count);
+
+        // Filter and collect
+        System.out.println("\nFiltered (containing 'Int' or 'Bool'):");
+        answers.stream()
+            .flatMap(UnificationAnswer::stream)
+            .filter(s -> s.contains("Int") || s.contains("Bool"))
+            .forEach(s -> System.out.println("  - " + s));
+
+        // Convert to iterator
+        System.out.println("\nUsing iterator:");
+        var iterator = UnificationAnswer.of("test: Data").stream().iterator();
+        while (iterator.hasNext()) {
+            System.out.println("  Iterator value: " + iterator.next());
+        }
+
+        System.out.println();
+    }
+
     
     // === Main method to run all examples ===
     
@@ -288,5 +340,6 @@ public class UnificationAnswerExamples {
         example10_PartialOrder();
         example11_BottomElement();
         example12_FoldPattern();
+        example13_StreamIntegration();
     }
 }

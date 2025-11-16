@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * A monadic type representing the result of a unification computation.
@@ -170,7 +171,7 @@ public sealed interface UnificationAnswer<T>
      * @param fallback the fallback value
      * @return the solution if present, otherwise fallback
      */
-    T getOrElse(T fallback);
+    T solutionOrElse(T fallback);
     
     /**
      * Returns the solution value if present, otherwise computes it using the supplier.
@@ -179,7 +180,7 @@ public sealed interface UnificationAnswer<T>
      * @return the solution if present, otherwise the supplied value
      * @throws NullPointerException if supplier is {@code null}
      */
-    T getOrElse(Supplier<? extends T> supplier);
+    T solutionOrElse(Supplier<? extends T> supplier);
     
     /**
      * Returns an {@code Optional} containing the solution if present.
@@ -187,6 +188,23 @@ public sealed interface UnificationAnswer<T>
      * @return an {@code Optional} with the solution, or empty if not a solution
      */
     Optional<T> toOptional();
+    
+    /**
+     * Returns a {@code Stream} containing the solution if present, or an empty stream otherwise.
+     * <p>
+     * This method is useful for:
+     * <ul>
+     *   <li>Converting to an iterator: {@code answer.stream().iterator()}</li>
+     *   <li>Filtering and mapping: {@code answer.stream().filter(...).map(...)}</li>
+     *   <li>Collecting results: {@code answer.stream().collect(...)}</li>
+     *   <li>Integrating with Stream APIs</li>
+     * </ul>
+     *
+     * @return a {@code Stream} containing the solution, or empty if Failure or Unknown
+     */
+    default Stream<T> stream() {
+        return toOptional().stream();
+    }
     
     /**
      * Returns the solution value if present.
@@ -360,12 +378,12 @@ public sealed interface UnificationAnswer<T>
         }
         
         @Override
-        public T getOrElse(T fallback) {
+        public T solutionOrElse(T fallback) {
             return solution;
         }
         
         @Override
-        public T getOrElse(Supplier<? extends T> supplier) {
+        public T solutionOrElse(Supplier<? extends T> supplier) {
             Objects.requireNonNull(supplier, "fallback supplier must not be null");
             return solution;
         }
@@ -478,12 +496,12 @@ public sealed interface UnificationAnswer<T>
         }
         
         @Override
-        public T getOrElse(T fallback) {
+        public T solutionOrElse(T fallback) {
             return fallback;
         }
         
         @Override
-        public T getOrElse(Supplier<? extends T> supplier) {
+        public T solutionOrElse(Supplier<? extends T> supplier) {
             Objects.requireNonNull(supplier, "fallback supplier must not be null");
             return supplier.get();
         }
@@ -593,12 +611,12 @@ public sealed interface UnificationAnswer<T>
         }
         
         @Override
-        public T getOrElse(T fallback) {
+        public T solutionOrElse(T fallback) {
             return fallback;
         }
         
         @Override
-        public T getOrElse(Supplier<? extends T> supplier) {
+        public T solutionOrElse(Supplier<? extends T> supplier) {
             Objects.requireNonNull(supplier, "fallback supplier must not be null");
             return supplier.get();
         }
