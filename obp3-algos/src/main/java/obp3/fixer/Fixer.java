@@ -49,7 +49,8 @@ public class Fixer<S, T> implements Function<S, T>{
     }
 
     /// The flag 'inactive' prevents reentrant calls by the client.
-    boolean inactive = true;
+    //    boolean inactive = true;
+    int activeCount = 0;
 
     /// Invocations of 'apply' trigger the fixed point computation.
     @Override
@@ -57,24 +58,33 @@ public class Fixer<S, T> implements Function<S, T>{
         // if the node is fixed already just return it.
         var property = mFixed.get(node);
         if (property != null) { return property; }
-        assert inactive;
-        inactive = false;
-        ensureTransient(node);
-        // while we have work to do just do it,
-        // - starting either at the node that we just added, if the workset was empty and node was not already transient
-        // - or continue with the workset in the defined 'order' (FIFO here).
-        while (!mWorkset.isEmpty()) {
-            var current = mWorkset.poll();
-            solve(current);
+        //The `assert inactive` forbids calling apply again from inside your own RHS function during solving
+        // assert inactive;
+        if (activeCount++ > 0) {
+            //Already computing a fixpoint -- instead of assert return the current approximation
+            //nested calls return current best known value, I guess the monotonic semantics is maintained -- this should be tested
+            ensureTransient(node);
+            return mTransient.getOrDefault(node, mFixed.get(node));
         }
+        try {
+            ensureTransient(node);
+            // while we have work to do just do it,
+            // - starting either at the node that we just added, if the workset was empty and node was not already transient
+            // - or continue with the workset in the defined 'order' (FIFO here).
+            while (!mWorkset.isEmpty()) {
+                var current = mWorkset.poll();
+                solve(current);
+            }
 
-        // we are done for this node.
-        // copies the transient table into the permanent table, and
-        //    empties the transient table.
-        //    This allows all nodes to be reclaimed by the garbage collector.
-        mFixed.putAll(mTransient);
-        mTransient.clear();
-        inactive = true;
+            // we are done for this node.
+            // copies the transient table into the permanent table, and
+            //    empties the transient table.
+            //    This allows all nodes to be reclaimed by the garbage collector.
+            mFixed.putAll(mTransient);
+            mTransient.clear();
+        } finally {
+            activeCount--;
+        }
         return mFixed.get(node);
     }
 
@@ -145,9 +155,5 @@ public class Fixer<S, T> implements Function<S, T>{
                 mWorkset.addAll(mParents.get(current));
             }
         }
-
-
-
-
     }
 }
