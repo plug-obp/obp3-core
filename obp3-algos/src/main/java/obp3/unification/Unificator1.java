@@ -8,12 +8,28 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
 public class Unificator1 {
     public static void main(String[] args) {
         Unificator1 unificator = new Unificator1();
+
+        BiFunction<Term, Term, Function<Var, UnificationAnswer<Term>>> runUnify = (Term lhs, Term rhs) -> {
+            System.out.println(lhs + " = " + rhs);
+            unificator.substitutions.clear();
+            var vx = unificator.unify(lhs, rhs, unificator::substitution);
+            if (vx.isEmpty()) {
+                System.out.println("No solution found");
+                return (t) -> UnificationAnswer.unknown();
+            }
+            System.out.println("Substs: " + unificator.substitutions);
+            SubstitutionMaker sm = new SubstitutionMaker();
+            System.out.println(sm.normalize(lhs, vx.get()) + " = " + sm.normalize(rhs, vx.get()));
+            return vx.get();
+        };
+
 
         Term lhs = new App("f",
                         new App("g", new Var("X"), new App("a")),
@@ -22,13 +38,8 @@ public class Unificator1 {
                         new App("g", new App("b"), new App("a")),
                         new App("h", new Var("Z")));
 
-        System.out.println(lhs + " = " + rhs);
-        var vx = unificator.unify(lhs, rhs, unificator::substitution);
-        if (vx.isEmpty()) {
-            System.out.println("No solution found");
-            return;
-        }
-        var valuation = vx.get();
+
+        var valuation = runUnify.apply(lhs, rhs);
 
         System.out.println("Substs: " + unificator.substitutions);
 
@@ -58,26 +69,32 @@ public class Unificator1 {
         rhs = new App("f",
                         new App("g", new App("b"), new App("a")),
                         new App("h", new App("m", new Var("Z"), new Var("Z"))));
-        System.out.println(lhs + " = " + rhs);
-        unificator.substitutions.clear();
-        vx = unificator.unify(lhs, rhs, unificator::substitution);
-        if (vx.isEmpty()) {
-            System.out.println("No solution found");
-            return;
-        }
-        System.out.println("Substs: " + unificator.substitutions);
+        runUnify.apply(lhs, rhs);
 
         lhs = new App("f", new Var("X"));
         rhs = new Var("X");
-        System.out.println(lhs + " = " + rhs);
-        unificator.substitutions.clear();
-        vx = unificator.unify(lhs, rhs, unificator::substitution);
-        if (vx.isEmpty()) {
-            System.out.println("No solution found");
-            return;
-        }
-        System.out.println("Substs: " + unificator.substitutions);
+        runUnify.apply(lhs, rhs);
+
+        lhs = new App("p", new Var("X"), new Var("Y"));
+        rhs = new App("p", new Var("X"), new Var("Y"));
+        runUnify.apply(lhs, rhs);
+
+        lhs = new App("p", new Var("X"), new Var("Y"));
+        rhs = new App("p", new Var("Y"), new Var("X"));
+        runUnify.apply(lhs, rhs);
+
+        lhs = new App("p", new Var("X"), new Var("Y"), new App("a"));
+        rhs = new App("p", new Var("Y"), new Var("X"), new Var("X"));
+        runUnify.apply(lhs, rhs);
+
+        lhs = new App("q",
+                new App("p", new Var("X"), new Var("Y")),
+                new App("p", new Var("Y"), new Var("X")));
+        rhs = new App("q", new Var("Z"), new Var("Z"));
+        runUnify.apply(lhs, rhs);
     }
+
+
 
     Map<Var, UnificationAnswer<Term>> substitutions = new HashMap<>();
     UnificationAnswer<Term> substitution(Var v) {
@@ -86,7 +103,7 @@ public class Unificator1 {
 
     boolean extend(Var t1, Term t2) {
         if (occursIn(t1, t2, this::substitution)) {
-            System.err.println("[Occurs-check] Infinite loop detected");
+            System.out.println("[Occurs-check] Infinite loop detected");
             return false;
         }
         return substitutions.put(t1, UnificationAnswer.of(t2)) == null;
@@ -94,8 +111,8 @@ public class Unificator1 {
 
 
     Optional<Function<Var, UnificationAnswer<Term>>> unify(Term lhs, Term rhs, Function<Var, UnificationAnswer<Term>> mapper) {
-        var t1 = lhs.accept(substitutionMaker, mapper);
-        var t2 = rhs.accept(substitutionMaker, mapper);
+        var t1 = substitutionMaker.normalize(lhs, mapper);
+        var t2 = substitutionMaker.normalize(rhs, mapper);
         //if they are the same
         if (termEq(t1, t2)) {
             return Optional.of(mapper);
@@ -143,6 +160,9 @@ public class Unificator1 {
     }
 
     private static class SubstitutionMaker implements Visitor<Function<Var, UnificationAnswer<Term>>, Term> {
+        public Term normalize(Term term, Function<Var, UnificationAnswer<Term>> mapper) {
+            return term.accept(this, mapper);
+        }
         @Override
         public Term visit(Var node, Function<Var, UnificationAnswer<Term>> mapper) {
             var answer = mapper.apply(node);
