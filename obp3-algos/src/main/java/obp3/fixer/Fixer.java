@@ -25,6 +25,7 @@ public class Fixer<S, T> implements Function<S, T>{
     /// NC: In the Pottier algorithm this is a graph, I just store the parents here.
     /// NC: Homework: what are the consequences ?
     Map<S, Set<S>> mParents = new IdentityHashMap<>();
+    Map<S, Set<S>> mChildren = new IdentityHashMap<>();
 
     /// The workset is based on a Queue, but it could just as well be based on a
     ///    Stack. A textual replacement is possible. It could also be based on a
@@ -94,6 +95,7 @@ public class Fixer<S, T> implements Function<S, T>{
         // create a transient node starting it at the bottom of the lattice.
         mTransient.put(node, lattice.bottom());
         mParents.put(node, Collections.newSetFromMap(new IdentityHashMap<>()) );
+        mChildren.put(node, Collections.newSetFromMap(new IdentityHashMap<>()) );
         mWorkset.add(node);
     }
     void solve(S current) {
@@ -135,8 +137,20 @@ public class Fixer<S, T> implements Function<S, T>{
 
         var isMaximal = lattice.isMaximal(newProperty);
         if (!isMaximal) {
+            //remove current from the parents of old children (forget old children)
+            Set<S> oldChildren = mChildren.computeIfAbsent(current, _ -> Collections.newSetFromMap(new IdentityHashMap<>()));
+            for (S oldChild : oldChildren) {
+                var parentsOfOld = mParents.get(oldChild);
+                if (parentsOfOld != null) {
+                    parentsOfOld.remove(current);
+                }
+            }
+            oldChildren.clear();
+
+            //register new parents/children
             for (S child : currentChildren) {
                 mParents.computeIfAbsent(child, _ -> Collections.newSetFromMap(new IdentityHashMap<>()) ).add(current);
+                mChildren.computeIfAbsent(current, _ -> Collections.newSetFromMap(new IdentityHashMap<>())).add(child);
             }
 
             // If the updated value differs from the previous value, record
