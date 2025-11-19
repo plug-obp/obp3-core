@@ -17,7 +17,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestDFTWhile {
-    <V> IExecutable<IDepthFirstTraversalConfiguration<V, V>> simpleDFS(
+    <V> IExecutable<?, IDepthFirstTraversalConfiguration<V, V>> simpleDFS(
             IRootedGraph<V> graph) {
         return new DepthFirstTraversal<>(graph);
     }

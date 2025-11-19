@@ -1,10 +1,12 @@
 package obp3.modelchecking.buchi.ndfs.cvwy92;
 
+import obp3.Either;
 import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.runtime.sli.IRootedGraph;
 import obp3.runtime.sli.Step;
 import obp3.sli.core.operators.ReRootedGraph;
+import obp3.sli.core.operators.product.Product;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
@@ -45,14 +47,14 @@ import java.util.function.Predicate;
  * "Memory-efficient algorithms for the verification of temporal properties."
  * Formal methods in system design 1, no. 2 (1992): 275-288.
  */
-public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <EmptinessCheckerAnswer<V>>{
-    IExecutable<IDepthFirstTraversalConfiguration<V, A>> algorithm;
+public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, EmptinessCheckerAnswer<V>>{
+    IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, IDepthFirstTraversalConfiguration<V, A>> algorithm;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
     int depthBound;
     Function<V, A> reducer;
     Predicate<V> acceptingPredicate;
-    BooleanSupplier hasToTerminateSupplier;
+    Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate;
 
     EmptinessCheckerAnswer<V> result = new EmptinessCheckerAnswer<>();
 
@@ -117,7 +119,7 @@ public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <Empt
                         })
         );
 
-        var config = algo.run(hasToTerminateSupplier);
+        var config = algo.run(hasToTerminatePredicate);
         if (result.holds) return false;
         result.addToTrace(vertex, config.getStack());
 
@@ -125,10 +127,10 @@ public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <Empt
     }
 
     @Override
-    public EmptinessCheckerAnswer<V> run(BooleanSupplier hasToTerminateSupplier) {
-        this.hasToTerminateSupplier = hasToTerminateSupplier;
+    public EmptinessCheckerAnswer<V> run(Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate) {
+        this.hasToTerminatePredicate = hasToTerminatePredicate;
 
-        var config = algorithm.run(hasToTerminateSupplier);
+        var config = algorithm.run(hasToTerminatePredicate);
         if (result.holds) return result;
         result.addToTrace(config.getStack());
         result.trace = result.trace.reversed();

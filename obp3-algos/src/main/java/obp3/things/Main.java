@@ -25,7 +25,7 @@ public class Main {
     public static <V> void traversalDFS(IRootedGraph<V> graph,
                                         Function<
                                                 IDepthFirstTraversalConfiguration<V, V>,
-                                                IExecutable<IDepthFirstTraversalConfiguration<V, V>>
+                                                IExecutable<?, IDepthFirstTraversalConfiguration<V, V>>
                                                 > constructor) {
         var start = Instant.now();
 
@@ -45,13 +45,13 @@ public class Main {
             int limit, int width, long seed,
             Function<
                     IDepthFirstTraversalConfiguration<Long, Long>,
-                    IExecutable<IDepthFirstTraversalConfiguration<Long, Long>>> constructor) {
+                    IExecutable<?, IDepthFirstTraversalConfiguration<Long, Long>>> constructor) {
         var graph = new LimitedRandomRootedGraph(limit, width, seed);
         traversalDFS(graph, constructor);
     }
 
 
-    public static <V> void traversal(IRootedGraph<V> graph, Function<IRootedGraph<V>, IExecutable<Set<V>>> constructor) {
+    public static <V> void traversal(IRootedGraph<V> graph, Function<IRootedGraph<V>, IExecutable<?, Set<V>>> constructor) {
         var start = Instant.now();
 
         var exe = constructor.apply(graph);
@@ -64,7 +64,7 @@ public class Main {
         out.println("\t" + graph + " + " + exe.getClass().getSimpleName() + ": " + size + " configurations in " + duration + " ms");
     }
 
-    public static void limitedRandomTraversal(int limit, int width, long seed, Function<IRootedGraph<Long>, IExecutable<Set<Long>>> constructor) {
+    public static void limitedRandomTraversal(int limit, int width, long seed, Function<IRootedGraph<Long>, IExecutable<?, Set<Long>>> constructor) {
         var graph = new LimitedRandomRootedGraph(limit, width, seed);
         traversal(graph, constructor);
     }

@@ -1,26 +1,26 @@
 package obp3;
 
-import obp3.runtime.sli.DeterministicSemanticRelation;
 import obp3.runtime.IExecutable;
+import obp3.runtime.sli.DeterministicSemanticRelation;
 
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
-public class Sequencer<A, C> implements IExecutable<Optional<C>> {
+public class Sequencer<A, C> implements IExecutable<C, Optional<C>> {
     DeterministicSemanticRelation<A, C> operand;
 
     public Sequencer(DeterministicSemanticRelation<A, C> operand) {
         this.operand = operand;
     }
 
-    public Optional<C> run(BooleanSupplier hasToTerminateSupplier) {
+    public Optional<C> run(Predicate<C> hasToTerminatePredicate) {
         C previous = null;
         var current = this.operand.initial();
         while (current.isPresent()) {
             previous = current.get();
 
             //check if we have a termination request
-            if (hasToTerminateSupplier.getAsBoolean()) { return Optional.of(previous); }
+            if (hasToTerminatePredicate.test(previous)) { return Optional.of(previous); }
 
             var actionO = this.operand.actions(previous);
             if (actionO.isEmpty()) break;

@@ -5,8 +5,9 @@ import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
-public class DepthFirstTraversalWhile<V, A> implements IExecutable<IDepthFirstTraversalConfiguration<V, A>> {
+public class DepthFirstTraversalWhile<V, A> implements IExecutable<IDepthFirstTraversalConfiguration<V, A>, IDepthFirstTraversalConfiguration<V, A>> {
     IDepthFirstTraversalConfiguration<V, A> configuration;
 
     public DepthFirstTraversalWhile(IDepthFirstTraversalConfiguration<V, A> configuration) {
@@ -14,13 +15,13 @@ public class DepthFirstTraversalWhile<V, A> implements IExecutable<IDepthFirstTr
     }
 
     @Override
-    public IDepthFirstTraversalConfiguration<V, A> run(BooleanSupplier hasToTerminateSupplier) {
+    public IDepthFirstTraversalConfiguration<V, A> run(Predicate<IDepthFirstTraversalConfiguration<V, A>> hasToTerminatePredicate) {
         configuration.initial();
         DFTConfigurationSetDeque.StackFrame<V> stackFrame;
         while (     //did we finish ?
                     (stackFrame = configuration.peek()) != null
                     //do we have a termination request ?
-                && !hasToTerminateSupplier.getAsBoolean()) {
+                && !hasToTerminatePredicate.test(configuration)) {
             var neighboursIterator = stackFrame.neighbours();
 
             var depthBound = configuration.getModel().getDepthBound();

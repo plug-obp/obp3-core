@@ -7,10 +7,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class Execution<I, R> {
+public class Execution<I, ExeState, R> {
     public String name;
     I parameters;
-    Function<I, IExecutable<R>> executableMaker;
+    Function<I, IExecutable<ExeState, R>> executableMaker;
 
     private Thread thread;
     public final AtomicBoolean running = new AtomicBoolean(false);
@@ -24,7 +24,7 @@ public class Execution<I, R> {
     public Execution(
             String name,
             I parameters,
-            Function<I, IExecutable<R>> executableMaker,
+            Function<I, IExecutable<ExeState, R>> executableMaker,
             Function<R, String> resultToString) {
         this.name = name;
         this.parameters = parameters;
@@ -34,7 +34,7 @@ public class Execution<I, R> {
 
     Thread worker() {
         return new Thread(() -> {
-            IExecutable<R> executable = executableMaker.apply(parameters);
+            IExecutable<ExeState, R> executable = executableMaker.apply(parameters);
             result = executable.run(() -> {
                 if (paused.get()) {
                     semaphore.acquireUninterruptibly();

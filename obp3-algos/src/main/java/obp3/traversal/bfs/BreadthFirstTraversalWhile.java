@@ -6,22 +6,23 @@ import obp3.runtime.sli.IRootedGraph;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
-public class BreadthFirstTraversalWhile<V> implements IExecutable<Set<V>> {
+public class BreadthFirstTraversalWhile<V> implements IExecutable<BreadthFirstTraversalConfiguration<V>, Set<V>> {
     IRootedGraph<V> graph;
 
     public BreadthFirstTraversalWhile(IRootedGraph<V> graph) {
         this.graph = graph;
     }
 
-    public Set<V> run(BooleanSupplier hasToTerminateSupplier) {
+    public Set<V> run(Predicate<BreadthFirstTraversalConfiguration<V>> hasToTerminatePredicate) {
         var c = BreadthFirstTraversalConfiguration.initial(graph.roots());
 
         while (!c.frontier.isEmpty() || c.neighbours.hasNext()) {
             for (Iterator<V> it = c.neighbours; it.hasNext(); ) {
 
                 //check if we have a termination request
-                if (hasToTerminateSupplier.getAsBoolean()) { return c.known; }
+                if (hasToTerminatePredicate.test(c)) { return c.known; }
 
                 V v = it.next();
                 if (!c.known.contains(v)) {

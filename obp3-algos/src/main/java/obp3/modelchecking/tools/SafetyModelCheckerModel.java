@@ -29,7 +29,7 @@ public record SafetyModelCheckerModel<MA, MC, PA, PC>(
         Function<Product<MC, PC>, ?> reducer) implements ModelCheckerModel<Product<MC, PC>> {
 
     @Override
-    public IExecutable<EmptinessCheckerAnswer<Product<MC, PC>>> modelChecker() {
+    public IExecutable<?, EmptinessCheckerAnswer<Product<MC, PC>>> modelChecker() {
         BiPredicate<String, Step<MA, MC>> atomEvaluator = (s, step) -> StepSynchronousProductSemantics.evaluateAtom(s, step, this.atomicPropositionEvaluator);
         var propertySemantics = this.propertySemanticsProvider.apply(atomEvaluator);
         var product = new StepSynchronousProductSemantics<>(new StepProductParameters<>(modelSemantics, propertySemantics));

@@ -7,5 +7,5 @@ public sealed interface ModelCheckerModel<C> permits
         StatePredicateModelCheckerModel,
         SafetyModelCheckerModel,
         BuchiModelCheckerModel {
-    IExecutable<EmptinessCheckerAnswer<C>> modelChecker();
+    IExecutable<?, EmptinessCheckerAnswer<C>> modelChecker();
 }

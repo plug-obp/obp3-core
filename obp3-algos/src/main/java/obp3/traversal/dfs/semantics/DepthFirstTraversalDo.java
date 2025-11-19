@@ -4,8 +4,9 @@ import obp3.runtime.IExecutable;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
-public class DepthFirstTraversalDo<V, A> implements IExecutable<IDepthFirstTraversalConfiguration<V, A>> {
+public class DepthFirstTraversalDo<V, A> implements IExecutable<IDepthFirstTraversalConfiguration<V, A>, IDepthFirstTraversalConfiguration<V, A>> {
     IDepthFirstTraversalConfiguration<V, A> configuration;
 
     public DepthFirstTraversalDo(IDepthFirstTraversalConfiguration<V, A> configuration) {
@@ -13,14 +14,14 @@ public class DepthFirstTraversalDo<V, A> implements IExecutable<IDepthFirstTrave
     }
 
     @Override
-    public IDepthFirstTraversalConfiguration<V, A> run(BooleanSupplier hasToTerminateSupplier) {
+    public IDepthFirstTraversalConfiguration<V, A> run(Predicate<IDepthFirstTraversalConfiguration<V, A>> hasToTerminatePredicate) {
         configuration.initial();
         do {
             var stackFrame = configuration.peek();
             if (   //did we finish ?
                    stackFrame == null
                    //do we have a termination request ?
-                || hasToTerminateSupplier.getAsBoolean()) {
+                || hasToTerminatePredicate.test(configuration)) {
                 //at the end no stack frame is left
                 break;
             }

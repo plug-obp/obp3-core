@@ -1,10 +1,12 @@
 package obp3.modelchecking.buchi.ndfs.naive;
 
+import obp3.Either;
 import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.runtime.sli.IRootedGraph;
 import obp3.runtime.sli.Step;
 import obp3.sli.core.operators.ReRootedGraph;
+import obp3.sli.core.operators.product.Product;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
@@ -14,15 +16,15 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<EmptinessCheckerAnswer<V>> {
+public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, EmptinessCheckerAnswer<V>> {
 
-    IExecutable<IDepthFirstTraversalConfiguration<V, A>> algorithm;
+    IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, IDepthFirstTraversalConfiguration<V, A>> algorithm;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
     int depthBound;
     Function<V, A> reducer;
     Predicate<V> acceptingPredicate;
-    BooleanSupplier hasToTerminateSupplier;
+    Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate;
 
     EmptinessCheckerAnswer<V> result = new EmptinessCheckerAnswer<>();
 
@@ -76,7 +78,7 @@ public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<Emptine
                 })
         );
 
-        var config = algo.run(hasToTerminateSupplier);
+        var config = algo.run(hasToTerminatePredicate);
         if (result.holds) {
             return false;
         }
@@ -85,10 +87,10 @@ public class EmptinessChecherBuchiNaiveNDFS<V, A> implements IExecutable<Emptine
     }
 
     @Override
-    public EmptinessCheckerAnswer<V> run(BooleanSupplier hasToTerminateSupplier) {
-        this.hasToTerminateSupplier = hasToTerminateSupplier;
+    public EmptinessCheckerAnswer<V> run(Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate) {
+        this.hasToTerminatePredicate = hasToTerminatePredicate;
 
-        var config = algorithm.run(hasToTerminateSupplier);
+        var config = algorithm.run(hasToTerminatePredicate);
         if (result.holds) {
             return result;
         }

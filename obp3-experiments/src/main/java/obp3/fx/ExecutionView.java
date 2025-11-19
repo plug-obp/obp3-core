@@ -18,7 +18,7 @@ import obp3.Execution;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 
-public class ExecutionView<I, R> extends GridPane {
+public class ExecutionView<I, ExeState, R> extends GridPane {
     private final String playIconName = "gmi-play-arrow:30";
     private final String pauseIconName = "gmi-pause:30";
     private final String resumeIconName = "gmi-play-circle-filled:30";
@@ -33,9 +33,9 @@ public class ExecutionView<I, R> extends GridPane {
     private final FontIcon detailsIcon = new FontIcon(detailsIconName);
     private final FontIcon clearIcon = new FontIcon(clearIconName);
 
-    private final Execution<I, R> execution;
+    private final Execution<I, ExeState, R> execution;
 
-    public ExecutionView(Execution<I, R> execution) {
+    public ExecutionView(Execution<I, ExeState, R> execution) {
         super();
         this.execution = execution;
         add(nameLabel, 1, 0);

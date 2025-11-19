@@ -1,12 +1,15 @@
 package obp3.scc.tarjan2;
 
+import obp3.Either;
 import obp3.runtime.IExecutable;
 import obp3.runtime.sli.IRootedGraph;
+import obp3.sli.core.operators.product.Product;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /// Implementation of the Algorithm T from
 /// [Robert E. Tarjan, Uri Zwick, *Finding Strong Components Using Depth-First Search*](https://arxiv.org/pdf/2201.07197)
@@ -18,10 +21,10 @@ import java.util.function.Function;
 /// It would be interesting to see if through another synchronous composition we can obtain an efficient
 ///  buchi acceptance cycle detection, without touching the underlying Tarjan.
 /// It seems to me that the acceptance cycle detection part could act as a pruning monitor over Tarjan.
-public class TarjanStronglyConnectedComponentsAlgoT<V, A> implements IExecutable<TarjanMemory<V>> {
+public class TarjanStronglyConnectedComponentsAlgoT<V, A> implements IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, TarjanMemory<V>> {
 
     final TarjanCallbacks<V, A> tarjanCallbacks = new TarjanCallbacks<>();
-    final IExecutable<IDepthFirstTraversalConfiguration<V, A>> algorithm;
+    final IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, IDepthFirstTraversalConfiguration<V, A>> algorithm;
 
     public TarjanStronglyConnectedComponentsAlgoT(IRootedGraph<V> graph) {
         this(DepthFirstTraversal.Algorithm.WHILE, graph, -1, null);
@@ -40,8 +43,8 @@ public class TarjanStronglyConnectedComponentsAlgoT<V, A> implements IExecutable
     }
 
     @Override
-    public TarjanMemory<V> run(BooleanSupplier hasToTerminateSupplier) {
-        algorithm.run(hasToTerminateSupplier);
+    public TarjanMemory<V> run(Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate) {
+        algorithm.run(hasToTerminatePredicate);
         return tarjanCallbacks.memory;
     }
 }

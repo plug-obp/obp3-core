@@ -22,7 +22,7 @@ public record StatePredicateModelCheckerModel<MA, MC>(
         Function<MC, ?> reducer) implements ModelCheckerModel<MC> {
 
     @Override
-    public IExecutable<EmptinessCheckerAnswer<MC>> modelChecker() {
+    public IExecutable<?, EmptinessCheckerAnswer<MC>> modelChecker() {
         var rootedGraph = new SemanticRelation2RootedGraph<>(this.modelSemantics);
         return new SafetyDepthFirstTraversal<>(
                 this.traversalStrategy,

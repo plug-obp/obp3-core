@@ -1,11 +1,13 @@
 package obp3.modelchecking.buchi.ndfs.gs09.cdlp05;
 
+import obp3.Either;
 import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.modelchecking.buchi.ndfs.gs09.VertexColor;
 import obp3.runtime.sli.IRootedGraph;
 import obp3.runtime.sli.Step;
 import obp3.sli.core.operators.ReRootedGraph;
+import obp3.sli.core.operators.product.Product;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.DepthFirstTraversalParameters;
@@ -33,17 +35,17 @@ import java.util.function.Predicate;
  *
  */
 
-public class EmptinessCheckerBuchiGS09CDLP05<V, A> implements IExecutable<EmptinessCheckerAnswer<V>>  {
+public class EmptinessCheckerBuchiGS09CDLP05<V, A> implements IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, EmptinessCheckerAnswer<V>>  {
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
     int depthBound;
     Function<V, A> reducer;
     Predicate<V> acceptingPredicate;
-    BooleanSupplier hasToTerminateSupplier;
+    Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate;
 
     EmptinessCheckerAnswer<V> result = new EmptinessCheckerAnswer<>();
 
-    IExecutable<IDepthFirstTraversalConfiguration<V, A>> executable;
+    IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, IDepthFirstTraversalConfiguration<V, A>> executable;
 
     public EmptinessCheckerBuchiGS09CDLP05(
             IRootedGraph<V> graph,
@@ -141,7 +143,7 @@ public class EmptinessCheckerBuchiGS09CDLP05<V, A> implements IExecutable<Emptin
         var model = new DepthFirstTraversalParameters<>(rerooted, depthBound, reducer, redCallbacks);
         var redConfig = new BuchiGS09RedConfiguration<>(model, configuration.known);
         var dfsRed = new DepthFirstTraversal<>(traversalAlgorithm, redConfig);
-        dfsRed.run(hasToTerminateSupplier);
+        dfsRed.run(hasToTerminatePredicate);
     }
 
     boolean onKnownRed(V source, V target, IDepthFirstTraversalConfiguration<V, A> config) {
@@ -156,9 +158,9 @@ public class EmptinessCheckerBuchiGS09CDLP05<V, A> implements IExecutable<Emptin
     }
 
     @Override
-    public EmptinessCheckerAnswer<V> run(BooleanSupplier hasToTerminateSupplier) {
-        this.hasToTerminateSupplier = hasToTerminateSupplier;
-        executable.run(hasToTerminateSupplier);
+    public EmptinessCheckerAnswer<V> run(Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate) {
+        this.hasToTerminatePredicate = hasToTerminatePredicate;
+        executable.run(hasToTerminatePredicate);
         result.trace = result.trace.reversed();
         return result;
     }

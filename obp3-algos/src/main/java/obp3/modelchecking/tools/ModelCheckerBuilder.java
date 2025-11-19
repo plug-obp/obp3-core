@@ -179,7 +179,8 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
         );
     }
 
-    public IExecutable<EmptinessCheckerAnswer<?>> modelChecker() {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public IExecutable<?, EmptinessCheckerAnswer<?>> modelChecker() {
         if (modelSemantics == null) {
             throw new IllegalStateException("modelSemantics is required for [Safety|Buchi]ModelChecker");
         }

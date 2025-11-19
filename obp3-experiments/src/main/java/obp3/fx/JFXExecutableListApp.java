@@ -8,8 +8,10 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import obp3.Either;
 import obp3.Execution;
 import obp3.runtime.IExecutable;
+import obp3.sli.core.operators.product.Product;
 import obp3.things.LimitedRandomRootedGraph;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
@@ -23,7 +25,11 @@ import java.util.ArrayList;
 import java.util.function.Function;
 
 public class JFXExecutableListApp extends Application {
-    private final ListView<Execution<Parameters, IDepthFirstTraversalConfiguration<Long, Long>>> listView =
+    private final ListView<
+            Execution<
+                    Parameters,
+                    ?,
+                    IDepthFirstTraversalConfiguration<Long, Long>>> listView =
             new ListView<>();
 
     @Override
@@ -44,7 +50,7 @@ public class JFXExecutableListApp extends Application {
         primaryStage.show();
     }
     private void populateList() {
-        var tasks = new ArrayList<Execution<Parameters, IDepthFirstTraversalConfiguration<Long, Long>>>();
+        var tasks = new ArrayList<Execution<Parameters, ?, IDepthFirstTraversalConfiguration<Long, Long>>>();
         tasks.add(traversal(1000, DepthFirstTraversalRelational::new));
         tasks.add(traversal(1000, DepthFirstTraversalDo::new));
         tasks.add(traversal(10000, DepthFirstTraversalRelational::new));
@@ -54,10 +60,10 @@ public class JFXExecutableListApp extends Application {
     }
 
 
-    private Execution<Parameters, IDepthFirstTraversalConfiguration<Long, Long>> traversal(
+    private Execution<Parameters, ?, IDepthFirstTraversalConfiguration<Long, Long>> traversal(
             long limit,
             Function<IDepthFirstTraversalConfiguration<Long, Long>,
-                    IExecutable<IDepthFirstTraversalConfiguration<Long, Long>>> constructor) {
+                    IExecutable<?, IDepthFirstTraversalConfiguration<Long, Long>>> constructor) {
         var width = 30;
         var seed = System.nanoTime();
 
@@ -73,7 +79,7 @@ public class JFXExecutableListApp extends Application {
                     var executable = p.constructor.apply(
                             new DFTConfigurationSetDeque<>(
                                 new DepthFirstTraversalParameters<>(graph, Function.identity())));
-                    return executable;
+                    return (IExecutable<Object, IDepthFirstTraversalConfiguration<Long, Long>>)executable;
                 },
                 (r) -> "Explored: " + formater.format(r.getKnown().size()) + " configurations");
     }
@@ -82,7 +88,7 @@ public class JFXExecutableListApp extends Application {
             long limit,
             int width,
             long seed,
-            Function<IDepthFirstTraversalConfiguration<Long, Long>, IExecutable<IDepthFirstTraversalConfiguration<Long, Long>>> constructor){}
+            Function<IDepthFirstTraversalConfiguration<Long, Long>, IExecutable<? , IDepthFirstTraversalConfiguration<Long, Long>>> constructor){}
 
     public static void main(String[] args) {
         launch(args);
@@ -93,10 +99,10 @@ public class JFXExecutableListApp extends Application {
  * Custom ListCell that displays an ExecutableTask with interactive buttons.
  */
 
-class ExecutionListCell<I, R> extends ListCell<Execution<I, R>> {
+class ExecutionListCell<I, ExeState, R> extends ListCell<Execution<I, ?, R>> {
 
     @Override
-    protected void updateItem(Execution<I, R> task, boolean empty) {
+    protected void updateItem(Execution<I, ?, R> task, boolean empty) {
         super.updateItem(task, empty);
         if (empty || task == null) {
             setGraphic(null);
@@ -104,7 +110,7 @@ class ExecutionListCell<I, R> extends ListCell<Execution<I, R>> {
             if (getGraphic() == null) {
                 setGraphic(new ExecutionView<>(task));
             }
-            ((ExecutionView<?,?>)getGraphic()).updateView();
+            ((ExecutionView<?,?,?>)getGraphic()).updateView();
         }
     }
 }

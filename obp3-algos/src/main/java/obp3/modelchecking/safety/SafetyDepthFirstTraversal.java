@@ -1,9 +1,11 @@
 package obp3.modelchecking.safety;
 
+import obp3.Either;
 import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.runtime.sli.IRootedGraph;
 import obp3.runtime.sli.Step;
+import obp3.sli.core.operators.product.Product;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
@@ -13,14 +15,14 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class SafetyDepthFirstTraversal<V, A> implements IExecutable<EmptinessCheckerAnswer<V>> {
-    IExecutable<IDepthFirstTraversalConfiguration<V, A>> algorithm;
+public class SafetyDepthFirstTraversal<V, A> implements IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, EmptinessCheckerAnswer<V>> {
+    IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, IDepthFirstTraversalConfiguration<V, A>> algorithm;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
     int depthBound;
     Function<V, A> reducer;
     Predicate<V> acceptingPredicate;
-    BooleanSupplier hasToTerminateSupplier;
+    Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate;
 
     EmptinessCheckerAnswer<V> result = new EmptinessCheckerAnswer<>();
 
@@ -57,9 +59,9 @@ public class SafetyDepthFirstTraversal<V, A> implements IExecutable<EmptinessChe
     }
 
     @Override
-    public EmptinessCheckerAnswer<V> run(BooleanSupplier hasToTerminateSupplier) {
-        this.hasToTerminateSupplier = hasToTerminateSupplier;
-        algorithm.run(hasToTerminateSupplier);
+    public EmptinessCheckerAnswer<V> run(Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate) {
+        this.hasToTerminatePredicate = hasToTerminatePredicate;
+        algorithm.run(hasToTerminatePredicate);
         result.trace = result.trace.reversed();
         return result;
     }

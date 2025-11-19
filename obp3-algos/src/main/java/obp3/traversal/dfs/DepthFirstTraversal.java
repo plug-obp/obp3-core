@@ -1,7 +1,9 @@
 package obp3.traversal.dfs;
 
+import obp3.Either;
 import obp3.runtime.IExecutable;
 import obp3.runtime.sli.IRootedGraph;
+import obp3.sli.core.operators.product.Product;
 import obp3.traversal.dfs.defaults.domain.DFTConfiguration4TreeDeque;
 import obp3.traversal.dfs.defaults.domain.DFTConfigurationSetDeque;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
@@ -14,15 +16,16 @@ import obp3.traversal.dfs.semantics.DepthFirstTraversalWhile;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-public class DepthFirstTraversal<V, A> implements IExecutable<IDepthFirstTraversalConfiguration<V, A>> {
+public class DepthFirstTraversal<V, A> implements IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, IDepthFirstTraversalConfiguration<V, A>> {
     public enum Algorithm {
         WHILE,
         RELATIONAL,
         DO
     }
 
-    final IExecutable<IDepthFirstTraversalConfiguration<V, A>> algorithm;
+    final IExecutable<?, IDepthFirstTraversalConfiguration<V, A>> algorithm;
 
     public DepthFirstTraversal(IRootedGraph<V> graph) {
         this(Algorithm.WHILE, graph, null, null);
@@ -119,8 +122,12 @@ public class DepthFirstTraversal<V, A> implements IExecutable<IDepthFirstTravers
         };
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public IDepthFirstTraversalConfiguration<V, A> run(BooleanSupplier hasToTerminateSupplier) {
-        return algorithm.run(hasToTerminateSupplier);
+    public IDepthFirstTraversalConfiguration<V, A> run(Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate) {
+        if (algorithm instanceof DepthFirstTraversalRelational relational) {
+            return relational.run(c -> hasToTerminatePredicate.test((Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>)c));
+        }
+        return algorithm.run(c -> hasToTerminatePredicate.test(Either.left((IDepthFirstTraversalConfiguration<V, A>) c)));
     }
 }

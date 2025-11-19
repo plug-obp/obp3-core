@@ -1,5 +1,6 @@
 package obp3.modelchecking.tools;
 
+import obp3.Either;
 import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.modelchecking.buchi.ndfs.cvwy92.EmptinessCheckerBuchiCVWY92Algo2;
 import obp3.modelchecking.buchi.ndfs.gs09.EmptinessCheckerBuchiGS09;
@@ -16,6 +17,7 @@ import obp3.sli.core.operators.product.Product;
 import obp3.sli.core.operators.product.StepSynchronousProductSemantics;
 import obp3.sli.core.operators.product.model.StepProductParameters;
 import obp3.traversal.dfs.DepthFirstTraversal;
+import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -45,7 +47,7 @@ public record BuchiModelCheckerModel<MA, MC, PA, PC>(
     }
 
     @Override
-    public IExecutable<EmptinessCheckerAnswer<Product<MC, PC>>> modelChecker() {
+    public IExecutable<?, EmptinessCheckerAnswer<Product<MC, PC>>> modelChecker() {
         BiPredicate<String, Step<MA, MC>> atomEvaluator = (s, step) -> StepSynchronousProductSemantics.evaluateAtom(s, step, this.atomicPropositionEvaluator);
         var propertySemantics = this.propertySemanticsProvider.apply(atomEvaluator);
         var product = new StepSynchronousProductSemantics<>(new StepProductParameters<>(modelSemantics, propertySemantics));

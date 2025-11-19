@@ -6,8 +6,9 @@ import obp3.runtime.sli.IRootedGraph;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
-public class BreadthFirstTraversalDo<V> implements IExecutable<Set<V>> {
+public class BreadthFirstTraversalDo<V> implements IExecutable<BreadthFirstTraversalConfiguration<V>, Set<V>> {
     IRootedGraph<V> graph;
 
     public BreadthFirstTraversalDo(IRootedGraph<V> graph) {
@@ -15,13 +16,13 @@ public class BreadthFirstTraversalDo<V> implements IExecutable<Set<V>> {
     }
 
     @Override
-    public Set<V> run(BooleanSupplier hasToTerminateSupplier) {
+    public Set<V> run(Predicate<BreadthFirstTraversalConfiguration<V>> hasToTerminatePredicate) {
         var c = BreadthFirstTraversalConfiguration.initial(graph.roots());
         do {
             for (Iterator<V> it = c.neighbours; it.hasNext(); ) {
                 V v = it.next();
                 //check if we have a termination request
-                if (hasToTerminateSupplier.getAsBoolean()) { return c.known; }
+                if (hasToTerminatePredicate.test(c)) { return c.known; }
                 if (!c.known.contains(v)) {
                     c.known.add(v);
                     c.frontier.addLast(v);
