@@ -24,7 +24,7 @@ package obp3.datastructures.collections.linearscan;
 
 import obp3.datastructures.collections.linearscan.utils.DeletedSentinel;
 import obp3.datastructures.collections.linearscan.utils.EmptySentinel;
-import obp3.hashcons.Hashable;
+import obp3.utils.Hashable;
 
 import java.util.Arrays;
 

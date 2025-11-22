@@ -1,6 +1,6 @@
 package obp3.traversal.dfs.domain;
 
-import obp3.things.PeekableIterator;
+import obp3.utils.PeekableIterator;
 import obp3.traversal.dfs.model.IDepthFirstTraversalParameters;
 
 import java.util.Iterator;

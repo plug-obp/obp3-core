@@ -1,6 +1,6 @@
 package obp3.modelchecking.buchi.ndfs.naive;
 
-import obp3.Either;
+import obp3.utils.Either;
 import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.runtime.sli.IRootedGraph;
@@ -12,7 +12,6 @@ import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
 
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 

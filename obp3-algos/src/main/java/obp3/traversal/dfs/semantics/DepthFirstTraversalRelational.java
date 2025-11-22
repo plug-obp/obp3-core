@@ -1,6 +1,6 @@
 package obp3.traversal.dfs.semantics;
 
-import obp3.Either;
+import obp3.utils.Either;
 import obp3.runtime.IExecutable;
 import obp3.Sequencer;
 import obp3.sli.core.operators.ToDetermistic;
@@ -13,8 +13,6 @@ import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.semantics.relational.DepthFirstTraversalRelation;
 import obp3.traversal.dfs.semantics.relational.callbacks.DepthFirstTraversalCallbackSemantics;
 
-import java.util.Optional;
-import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 public class DepthFirstTraversalRelational<V, A> implements IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>,  Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, IDepthFirstTraversalConfiguration<V, A>> {

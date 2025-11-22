@@ -1,13 +1,12 @@
 package obp3.scc.tarjan2;
 
-import obp3.Either;
+import obp3.utils.Either;
 import obp3.runtime.IExecutable;
 import obp3.runtime.sli.IRootedGraph;
 import obp3.sli.core.operators.product.Product;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 

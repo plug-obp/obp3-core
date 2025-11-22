@@ -1,6 +1,6 @@
 package obp3.modelchecking.buchi.ndfs.gs09.cdlp05.separated;
 
-import obp3.Either;
+import obp3.utils.Either;
 import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.modelchecking.buchi.ndfs.gs09.VertexColor;
@@ -20,7 +20,6 @@ import obp3.traversal.dfs.semantics.DepthFirstTraversalRelational;
 import obp3.traversal.dfs.semantics.DepthFirstTraversalWhile;
 
 import java.util.*;
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 

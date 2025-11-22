@@ -1,4 +1,4 @@
-package obp3.things;
+package obp3.utils;
 
 import java.util.Iterator;
 import java.util.Objects;

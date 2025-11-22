@@ -2,41 +2,29 @@ package obp3.hashcons.example.lambda.hashcons.expando;
 
 import obp3.hashcons.HashConsTable;
 import obp3.hashcons.HashConsed;
-import obp3.hashcons.Hashable;
 import obp3.hashcons.example.lambda.TermFactory;
 import obp3.hashcons.example.lambda.syntax.App;
 import obp3.hashcons.example.lambda.syntax.Lambda;
 import obp3.hashcons.example.lambda.syntax.Term;
 import obp3.hashcons.example.lambda.syntax.Var;
-import obp3.sli.core.operators.product.Product;
+import obp3.utils.Hashable;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 public class ExpandoTermHashConsedFactory extends TermFactory {
     private final HashConsTable<Term> table;
-    private final Map<Term, Product<Integer, Integer>> hashConsMap = Collections.synchronizedMap(new WeakHashMap<>());
 
-    HashConsed<Term> associate(Term node, int tag, int hashKey) {
-        var data = new Product<>(tag, hashKey);
-        hashConsMap.put(node, data);
-        return new HashConsed.FunctionalHashConsed<>(
-                () -> node,
-                data::l,
-                data::r
-        );
-    }
+    record TermHashConsed(Term node, int tag, int hashKey) implements HashConsed<Term> {}
 
     public ExpandoTermHashConsedFactory() {
-        this.table = new HashConsTable<>(Hashable.standard(), this::associate);
+        this.table = new HashConsTable<>(Hashable.standard(), TermHashConsed::new);
     }
     public ExpandoTermHashConsedFactory(HashConsTable<Term> table) {
         this.table = table;
     }
 
-    public Map<Term, Product<Integer, Integer>> getHashConsMap() {
-        return hashConsMap;
+    public Map<Term, HashConsed<Term>> getHashConsMap() {
+        return table.map();
     }
 
     public Term hashConsed(Term term) {

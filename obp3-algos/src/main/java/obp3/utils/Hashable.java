@@ -1,4 +1,4 @@
-package obp3.hashcons;
+package obp3.utils;
 
 import java.util.Objects;
 import java.util.Comparator;

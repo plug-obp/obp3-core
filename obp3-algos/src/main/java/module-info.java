@@ -26,4 +26,5 @@ module obp.algos {
     exports obp3.modelchecking.buchi.ndfs.gs09.cdlp05.separated;
     exports obp3.modelchecking.safety;
     exports obp3.modelchecking.tools;
+    exports obp3.utils;
 }

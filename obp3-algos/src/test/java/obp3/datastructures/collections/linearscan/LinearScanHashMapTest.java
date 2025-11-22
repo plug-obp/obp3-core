@@ -1,6 +1,6 @@
 package obp3.datastructures.collections.linearscan;
 
-import obp3.hashcons.Hashable;
+import obp3.utils.Hashable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.BeforeEach;

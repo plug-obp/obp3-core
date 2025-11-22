@@ -5,12 +5,13 @@ import obp3.hashcons.example.lambda.hashcons.nowrapper.syntax.App;
 import obp3.hashcons.example.lambda.hashcons.nowrapper.syntax.Lambda;
 import obp3.hashcons.example.lambda.hashcons.nowrapper.syntax.Term;
 import obp3.hashcons.example.lambda.hashcons.nowrapper.syntax.Var;
+import obp3.utils.Hashable;
 
 public class DirectTermHashConsedFactory {
     private final HashConsTable<Term> table;
 
     public DirectTermHashConsedFactory() {
-        this(new HashConsTable<>(new HashableTerm(), Term::toHashCons));
+        this(new HashConsTable<>(Hashable.standard(), Term::toHashCons));
     }
     public DirectTermHashConsedFactory(HashConsTable<Term> table) {
         this.table = table;

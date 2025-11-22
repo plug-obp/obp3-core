@@ -1,7 +1,7 @@
 package obp3.modelchecking.buchi.ndfs.gs09.cdlp05;
 
 import obp3.modelchecking.buchi.ndfs.gs09.VertexColor;
-import obp3.things.PeekableIterator;
+import obp3.utils.PeekableIterator;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.IDepthFirstTraversalParameters;
 

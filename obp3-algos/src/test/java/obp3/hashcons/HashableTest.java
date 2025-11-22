@@ -1,5 +1,6 @@
 package obp3.hashcons;
 
+import obp3.utils.Hashable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;

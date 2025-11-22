@@ -6,12 +6,13 @@ import obp3.hashcons.example.lambda.syntax.App;
 import obp3.hashcons.example.lambda.syntax.Lambda;
 import obp3.hashcons.example.lambda.syntax.Term;
 import obp3.hashcons.example.lambda.syntax.Var;
+import obp3.utils.Hashable;
 
 public class TermHashConsedFactory extends TermFactory {
     private final HashConsTable<Term> table;
 
     public TermHashConsedFactory() {
-        this(new HashConsTable<>(new HashableTerm(), TermHashConsed::new));
+        this(new HashConsTable<>(Hashable.standard(), TermHashConsed::new));
     }
     public TermHashConsedFactory(HashConsTable<Term> table) {
         this.table = table;
