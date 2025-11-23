@@ -10,11 +10,25 @@ import obp3.hashcons.example.lambda.syntax.Var;
 import obp3.utils.Hashable;
 
 import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.ToIntFunction;
 
 public class ExpandoTermHashConsedFactory extends TermFactory {
     private final HashConsTable<Term> table;
 
-    record TermHashConsed(Term node, int tag, int hashKey) implements HashConsed<Term> {}
+    record TermHashConsed(Term node, int tag, int hashKey) implements HashConsed<Term> {
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof TermHashConsed other)) return false;
+            return this.tag == other.tag;
+        }
+
+        @Override
+        public int hashCode() {
+            return hashKey;
+        }
+    }
 
     public ExpandoTermHashConsedFactory() {
         this.table = new HashConsTable<>(Hashable.standard(), TermHashConsed::new);

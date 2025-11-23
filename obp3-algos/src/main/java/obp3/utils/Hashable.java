@@ -2,6 +2,8 @@ package obp3.utils;
 
 import java.util.Objects;
 import java.util.Comparator;
+import java.util.function.BiPredicate;
+import java.util.function.ToIntFunction;
 
 /**
  * A functional interface that combines hash code computation and equality testing
@@ -96,7 +98,32 @@ public interface Hashable<T> {
             }
         };
     }
-    
+
+    /**
+     * Returns a hashable that uses the given equality predicate and hash function
+     *
+     * @param <T> the type of objects
+     * @return a hashable using the given equality predicate and hash function
+     */
+    static <T> Hashable<T> from(BiPredicate<T, T> equalPredicate, ToIntFunction<T> hashFunction) {
+        return new Hashable<>() {
+            @Override
+            public int hash(T x) {
+                return hashFunction.applyAsInt(x);
+            }
+
+            @Override
+            public boolean equal(T x, T y) {
+                return equalPredicate.test(x, y);
+            }
+
+            @Override
+            public String toString() {
+                return "Hashable.from(" + equalPredicate + ", " + hashFunction + ")";
+            }
+        };
+    }
+
     /**
      * Returns a hashable based on a comparator. Two objects are considered equal
      * if the comparator returns 0 when comparing them.

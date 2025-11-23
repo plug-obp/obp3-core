@@ -14,8 +14,12 @@ import obp3.traversal.dfs.semantics.DepthFirstTraversalDo;
 import obp3.traversal.dfs.semantics.DepthFirstTraversalRelational;
 import obp3.traversal.dfs.semantics.DepthFirstTraversalWhile;
 
+import java.util.ArrayDeque;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class DepthFirstTraversal<V, A> implements IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, IDepthFirstTraversalConfiguration<V, A>> {
     public enum Algorithm {
@@ -27,7 +31,7 @@ public class DepthFirstTraversal<V, A> implements IExecutable<Either<IDepthFirst
     final IExecutable<?, IDepthFirstTraversalConfiguration<V, A>> algorithm;
 
     public DepthFirstTraversal(IRootedGraph<V> graph) {
-        this(Algorithm.WHILE, graph, null, null);
+        this(Algorithm.WHILE, graph, HashSet::new, null, null);
     }
 
     public DepthFirstTraversal(IRootedGraph<V> graph, Function<V, A> reducer) {
@@ -35,7 +39,7 @@ public class DepthFirstTraversal<V, A> implements IExecutable<Either<IDepthFirst
     }
 
     public DepthFirstTraversal(IRootedGraph<V> graph, IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
-        this(Algorithm.WHILE, graph, null, callbacksModel);
+        this(Algorithm.WHILE, graph,HashSet::new, null, callbacksModel);
     }
 
     public DepthFirstTraversal(IRootedGraph<V> graph, Function<V, A> reducer, IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
@@ -43,11 +47,15 @@ public class DepthFirstTraversal<V, A> implements IExecutable<Either<IDepthFirst
     }
 
     public DepthFirstTraversal(Algorithm algorithm, IRootedGraph<V> graph) {
-        this(algorithm, graph, null, null);
+        this(algorithm, graph,HashSet::new, null, null);
     }
 
     public DepthFirstTraversal(Algorithm algorithm, IRootedGraph<V> graph, IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
-        this(algorithm, graph, null, callbacksModel);
+        this(algorithm, graph,HashSet::new, null, callbacksModel);
+    }
+
+    public DepthFirstTraversal(Algorithm algorithm, IRootedGraph<V> graph, Supplier<Set<Object>> knownProvider, IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
+        this(algorithm, graph, knownProvider, null, callbacksModel);
     }
 
     public DepthFirstTraversal(Algorithm algorithm, IRootedGraph<V> graph, Function<V, A> reducer) {
@@ -59,7 +67,7 @@ public class DepthFirstTraversal<V, A> implements IExecutable<Either<IDepthFirst
             IRootedGraph<V> graph,
             int depthBound,
             IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
-        this(algorithm, graph, depthBound, null, callbacksModel, true);
+        this(algorithm, graph, HashSet::new, depthBound, null, callbacksModel, true);
     }
 
     public DepthFirstTraversal(
@@ -67,7 +75,16 @@ public class DepthFirstTraversal<V, A> implements IExecutable<Either<IDepthFirst
             IRootedGraph<V> graph,
             Function<V, A> reducer,
             IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
-        this(algorithm, graph, -1, reducer, callbacksModel, true);
+        this(algorithm, graph, HashSet::new, -1, reducer, callbacksModel, true);
+    }
+
+    public DepthFirstTraversal(
+            Algorithm algorithm,
+            IRootedGraph<V> graph,
+            Supplier<Set<Object>> knownProvider,
+            Function<V, A> reducer,
+            IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
+        this(algorithm, graph, knownProvider, -1, reducer, callbacksModel, true);
     }
 
     public DepthFirstTraversal(
@@ -76,7 +93,7 @@ public class DepthFirstTraversal<V, A> implements IExecutable<Either<IDepthFirst
             int depthBound,
             Function<V, A> reducer,
             IDepthFirstTraversalCallbacksModel<V, A> callbacksModel) {
-        this(algorithm, graph, depthBound, reducer, callbacksModel, true);
+        this(algorithm, graph, HashSet::new, depthBound, reducer, callbacksModel, true);
     }
 
     public DepthFirstTraversal(
@@ -95,6 +112,7 @@ public class DepthFirstTraversal<V, A> implements IExecutable<Either<IDepthFirst
     public DepthFirstTraversal(
             Algorithm algorithm,
             IRootedGraph<V> graph,
+            Supplier<Set<Object>> knownProvider,
             int depthBound,
             Function<V, A> reducer,
             IDepthFirstTraversalCallbacksModel<V, A> callbacksModel,
@@ -109,7 +127,7 @@ public class DepthFirstTraversal<V, A> implements IExecutable<Either<IDepthFirst
         if (graph.isTree()) {
             configuration = new DFTConfiguration4TreeDeque<>(model);
         } else {
-            configuration = new DFTConfigurationSetDeque<>(model);
+            configuration = new DFTConfigurationSetDeque<>(model, knownProvider.get(), new ArrayDeque<>());
         }
         this.algorithm = switch (algorithm) {
             case WHILE ->

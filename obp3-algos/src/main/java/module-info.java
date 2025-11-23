@@ -27,4 +27,5 @@ module obp.algos {
     exports obp3.modelchecking.safety;
     exports obp3.modelchecking.tools;
     exports obp3.utils;
+    exports obp3.hashcons;
 }
