@@ -1,27 +1,29 @@
 package obp3.modelchecking.safety;
 
-import obp3.utils.Either;
-import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
+import obp3.modelchecking.EmptinessCheckerExecutable;
+import obp3.modelchecking.EmptinessCheckerStatus;
+import obp3.runtime.IExecutable;
 import obp3.runtime.sli.IRootedGraph;
 import obp3.runtime.sli.Step;
 import obp3.sli.core.operators.product.Product;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.traversal.dfs.domain.IDepthFirstTraversalConfiguration;
 import obp3.traversal.dfs.model.FunctionalDFTCallbacksModel;
+import obp3.utils.Either;
 
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class SafetyDepthFirstTraversal<V, A> implements IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, EmptinessCheckerAnswer<V>> {
+public class SafetyDepthFirstTraversal<V, A> implements EmptinessCheckerExecutable<V> {
     IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, IDepthFirstTraversalConfiguration<V, A>> algorithm;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
     int depthBound;
     Function<V, A> reducer;
     Predicate<V> acceptingPredicate;
-    Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate;
+    Predicate<EmptinessCheckerStatus> hasToTerminatePredicate;
 
     EmptinessCheckerAnswer<V> result = new EmptinessCheckerAnswer<>();
 
@@ -57,10 +59,12 @@ public class SafetyDepthFirstTraversal<V, A> implements IExecutable<Either<IDept
         return false;
     }
 
+    private final EmptinessCheckerStatus status = new EmptinessCheckerStatus();
+
     @Override
-    public EmptinessCheckerAnswer<V> run(Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate) {
+    public EmptinessCheckerAnswer<V> run(Predicate<EmptinessCheckerStatus> hasToTerminatePredicate) {
         this.hasToTerminatePredicate = hasToTerminatePredicate;
-        algorithm.run(hasToTerminatePredicate);
+        algorithm.run((c) -> EmptinessCheckerStatus.statusCallback(status, c, hasToTerminatePredicate));
         result.trace = result.trace.reversed();
         return result;
     }

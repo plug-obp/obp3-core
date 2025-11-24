@@ -1,6 +1,7 @@
 package obp3.modelchecking.tools;
 
 import obp3.modelchecking.EmptinessCheckerAnswer;
+import obp3.modelchecking.EmptinessCheckerExecutable;
 import obp3.modelchecking.buchi.ndfs.cvwy92.EmptinessCheckerBuchiCVWY92Algo2;
 import obp3.modelchecking.buchi.ndfs.gs09.EmptinessCheckerBuchiGS09;
 import obp3.modelchecking.buchi.ndfs.gs09.cdlp05.EmptinessCheckerBuchiGS09CDLP05;
@@ -45,7 +46,7 @@ public record BuchiModelCheckerModel<MA, MC, PA, PC>(
     }
 
     @Override
-    public IExecutable<?, EmptinessCheckerAnswer<Product<MC, PC>>> modelChecker() {
+    public EmptinessCheckerExecutable<Product<MC, PC>> modelChecker() {
         BiPredicate<String, Step<MA, MC>> atomEvaluator = (s, step) -> StepSynchronousProductSemantics.evaluateAtom(s, step, this.atomicPropositionEvaluator);
         var propertySemantics = this.propertySemanticsProvider.apply(atomEvaluator);
         var product = new StepSynchronousProductSemantics<>(new StepProductParameters<>(modelSemantics, propertySemantics));

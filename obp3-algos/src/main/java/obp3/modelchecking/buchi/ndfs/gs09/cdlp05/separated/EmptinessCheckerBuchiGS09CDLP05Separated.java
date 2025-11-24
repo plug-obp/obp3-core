@@ -1,5 +1,7 @@
 package obp3.modelchecking.buchi.ndfs.gs09.cdlp05.separated;
 
+import obp3.modelchecking.EmptinessCheckerExecutable;
+import obp3.modelchecking.EmptinessCheckerStatus;
 import obp3.utils.Either;
 import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
@@ -44,14 +46,14 @@ import java.util.function.Predicate;
  *
  */
 
-public class EmptinessCheckerBuchiGS09CDLP05Separated<V, A> implements IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, EmptinessCheckerAnswer<V>> {
+public class EmptinessCheckerBuchiGS09CDLP05Separated<V, A> implements EmptinessCheckerExecutable<V> {
     IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, IDepthFirstTraversalConfiguration<V, A>> traversal;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
     int depthBound;
     Function<V, A> reducer;
     Predicate<V> acceptingPredicate;
-    Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate;
+    Predicate<EmptinessCheckerStatus> hasToTerminatePredicate;
 
     EmptinessCheckerAnswer<V> result = new EmptinessCheckerAnswer<>();
     record Memory<X>(int[] weight, Map<X, WeightedColor> colorMap, Deque<Boolean[]> allMyChildreAreRedStack) { }
@@ -181,17 +183,11 @@ public class EmptinessCheckerBuchiGS09CDLP05Separated<V, A> implements IExecutab
                 configuration.getKnown(),
                 memory.colorMap
         );
-        var dfsRed = switch (traversalAlgorithm) {
-            case WHILE ->
-                    new DepthFirstTraversalWhile<>(redConfig)
-                            .run(c -> hasToTerminatePredicate.test(Either.left(c)));
-            case RELATIONAL ->
-                    new DepthFirstTraversalRelational<>(redConfig)
-                            .run(hasToTerminatePredicate);
-            case DO ->
-                    new DepthFirstTraversalDo<>(redConfig)
-                            .run(c -> hasToTerminatePredicate.test(Either.left(c)));
-        };
+
+        var dfsRed = new DepthFirstTraversal<>(traversalAlgorithm, redConfig);
+        var prefixStatus = new EmptinessCheckerStatus(status);
+        dfsRed.run(c -> EmptinessCheckerStatus.statusCallback(new EmptinessCheckerStatus(0, status.worklistSize), status, c, hasToTerminatePredicate));
+        status.reset(prefixStatus);
     }
 
     boolean onKnownRed(V source, V target, IDepthFirstTraversalConfiguration<V, A> configuration) {
@@ -229,10 +225,12 @@ public class EmptinessCheckerBuchiGS09CDLP05Separated<V, A> implements IExecutab
         return weightedColor.weight;
     }
 
+    private final EmptinessCheckerStatus status = new EmptinessCheckerStatus();
+
     @Override
-    public EmptinessCheckerAnswer<V> run(Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate) {
+    public EmptinessCheckerAnswer<V> run(Predicate<EmptinessCheckerStatus> hasToTerminatePredicate) {
         this.hasToTerminatePredicate = hasToTerminatePredicate;
-        traversal.run(hasToTerminatePredicate);
+        traversal.run(c -> EmptinessCheckerStatus.statusCallback(status, c, hasToTerminatePredicate));
         result.trace = result.trace.reversed();
         return result;
     }

@@ -1,8 +1,7 @@
 package obp3.modelchecking.tools;
 
-import obp3.modelchecking.EmptinessCheckerAnswer;
+import obp3.modelchecking.EmptinessCheckerExecutable;
 import obp3.modelchecking.safety.SafetyDepthFirstTraversal;
-import obp3.runtime.IExecutable;
 import obp3.runtime.sli.SemanticRelation;
 import obp3.sli.core.operators.SemanticRelation2RootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;
@@ -22,7 +21,7 @@ public record StatePredicateModelCheckerModel<MA, MC>(
         Function<MC, ?> reducer) implements ModelCheckerModel<MC> {
 
     @Override
-    public IExecutable<?, EmptinessCheckerAnswer<MC>> modelChecker() {
+    public EmptinessCheckerExecutable<MC> modelChecker() {
         var rootedGraph = new SemanticRelation2RootedGraph<>(this.modelSemantics);
         return new SafetyDepthFirstTraversal<>(
                 this.traversalStrategy,

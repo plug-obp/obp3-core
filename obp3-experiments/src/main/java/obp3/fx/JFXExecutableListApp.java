@@ -58,6 +58,7 @@ public class JFXExecutableListApp extends Application {
     }
 
 
+    @SuppressWarnings("unchecked")
     private Execution<Parameters, ?, IDepthFirstTraversalConfiguration<Long, Long>> traversal(
             long limit,
             Function<IDepthFirstTraversalConfiguration<Long, Long>,

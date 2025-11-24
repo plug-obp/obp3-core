@@ -1,8 +1,7 @@
 package obp3.modelchecking.tools;
 
-import obp3.modelchecking.EmptinessCheckerAnswer;
+import obp3.modelchecking.EmptinessCheckerExecutable;
 import obp3.modelchecking.safety.SafetyDepthFirstTraversal;
-import obp3.runtime.IExecutable;
 import obp3.runtime.sli.DependentSemanticRelation;
 import obp3.runtime.sli.SemanticRelation;
 import obp3.runtime.sli.Step;
@@ -29,7 +28,7 @@ public record SafetyModelCheckerModel<MA, MC, PA, PC>(
         Function<Product<MC, PC>, ?> reducer) implements ModelCheckerModel<Product<MC, PC>> {
 
     @Override
-    public IExecutable<?, EmptinessCheckerAnswer<Product<MC, PC>>> modelChecker() {
+    public EmptinessCheckerExecutable<Product<MC, PC>> modelChecker() {
         BiPredicate<String, Step<MA, MC>> atomEvaluator = (s, step) -> StepSynchronousProductSemantics.evaluateAtom(s, step, this.atomicPropositionEvaluator);
         var propertySemantics = this.propertySemanticsProvider.apply(atomEvaluator);
         var product = new StepSynchronousProductSemantics<>(new StepProductParameters<>(modelSemantics, propertySemantics));

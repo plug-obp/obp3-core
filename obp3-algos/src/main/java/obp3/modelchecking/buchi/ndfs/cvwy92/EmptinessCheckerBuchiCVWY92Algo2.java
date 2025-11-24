@@ -1,5 +1,7 @@
 package obp3.modelchecking.buchi.ndfs.cvwy92;
 
+import obp3.modelchecking.EmptinessCheckerExecutable;
+import obp3.modelchecking.EmptinessCheckerStatus;
 import obp3.utils.Either;
 import obp3.runtime.IExecutable;
 import obp3.modelchecking.EmptinessCheckerAnswer;
@@ -46,14 +48,14 @@ import java.util.function.Predicate;
  * "Memory-efficient algorithms for the verification of temporal properties."
  * Formal methods in system design 1, no. 2 (1992): 275-288.
  */
-public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, EmptinessCheckerAnswer<V>>{
+public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements EmptinessCheckerExecutable<V> {
     IExecutable<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>, IDepthFirstTraversalConfiguration<V, A>> algorithm;
     DepthFirstTraversal.Algorithm traversalAlgorithm;
     IRootedGraph<V> graph;
     int depthBound;
     Function<V, A> reducer;
     Predicate<V> acceptingPredicate;
-    Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate;
+    Predicate<EmptinessCheckerStatus> hasToTerminatePredicate;
 
     EmptinessCheckerAnswer<V> result = new EmptinessCheckerAnswer<>();
 
@@ -118,18 +120,23 @@ public class EmptinessCheckerBuchiCVWY92Algo2<V, A> implements IExecutable <Eith
                         })
         );
 
-        var config = algo.run(hasToTerminatePredicate);
+        var prefixStatus = new EmptinessCheckerStatus(status);
+        var config = algo.run((c) -> EmptinessCheckerStatus.statusCallback(prefixStatus, status, c, hasToTerminatePredicate));
+        status.reset(prefixStatus);
+
         if (result.holds) return false;
         result.addToTrace(vertex, config.getStack());
 
         return true;
     }
 
+    private final EmptinessCheckerStatus status = new EmptinessCheckerStatus();
+
     @Override
-    public EmptinessCheckerAnswer<V> run(Predicate<Either<IDepthFirstTraversalConfiguration<V, A>, Product<IDepthFirstTraversalConfiguration<V, A>, Boolean>>> hasToTerminatePredicate) {
+    public EmptinessCheckerAnswer<V> run(Predicate<EmptinessCheckerStatus> hasToTerminatePredicate) {
         this.hasToTerminatePredicate = hasToTerminatePredicate;
 
-        var config = algorithm.run(hasToTerminatePredicate);
+        var config = algorithm.run((c) -> EmptinessCheckerStatus.statusCallback(status, c, hasToTerminatePredicate));
         if (result.holds) return result;
         result.addToTrace(config.getStack());
         result.trace = result.trace.reversed();
