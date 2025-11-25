@@ -46,7 +46,7 @@ public record SafetyModelCheckerModel<MA, MC, PA, PC>(
         return new SafetyModelCheckerBuilder<>();
     }
 
-    public static class SafetyModelCheckerBuilder<MA, MC, PA, PC> extends ModelCheckerBuilderWithPropertyBase<MA, MC, PA, PC> {
+    public static class SafetyModelCheckerBuilder<MA, MC, PA, PC> extends ModelCheckerBuilderWithPropertyBase<MA, MC, PA, PC, SafetyModelCheckerBuilder<MA, MC, PA, PC>> {
         public SafetyModelCheckerModel<MA, MC, PA, PC> build() {
             return new SafetyModelCheckerModel<>(
                     modelSemantics, atomicPropositionEvaluator, propertySemanticsProvider, acceptingPredicateForProduct,

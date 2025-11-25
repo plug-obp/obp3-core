@@ -34,7 +34,7 @@ public record StatePredicateModelCheckerModel<MA, MC>(
     public static <MA, MC> StatePredicateModelBuilder<MA, MC> builder() {
         return new StatePredicateModelBuilder<>();
     }
-    public static class StatePredicateModelBuilder<MA, MC> extends ModelCheckerBuilderBase<MA, MC, MC>{
+    public static class StatePredicateModelBuilder<MA, MC> extends ModelCheckerBuilderBase<MA, MC, MC, StatePredicateModelBuilder<MA, MC>>{
         public StatePredicateModelCheckerModel<MA, MC> build() {
             return new StatePredicateModelCheckerModel<>(
                     modelSemantics, acceptingPredicate,

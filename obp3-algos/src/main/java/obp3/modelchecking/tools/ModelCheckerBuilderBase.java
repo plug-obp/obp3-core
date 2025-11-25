@@ -1,54 +1,66 @@
 package obp3.modelchecking.tools;
 
 import obp3.runtime.sli.SemanticRelation;
+import obp3.runtime.sli.Step;
 import obp3.traversal.dfs.DepthFirstTraversal;
 
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class ModelCheckerBuilderBase<MA, MC, RT> {
+public class ModelCheckerBuilderBase<MA, MC, RT, SELF extends ModelCheckerBuilderBase<MA, MC, RT, SELF>> {
     SemanticRelation<MA, MC> modelSemantics;
     Predicate<MC> acceptingPredicate;
     DepthFirstTraversal.Algorithm traversalStrategy;
     int depthBound = -1;
     Function<RT, ?> reducer = Function.identity();
 
-    public ModelCheckerBuilderBase<MA, MC, RT> modelSemantics(SemanticRelation<MA, MC> modelSemantics) {
+    @SuppressWarnings("unchecked")
+    protected SELF self() {
+        return (SELF) this;
+    }
+
+    public SELF modelSemantics(SemanticRelation<MA, MC> modelSemantics) {
         this.modelSemantics = modelSemantics;
-        return this;
+        return self();
     }
 
-    public ModelCheckerBuilderBase<MA, MC, RT> acceptingPredicate(Predicate<MC> acceptingPredicate) {
+    public SELF acceptingPredicate(Predicate<MC> acceptingPredicate) {
         this.acceptingPredicate = acceptingPredicate;
-        return this;
+        return self();
     }
 
-    public ModelCheckerBuilderBase<MA, MC, RT> traversalStrategy(DepthFirstTraversal.Algorithm traversalStrategy) {
+    public SELF traversalStrategy(DepthFirstTraversal.Algorithm traversalStrategy) {
         this.traversalStrategy = traversalStrategy;
-        return this;
+        return self();
     }
 
-    public ModelCheckerBuilderBase<MA, MC, RT> unbounded() {
+
+    public SELF depthBound(int bound) {
+        this.depthBound = bound;
+        return self();
+    }
+
+    public SELF unbounded() {
         this.depthBound = -1;
-        return this;
+        return self();
     }
 
-    public ModelCheckerBuilderBase<MA, MC, RT> bounded(int bound) {
+    public SELF bounded(int bound) {
         if (bound <= 0) {
             throw new IllegalArgumentException("Bound must be greater than 0, got: " + bound);
         }
         this.depthBound = bound;
-        return this;
+        return self();
     }
 
-    public ModelCheckerBuilderBase<MA, MC, RT> reducer(Function<RT, ?> reducer) {
+    public SELF reducer(Function<RT, ?> reducer) {
         this.reducer = reducer;
-        return this;
+        return self();
     }
 
-    public ModelCheckerBuilderBase<MA, MC, RT> identityReducer() {
+    public SELF identityReducer() {
         this.reducer = Function.identity();
-        return this;
+        return self();
     }
-
 }

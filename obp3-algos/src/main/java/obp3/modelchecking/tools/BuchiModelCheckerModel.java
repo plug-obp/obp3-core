@@ -53,58 +53,51 @@ public record BuchiModelCheckerModel<MA, MC, PA, PC>(
         var rootedGraph = new SemanticRelation2RootedGraph<>(product);
         Predicate<Product<MC, PC>> acceptingPredicate = (c) -> this.acceptingPredicateForProduct.test(c, new Product<>(modelSemantics, propertySemantics));
 
-        switch (this.emptinessCheckerAlgorithm) {
-            case NAIVE:
-                return new EmptinessChecherBuchiNaiveNDFS<>(
-                        this.traversalStrategy,
-                        rootedGraph,
-                        this.depthBound,
-                        this.reducer,
-                        acceptingPredicate);
-            case GS09:
-                return new EmptinessCheckerBuchiGS09<>(
-                        this.traversalStrategy,
-                        rootedGraph,
-                        this.depthBound,
-                        this.reducer,
-                        acceptingPredicate);
-            case GS09_SEPARATED:
-                return new EmptinessCheckerBuchiGS09Separated<>(
+        return switch (this.emptinessCheckerAlgorithm) {
+            case NAIVE -> new EmptinessChecherBuchiNaiveNDFS<>(
                     this.traversalStrategy,
                     rootedGraph,
                     this.depthBound,
                     this.reducer,
                     acceptingPredicate);
-            case GS09_CDLP05:
-                return new EmptinessCheckerBuchiGS09CDLP05<>(
-                        this.traversalStrategy,
-                        rootedGraph,
-                        this.depthBound,
-                        this.reducer,
-                        acceptingPredicate);
-            case GS09_CDLP05_SEPARATED:
-                return new EmptinessCheckerBuchiGS09CDLP05Separated<>(
-                        this.traversalStrategy,
-                        rootedGraph,
-                        this.depthBound,
-                        this.reducer,
-                        acceptingPredicate);
-            case CVWY92Algo2:
-                return new EmptinessCheckerBuchiCVWY92Algo2<>(
-                        this.traversalStrategy,
-                        rootedGraph,
-                        this.depthBound,
-                        this.reducer,
-                        acceptingPredicate);
-        }
-        return null;
+            case GS09 -> new EmptinessCheckerBuchiGS09<>(
+                    this.traversalStrategy,
+                    rootedGraph,
+                    this.depthBound,
+                    this.reducer,
+                    acceptingPredicate);
+            case GS09_SEPARATED -> new EmptinessCheckerBuchiGS09Separated<>(
+                    this.traversalStrategy,
+                    rootedGraph,
+                    this.depthBound,
+                    this.reducer,
+                    acceptingPredicate);
+            case GS09_CDLP05 -> new EmptinessCheckerBuchiGS09CDLP05<>(
+                    this.traversalStrategy,
+                    rootedGraph,
+                    this.depthBound,
+                    this.reducer,
+                    acceptingPredicate);
+            case GS09_CDLP05_SEPARATED -> new EmptinessCheckerBuchiGS09CDLP05Separated<>(
+                    this.traversalStrategy,
+                    rootedGraph,
+                    this.depthBound,
+                    this.reducer,
+                    acceptingPredicate);
+            case CVWY92Algo2 -> new EmptinessCheckerBuchiCVWY92Algo2<>(
+                    this.traversalStrategy,
+                    rootedGraph,
+                    this.depthBound,
+                    this.reducer,
+                    acceptingPredicate);
+        };
     }
 
-    public <MA, MC, PA, PC> BuchiModelCheckerBuilder<MA, MC, PA, PC> builder() {
+    public BuchiModelCheckerBuilder<MA, MC, PA, PC> builder() {
         return new BuchiModelCheckerBuilder<>();
     }
 
-    public static class BuchiModelCheckerBuilder<MA, MC, PA, PC> extends ModelCheckerBuilderWithPropertyBase<MA, MC, PA, PC> {
+    public static class BuchiModelCheckerBuilder<MA, MC, PA, PC> extends ModelCheckerBuilderWithPropertyBase<MA, MC, PA, PC, BuchiModelCheckerBuilder<MA, MC, PA, PC>> {
         private BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm;
 
         public BuchiModelCheckerBuilder<MA, MC, PA, PC> emptinessCheckerAlgorithm(BuchiEmptinessCheckerAlgorithm emptinessCheckerAlgorithm) {

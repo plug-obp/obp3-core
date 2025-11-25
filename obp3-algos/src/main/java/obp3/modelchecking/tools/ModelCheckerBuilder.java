@@ -1,12 +1,15 @@
 package obp3.modelchecking.tools;
 
 import obp3.modelchecking.EmptinessCheckerAnswer;
+import obp3.modelchecking.EmptinessCheckerExecutable;
+import obp3.modelchecking.EmptinessCheckerStatus;
 import obp3.runtime.IExecutable;
 import obp3.runtime.sli.DependentSemanticRelation;
 import obp3.runtime.sli.SemanticRelation;
 import obp3.runtime.sli.Step;
 import obp3.sli.core.operators.product.Product;
 import obp3.traversal.dfs.DepthFirstTraversal;
+import obp3.utils.Either;
 
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -179,8 +182,7 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
         );
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public IExecutable<?, EmptinessCheckerAnswer<?>> modelChecker() {
+    public IExecutable<EmptinessCheckerStatus, EmptinessCheckerAnswer<Either<MC, Product<MC, PC>>>> modelChecker() {
         if (modelSemantics == null) {
             throw new IllegalStateException("modelSemantics is required for [Safety|Buchi]ModelChecker");
         }
@@ -188,17 +190,29 @@ public class ModelCheckerBuilder<MA, MC, PA, PC> {
             if (this.acceptingPredicateForModel == null) {
                 throw new IllegalStateException("acceptingPredicateForModel is required for StatePredicateModelChecker");
             }
-            var mcModel = this.buildSafety();
-            return (IExecutable)mcModel.modelChecker();
+            final var mcModel = this.buildSafety();
+            final var modelChecker = mcModel.modelChecker();
+            return hasToTerminatePredicate -> {
+                final var result = modelChecker.run(hasToTerminatePredicate);
+                return result.map(Either::left);
+            };
         }
         if (acceptingPredicateForProduct == null) {
             throw new IllegalStateException("acceptingPredicateForProduct is required for [Safety|Buchi]ModelChecker");
         }
         if (isBuchi) {
-            var mcModel = this.buildBuchi();
-            return (IExecutable)mcModel.modelChecker();
+            final var mcModel = this.buildBuchi();
+            final var modelChecker = mcModel.modelChecker();
+            return hasToTerminatePredicate -> {
+                final var result = modelChecker.run(hasToTerminatePredicate);
+                return result.map(Either::right);
+            };
         }
         var mcModel = this.buildSafetyWithProperty();
-        return (IExecutable)mcModel.modelChecker();
+        final var modelChecker = mcModel.modelChecker();
+        return hasToTerminatePredicate -> {
+            final var result = modelChecker.run(hasToTerminatePredicate);
+            return result.map(Either::right);
+        };
     }
 }
