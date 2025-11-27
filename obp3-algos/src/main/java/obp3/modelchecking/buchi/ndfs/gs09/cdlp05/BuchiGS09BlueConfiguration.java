@@ -105,6 +105,7 @@ public class BuchiGS09BlueConfiguration<V, A> implements IDepthFirstTraversalCon
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Set getKnown() {
         return known.keySet();
     }
