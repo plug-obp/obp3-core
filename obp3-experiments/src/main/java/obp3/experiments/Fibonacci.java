@@ -42,25 +42,25 @@ public class Fibonacci {
         System.out.println("RR[memo] is " + (timedRRMemo.elapsed() / timedIterative.elapsed()) + "X slower than iterative");
     }
 
-    long fibRecursive(int n) {
+    public long fibRecursive(int n) {
         return n <= 1 ? n : fibRecursive(n - 1) + fibRecursive(n - 2);
     }
 
     // memoized top-down recursion (O(n) time, O(n) space)
-    long fibMemo(int n) {
+    public long fibMemo(int n) {
         long[] cache = new long[n + 1];
         Arrays.fill(cache, -1);
         return fibMemo(n, cache);
     }
 
-    long fibMemo(int n, long[] cache) {
+    public long fibMemo(int n, long[] cache) {
         if (n <= 1) return n;
         if (cache[n] != -1) return cache[n];
         cache[n] = fibMemo(n - 1, cache) + fibMemo(n - 2, cache);
         return cache[n];
     }
 
-    long fibIterative(int n) {
+    public long fibIterative(int n) {
         long a = 0, b = 1;
         for (int i = 0; i < n; i++) {
             long c = a + b;
@@ -70,20 +70,21 @@ public class Fibonacci {
         return a;
     }
 
-    long fibTailRecursive(int n) {
+    public long fibTailRecursive(int n) {
         return fibTailRecursive(n, 0, 1);
     }
-    long fibTailRecursive(int n, long a, long b) {
+    public long fibTailRecursive(int n, long a, long b) {
         return n == 0 ? a : fibTailRecursive(n - 1, b, a + b);
     }
 
-    long fibRRMemo(int n) {
+    public long fibRRMemo(int n) {
         IRootedGraph<Integer> graph = new RootedGraphFunctional<>(
                 () -> List.of(n).iterator(),
                 v -> v <= 1 ? Collections.emptyIterator() : List.of(v - 1, v - 2).iterator(),
                 false, true
         );
         long[] cache = new long[n + 1];
+        Arrays.fill(cache, -1);
         var dfs = new DepthFirstTraversal<>(
                 DepthFirstTraversal.Algorithm.WHILE,
                 graph,
@@ -100,7 +101,7 @@ public class Fibonacci {
         return cache[n];
     }
 
-    long fibRRTail(int n) {
+    public long fibRRTail(int n) {
         record Frame(int n, long a, long b) {}
         long[] result = new long[1];
         var graph = new RootedGraphFunctional<>(
@@ -121,7 +122,7 @@ public class Fibonacci {
         return result[0];
     }
 
-    long fibRRTailReuse(int n) {
+    public long fibRRTailReuse(int n) {
         class Frame{ int n; long a; long b;
             Frame(int n, long a, long b) { this.n = n; this.a = a; this.b = b; }
             Frame change(int n, long a, long b) {
