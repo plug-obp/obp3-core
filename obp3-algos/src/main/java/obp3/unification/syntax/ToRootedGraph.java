@@ -25,7 +25,7 @@ public class ToRootedGraph implements IRootedGraph<Term> {
     public Iterator<Term> neighbours(Term term) {
         return switch (term) {
         case Var v -> mapper.apply(v).stream().iterator();
-        case App a -> Arrays.stream(a.terms()).iterator();
+        case App a -> a.terms().stream().iterator();
         };
     }
 }

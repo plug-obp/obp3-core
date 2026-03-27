@@ -6,10 +6,7 @@ import obp3.modelchecking.safety.SafetyDepthFirstTraversal;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.unification.syntax.*;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 public class Unificator {
@@ -73,13 +70,13 @@ public class Unificator {
             var rhs = entry.getValue();
             
             // If both sides are Apps with same name and arity, decompose
-            if (lhs instanceof App(String lName, Term[] lArgs) && 
-                rhs instanceof App(String rName, Term[] rArgs) &&
-                lName.equals(rName) && lArgs.length == rArgs.length) {
+            if (lhs instanceof App(String lName, List<Term> lArgs) &&
+                rhs instanceof App(String rName, List<Term> rArgs) &&
+                lName.equals(rName) && lArgs.size() == rArgs.size()) {
                 
                 // Decompose: f(s1, s2, ...) = f(t1, t2, ...) becomes s1=t1, s2=t2, ...
-                for (int i = 0; i < lArgs.length; i++) {
-                    workQueue.add(Map.entry(lArgs[i], rArgs[i]));
+                for (int i = 0; i < lArgs.size(); i++) {
+                    workQueue.add(Map.entry(lArgs.get(i), rArgs.get(i)));
                 }
             } else {
                 // Atomic constraint (at least one side is a Var or structures don't match)
@@ -162,7 +159,7 @@ public class Unificator {
         if (t instanceof Var tv) {
             return tv.equals(v);
         }
-        if (t instanceof App(String _, Term[] args)) {
+        if (t instanceof App(String _, List<Term> args)) {
             for (Term arg : args) {
                 if (simpleOccursCheck(v, arg)) {
                     return true;
@@ -177,11 +174,11 @@ public class Unificator {
         if (a instanceof Var(String aName) && b instanceof Var(String bName)) {
             return aName.equals(bName);
         }
-        if (a instanceof App(String aName, Term[] aTerms) && b instanceof App(String bName, Term[] bTerms)) {
+        if (a instanceof App(String aName, List<Term> aTerms) && b instanceof App(String bName, List<Term> bTerms)) {
             if (!aName.equals(bName)) return false;
-            if (aTerms.length != bTerms.length) return false;
-            for (int i = 0; i < aTerms.length; i++) {
-                if (!termEq(aTerms[i], bTerms[i])) return false;
+            if (aTerms.size() != bTerms.size()) return false;
+            for (int i = 0; i < aTerms.size(); i++) {
+                if (!termEq(aTerms.get(i), bTerms.get(i))) return false;
             }
             return true;
         }
@@ -207,7 +204,7 @@ public class Unificator {
 
         @Override
         public Term visit(App node, Function<Var, UnificationAnswer<Term>> mapper) {
-            var terms = Arrays.stream(node.terms()).map(t ->
+            var terms = node.terms().stream().map(t ->
                             t.accept(this, mapper)
                     ).toArray(Term[]::new);
             return new App(node.name(), terms);

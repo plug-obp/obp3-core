@@ -3,6 +3,7 @@ package obp3.fixer;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /// Heavily inspired by:
 /// - FRANCOIS POTTIER,<a href="https://gallium.inria.fr/~fpottier/publis/fpottier-fix.pdf"> Lazy Least Fixed Points in ML</a>
@@ -12,20 +13,21 @@ import java.util.function.Function;
 public class Fixer<S, T> implements Function<S, T>{
     Lattice<T> lattice;
     BiFunction<S, Function<S, T>, T> function;
+    Supplier<Map> mapSupplier;
 
     /// The permanent table maps variables that have reached a fixed point to properties. It persists forever.
-    Map<S, T> mFixed = new IdentityHashMap<>();
+    Map<S, T> mFixed;
 
     /// The transient table maps variables that have not yet reached a
     /// fixed point to nodes. At the beginning of a run, it is empty.
     /// It fills up during a run.
     /// At the end of a run, it is copied into the permanent table and cleared.
-    Map<S, T> mTransient = new IdentityHashMap<>();
+    Map<S, T> mTransient;
     /// Records the observers of a node (The nodes from which reachable)
     /// NC: In the Pottier algorithm this is a graph, I just store the parents here.
     /// NC: Homework: what are the consequences ?
-    Map<S, Set<S>> mParents = new IdentityHashMap<>();
-    Map<S, Set<S>> mChildren = new IdentityHashMap<>();
+    Map<S, Set<S>> mParents;
+    Map<S, Set<S>> mChildren;
 
     /// The workset is based on a Queue, but it could just as well be based on a
     ///    Stack. A textual replacement is possible. It could also be based on a
@@ -45,8 +47,17 @@ public class Fixer<S, T> implements Function<S, T>{
     Queue<S> mWorkset = new LinkedList<>();
 
     public Fixer(BiFunction<S, Function<S, T>, T> function, Lattice<T> lattice) {
+        this(function, lattice, IdentityHashMap::new);
+    }
+
+    public Fixer(BiFunction<S, Function<S, T>, T> function, Lattice<T> lattice, Supplier<Map> mapSupplier) {
         this.function = function;
         this.lattice = lattice;
+        this.mapSupplier = mapSupplier;
+        this.mFixed = mapSupplier.get();
+        this.mTransient = mapSupplier.get();
+        this.mParents = mapSupplier.get();
+        this.mChildren = mapSupplier.get();
     }
 
     /// The flag 'inactive' prevents reentrant calls by the client.
@@ -94,8 +105,8 @@ public class Fixer<S, T> implements Function<S, T>{
         if (mTransient.containsKey(node)) { return; }
         // create a transient node starting it at the bottom of the lattice.
         mTransient.put(node, lattice.bottom());
-        mParents.put(node, Collections.newSetFromMap(new IdentityHashMap<>()) );
-        mChildren.put(node, Collections.newSetFromMap(new IdentityHashMap<>()) );
+        mParents.put(node, Collections.newSetFromMap(mapSupplier.get()) );
+        mChildren.put(node, Collections.newSetFromMap(mapSupplier.get()) );
         mWorkset.add(node);
     }
     void solve(S current) {
@@ -138,7 +149,7 @@ public class Fixer<S, T> implements Function<S, T>{
         var isMaximal = lattice.isMaximal(newProperty);
         if (!isMaximal) {
             //remove current from the parents of old children (forget old children)
-            Set<S> oldChildren = mChildren.computeIfAbsent(current, _ -> Collections.newSetFromMap(new IdentityHashMap<>()));
+            Set<S> oldChildren = mChildren.computeIfAbsent(current, _ -> Collections.newSetFromMap(mapSupplier.get()));
             for (S oldChild : oldChildren) {
                 var parentsOfOld = mParents.get(oldChild);
                 if (parentsOfOld != null) {
@@ -149,8 +160,8 @@ public class Fixer<S, T> implements Function<S, T>{
 
             //register new parents/children
             for (S child : currentChildren) {
-                mParents.computeIfAbsent(child, _ -> Collections.newSetFromMap(new IdentityHashMap<>()) ).add(current);
-                mChildren.computeIfAbsent(current, _ -> Collections.newSetFromMap(new IdentityHashMap<>())).add(child);
+                mParents.computeIfAbsent(child, _ -> Collections.newSetFromMap(mapSupplier.get()) ).add(current);
+                mChildren.computeIfAbsent(current, _ -> Collections.newSetFromMap(mapSupplier.get())).add(child);
             }
 
             // If the updated value differs from the previous value, record

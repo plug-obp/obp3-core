@@ -4,8 +4,8 @@ import obp3.modelchecking.safety.SafetyDepthFirstTraversal;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import obp3.unification.syntax.*;
 
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -126,13 +126,13 @@ public class Unificator1 {
         if (t2 instanceof Var v) {
             return unify(t2, t1, mapper);
         }
-        if (t1 instanceof App(String name1, Term[] args1) && t2 instanceof App(String name2, Term[] args2)) {
-            if (!name1.equals(name2) || args1.length != args2.length) return Optional.empty();
-            return IntStream.range(0, args1.length)
+        if (t1 instanceof App(String name1, List<Term> args1) && t2 instanceof App(String name2,List<Term> args2)) {
+            if (!name1.equals(name2) || args1.size() != args2.size()) return Optional.empty();
+            return IntStream.range(0, args1.size())
                     .boxed().
                     reduce(
                             Optional.of(mapper),
-                            (ons, i) -> ons.flatMap( ns -> unify(args1[i], args2[i], ns)),
+                            (ons, i) -> ons.flatMap( ns -> unify(args1.get(i), args2.get(i), ns)),
                             (os1, os2) -> os1.isPresent() ? os1 : os2
                     );
         }
@@ -148,44 +148,15 @@ public class Unificator1 {
         if (a instanceof Var(String aName) && b instanceof Var(String bName)) {
             return aName.equals(bName);
         }
-        if (a instanceof App(String aName, Term[] aTerms) && b instanceof App(String bName, Term[] bTerms)) {
+        if (a instanceof App(String aName, List<Term> aTerms) && b instanceof App(String bName, List<Term> bTerms)) {
             if (!aName.equals(bName)) return false;
-            if (aTerms.length != bTerms.length) return false;
-            for (int i = 0; i < aTerms.length; i++) {
-                if (!termEq(aTerms[i], bTerms[i])) return false;
+            if (aTerms.size() != bTerms.size()) return false;
+            for (int i = 0; i < aTerms.size(); i++) {
+                if (!termEq(aTerms.get(i), bTerms.get(i))) return false;
             }
             return true;
         }
         return false;
-    }
-
-    private static class SubstitutionMaker implements Visitor<Function<Var, UnificationAnswer<Term>>, Term> {
-        public Term normalize(Term term, Function<Var, UnificationAnswer<Term>> mapper) {
-            return term.accept(this, mapper);
-        }
-        @Override
-        public Term visit(Var node, Function<Var, UnificationAnswer<Term>> mapper) {
-            var answer = mapper.apply(node);
-            // Only substitute if we have a solution AND it's not the same variable
-            // This prevents infinite loops
-            return answer
-                    .map(e -> {
-                        // Avoid infinite recursion: don't re-substitute if we got the same var back
-                        if (e instanceof Var ve && ve.equals(node)) {
-                            return node;
-                        }
-                        return e.accept(this, mapper);
-                    })
-                    .solutionOrElse(node);
-        }
-
-        @Override
-        public Term visit(App node, Function<Var, UnificationAnswer<Term>> mapper) {
-            var terms = Arrays.stream(node.terms()).map(t ->
-                            t.accept(this, mapper)
-                    ).toArray(Term[]::new);
-            return new App(node.name(), terms);
-        }
     }
 
     public boolean occursIn(Var v, Term t, Function<Var, UnificationAnswer<Term>> mapper) {
