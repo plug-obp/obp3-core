@@ -5,6 +5,7 @@ import obp3.unification.syntax.App;
 import obp3.unification.syntax.Term;
 import obp3.unification.syntax.Var;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class SLGSolver {
     }
 
     List<Rule> applicable(Term goal) {
-        return rules.get(goal.name());
+        return rules.getOrDefault(goal.name(), List.of());
     }
 
     AnswerSet solveConjunction(List<Term> goals, Substitution substitution, Function<Term, AnswerSet> request) {

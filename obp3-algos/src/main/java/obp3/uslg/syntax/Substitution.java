@@ -5,6 +5,8 @@ import obp3.unification.syntax.Var;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public record Substitution(Map<Var, Term> bindings) {
@@ -15,7 +17,12 @@ public record Substitution(Map<Var, Term> bindings) {
         return bindings.containsKey(variable);
     }
     public Term get(Var variable) {
-        return bindings.getOrDefault(variable, variable);
+        Term current = bindings.get(variable);
+        if (current == null) return variable;
+        while (current instanceof Var v && bindings.containsKey(v)) {
+            current = bindings.get(v);
+        }
+        return current;
     }
 
     public Substitution compose(Substitution other) {
@@ -42,11 +49,22 @@ public record Substitution(Map<Var, Term> bindings) {
         return bindings.hashCode();
     }
 
-    public boolean extend(Var variable, Term term) {
+    public Optional<Substitution> extend(Var variable, Term term) {
         if (variable.occursIn(term, this::get)) {
-            return false; // Occurs check failed
+            return Optional.empty(); // Occurs check failed
         }
-        bindings.put(variable, term);
-        return true;
+        var newBindings = new HashMap<>(bindings);
+        newBindings.put(variable, term);
+        return Optional.of(new Substitution(newBindings));
+    }
+
+    public Substitution project(Set<Var> variables) {
+        var projected = new HashMap<Var, Term>();
+        for (Var v : variables) {
+            if (bindings.containsKey(v)) {
+                projected.put(v, bindings.get(v));
+            }
+        }
+        return new Substitution(projected);
     }
 }

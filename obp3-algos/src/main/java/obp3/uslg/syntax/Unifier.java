@@ -18,8 +18,7 @@ public class Unifier {
         }
         //if one is a var
         if (t1 instanceof Var v) {
-            if (!substitution.extend(v, t2)) return Optional.empty();
-            return Optional.of(substitution);
+            return substitution.extend(v, t2);
         }
         //if the other is a var
         if (t2 instanceof Var v) {
