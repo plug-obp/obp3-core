@@ -16,7 +16,7 @@ public class SLGSolver {
             HashMap::new
     );
     Map<String, List<Rule>> rules;
-    int varCounter = 0;
+    IdentityHashMap<Rule, Rule> renamedRuleCache = new IdentityHashMap<>();
 
     public SLGSolver(List<Rule> rules) {
         this.rules = rules.stream().collect(
@@ -47,15 +47,21 @@ public class SLGSolver {
 
     Rule renameRule(Rule rule) {
         Map<Var, Var> renaming = new HashMap<>();
-        Function<Var, Term> mapper = v -> renaming.computeIfAbsent(v, _ -> new Var("_R" + varCounter++));
+        int id = System.identityHashCode(rule);
+        int[] localCounter = {0};
+        Function<Var, Term> mapper = v -> renaming.computeIfAbsent(v, _ -> new Var("_R" + id + "_" + localCounter[0]++));
         return rule.substitute(mapper);
+    }
+
+    Rule renamedRule(Rule rule) {
+        return renamedRuleCache.computeIfAbsent(rule, this::renameRule);
     }
 
     AnswerSet equations(Term call, Function<Term, AnswerSet> request) {
         Set<Var> callVars = collectVars(call);
         AnswerSet result = new AnswerSet();
         for (Rule rule : applicable(call)) {
-            Rule fresh = renameRule(rule);
+            Rule fresh = renamedRule(rule);
             Optional<Substitution> mgu = Unifier.unify(fresh.head(), call, Substitution.empty());
             if (mgu.isEmpty()) continue;
             Substitution substitution = mgu.get();
