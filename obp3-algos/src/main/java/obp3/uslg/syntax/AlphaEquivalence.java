@@ -18,7 +18,14 @@ public class AlphaEquivalence {
 
     private static Term toCanonical(Term term, Substitution substitution, NameGenerator nameGen) {
         return switch (term) {
-            case Var v -> nameGen.get(v, substitution);
+            case Var v -> {
+                Term resolved = substitution.get(v);
+                if (resolved instanceof Var rv) {
+                    yield nameGen.getOrCreate(rv);
+                }
+                // resolved to a non-Var term — canonicalize it recursively
+                yield toCanonical(resolved, substitution, nameGen);
+            }
             case App a -> new App(a.name(), a.terms().stream().map(t -> toCanonical(t, substitution, nameGen)).toList());
         };
     }
@@ -26,14 +33,12 @@ public class AlphaEquivalence {
     private static class NameGenerator {
         int counter = 0;
         private Map<Var, Integer> mapping = new HashMap<>();
-        public Var get(Var v, Substitution substitution) {
+        public Var getOrCreate(Var v) {
             var idx = mapping.get(v);
             if (idx != null) { return new Var("V" + idx); }
             idx = counter++;
-            var nv = new Var("V" + idx);
             mapping.put(v, idx);
-            return nv;
-
+            return new Var("V" + idx);
         }
     }
 }

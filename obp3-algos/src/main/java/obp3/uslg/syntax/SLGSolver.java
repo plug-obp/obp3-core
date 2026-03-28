@@ -5,11 +5,7 @@ import obp3.unification.syntax.App;
 import obp3.unification.syntax.Term;
 import obp3.unification.syntax.Var;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -20,27 +16,56 @@ public class SLGSolver {
             HashMap::new
     );
     Map<String, List<Rule>> rules;
+    int varCounter = 0;
+
     public SLGSolver(List<Rule> rules) {
         this.rules = rules.stream().collect(
                 Collectors.groupingBy(r -> r.head().name())
         );
     }
+
     public AnswerSet solve(Term term) {
         var canonicalTerm = AlphaEquivalence.toCanonical(term, Substitution.empty());
         var as = fixer.apply(canonicalTerm);
-        return as;
+        // Map canonical answers back to user variables
+        return mapBackToUserVars(term, canonicalTerm, as);
+    }
+
+    AnswerSet mapBackToUserVars(Term userTerm, Term canonicalTerm, AnswerSet canonicalAnswers) {
+        AnswerSet result = new AnswerSet();
+        Set<Var> userVars = collectVars(userTerm);
+        for (Substitution s : canonicalAnswers.answers()) {
+            // Unify the resolved canonical answer with the original user term
+            Term resolved = canonicalTerm.substitute(s::get);
+            Optional<Substitution> mapping = Unifier.unify(resolved, userTerm, Substitution.empty());
+            if (mapping.isPresent()) {
+                result = result.add(mapping.get().project(userVars));
+            }
+        }
+        return result;
+    }
+
+    Rule renameRule(Rule rule) {
+        Map<Var, Var> renaming = new HashMap<>();
+        Function<Var, Term> mapper = v -> renaming.computeIfAbsent(v, _ -> new Var("_R" + varCounter++));
+        return rule.substitute(mapper);
     }
 
     AnswerSet equations(Term call, Function<Term, AnswerSet> request) {
+        Set<Var> callVars = collectVars(call);
         AnswerSet result = new AnswerSet();
         for (Rule rule : applicable(call)) {
-            Optional<Substitution> mgu = Unifier.unify(rule.head(), call, Substitution.empty());
+            Rule fresh = renameRule(rule);
+            Optional<Substitution> mgu = Unifier.unify(fresh.head(), call, Substitution.empty());
             if (mgu.isEmpty()) continue;
             Substitution substitution = mgu.get();
-            var goals = rule.body().stream().map(term -> term.substitute(substitution::get)).toList();
-            //solve the conjunction of goals
+            var goals = fresh.body().stream().map(term -> term.substitute(substitution::get)).toList();
             AnswerSet solutions = solveConjunction(goals, substitution, request);
-            result = result.union(solutions);
+            // Project answers to only the call's variables
+            for (Substitution s : solutions.answers()) {
+                Substitution projected = projectResolved(s, callVars);
+                result = result.add(projected);
+            }
         }
         return result;
     }
@@ -51,23 +76,48 @@ public class SLGSolver {
 
     AnswerSet solveConjunction(List<Term> goals, Substitution substitution, Function<Term, AnswerSet> request) {
         if (goals.isEmpty()) {
-            //no more goals, return the current substitution as a solution
             return new AnswerSet(List.of(substitution));
         }
         Term first = goals.getFirst();
-        Term canonicalFirst = AlphaEquivalence.toCanonical(first, Substitution.empty());
+        Term canonicalFirst = AlphaEquivalence.toCanonical(first, substitution);
         List<Term> rest = goals.subList(1, goals.size());
-        //get the solutions for the first goal
         AnswerSet firstSolutions = request.apply(canonicalFirst);
         AnswerSet result = new AnswerSet();
-        //for each solution of the first goal, solve the rest of the goals with the new substitution
         for (Substitution s : firstSolutions.answers()) {
-            Substitution newSubstitution = substitution.compose(s);
+            // Apply the answer back: resolve canonical form with answer, then unify with original goal
+            Term resolved = canonicalFirst.substitute(s::get);
+            Optional<Substitution> applied = Unifier.unify(first, resolved, substitution);
+            if (applied.isEmpty()) continue;
+            Substitution newSubstitution = applied.get();
             var newGoals = rest.stream().map(term -> term.substitute(newSubstitution::get)).toList();
             AnswerSet restSolutions = solveConjunction(newGoals, newSubstitution, request);
             result = result.union(restSolutions);
         }
         return result;
+    }
+
+    static Set<Var> collectVars(Term term) {
+        Set<Var> vars = new HashSet<>();
+        collectVars(term, vars);
+        return vars;
+    }
+
+    private static void collectVars(Term term, Set<Var> vars) {
+        switch (term) {
+            case Var v -> vars.add(v);
+            case App a -> a.terms().forEach(t -> collectVars(t, vars));
+        }
+    }
+
+    Substitution projectResolved(Substitution s, Set<Var> vars) {
+        var projected = new HashMap<Var, Term>();
+        for (Var v : vars) {
+            Term resolved = s.get(v);
+            if (!resolved.equals(v)) {
+                projected.put(v, resolved);
+            }
+        }
+        return new Substitution(projected);
     }
 
     public static void main(String[] args) {
