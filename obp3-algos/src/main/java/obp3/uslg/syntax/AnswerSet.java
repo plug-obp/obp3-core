@@ -20,10 +20,6 @@ public class AnswerSet {
         newAnswers.add(answer);
         return new AnswerSet(newAnswers);
     }
-    public AnswerSet reverseAll(Substitution substitution) {
-        var answers = this.answers.stream().map(subst -> subst.mapVars(substitution)).toList();
-        return new AnswerSet(new HashSet<>(answers));
-    }
 
     public AnswerSet union(AnswerSet other) {
         var newAnswers = new HashSet<>(answers);

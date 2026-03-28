@@ -29,13 +29,11 @@ public class AlphaEquivalence {
         public Var get(Var v, Substitution substitution) {
             var idx = mapping.get(v);
             if (idx != null) { return new Var("V" + idx); }
-            do {
-                idx = counter++;
-                var nv = new Var("V" + idx);
-//                if (substitution.contains(nv)) continue;
-                mapping.put(v, idx);
-                return nv;
-            } while  (true);
+            idx = counter++;
+            var nv = new Var("V" + idx);
+            mapping.put(v, idx);
+            return nv;
+
         }
     }
 }

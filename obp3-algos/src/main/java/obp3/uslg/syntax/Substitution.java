@@ -30,15 +30,6 @@ public record Substitution(Map<Var, Term> bindings) {
         return new Substitution(newBindings);
     }
 
-    public Substitution mapVars(Substitution mapper) {
-        Map<Var, Term> newBindings = bindings.entrySet().stream()
-                .collect(Collectors.toMap(
-                        entry -> (Var) entry.getKey().substitute(mapper::get),
-                        entry -> entry.getValue().substitute(mapper::get)
-                ));
-        return new Substitution(newBindings);
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

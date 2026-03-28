@@ -25,10 +25,8 @@ public class SLGSolver {
         );
     }
     public AnswerSet solve(Term term) {
-        var bubbleSubstitution = Substitution.empty();
-        var canonicalTerm = AlphaEquivalence.toCanonical(term, bubbleSubstitution);
+        var canonicalTerm = AlphaEquivalence.toCanonical(term, Substitution.empty());
         var as = fixer.apply(canonicalTerm);
-//        return as.reverseAll(bubbleSubstitution);
         return as;
     }
 
@@ -56,7 +54,7 @@ public class SLGSolver {
             return new AnswerSet(List.of(substitution));
         }
         Term first = goals.getFirst();
-        Term canonicalFirst = AlphaEquivalence.toCanonical(first, substitution);
+        Term canonicalFirst = AlphaEquivalence.toCanonical(first, Substitution.empty());
         List<Term> rest = goals.subList(1, goals.size());
         //get the solutions for the first goal
         AnswerSet firstSolutions = request.apply(canonicalFirst);
@@ -96,7 +94,7 @@ public class SLGSolver {
 //                new Rule(new App("connection", new App("Haarlem"), new App("Leiden")))
         );
         SLGSolver solver = new SLGSolver(rules);
-        var result = solver.solve(new App("connection", new App("a"), new App("c")));
+        var result = solver.solve(new App("connection", new App("a"), new Var("T")));
         System.out.println(result);
     }
 }
