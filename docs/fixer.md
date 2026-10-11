@@ -3,7 +3,11 @@
 Reviewed 2026-10-12. This document describes the hardened Java solver in
 [`obp3.fixer`](../obp3-algos/src/main/java/obp3/fixer/Fixer.java), its client
 obligations, failure/cancellation behavior and qualification evidence.
-The baseline audited was `ebce326e00b7be217ae0c58f41881ece29dc4690`.
+The baseline audited was `ebce326e00b7be217ae0c58f41881ece29dc4690`; its
+[original source remains preserved](https://github.com/plug-obp/obp3-core/blob/ebce326e00b7be217ae0c58f41881ece29dc4690/obp3-algos/src/main/java/obp3/fixer/Fixer.java).
+The current fixes retain that implementation's map-based structure. The broader
+`Node`/`Run` refactor is preserved separately on `codex/fixer-refactor` at
+[`7f7dab9a3c184803760764d1e7247346ad8b6af8`](https://github.com/plug-obp/obp3-core/commit/7f7dab9a3c184803760764d1e7247346ad8b6af8).
 
 ## What the solver computes
 
@@ -114,28 +118,44 @@ Retaining an expired callback grants no access to a later run.
 
 ## Algorithm and invariants
 
-The permanent table holds only solutions published by completed runs. Each run
-has one variable-to-node table, using the selected map equivalence. Canonical
-node identity then governs observer/dependency sets and a FIFO work queue.
+The solver retains the original tables and queue, with variables represented
+directly as keys and set elements:
+
+| Field | Role |
+|---|---|
+| `mFixed` | Permanent solutions published only by completed runs. |
+| `mTransient` | Current approximations, including newly discovered top values, until the run completes. |
+| `mParents` | For each variable, the equations observing its approximation. |
+| `mChildren` | For each equation, the variables it currently observes. |
+| `mWorkset` | FIFO queue of variables awaiting equation evaluation. |
+
+The supplied map equivalence also governs dependency sets and queued membership.
+There are no canonical node wrappers or separate run objects. Small helpers
+maintain scheduling and cleanup around the existing `apply`, `ensureTransient`
+and `solve` flow.
 
 1. Discovering a new variable gives it bottom and queues it once.
 2. A queued equation has no outgoing dependency edges. Dequeuing it begins a
    new evaluation, during which requests record the values it currently observes.
 3. Requests return existing approximations; they do not recursively evaluate
    dependencies on the Java stack. New dependencies are queued.
-4. On a property change, observers are detached from their old dependencies and
-   queued once. A later evaluation establishes their current dependency set.
-   Copying the observer set before notification permits this detachment safely.
-5. Reaching top detaches the equation's dependencies. Its value cannot grow
-   further under the domain/monotonicity contract, but it remains private to the
-   run until successful completion.
-6. Queue exhaustion means all demanded equations are stable. Publish the run's
-   results, then discard its graph. Any earlier uncaught failure/cancellation
-   discards the graph without publishing those results.
+4. On a property change, the enqueue helper detaches each observer from its old
+   children and adds it to the queue only if it is not already queued. A later
+   evaluation establishes its current dependency set. Copying the observer set
+   before notification permits this detachment safely.
+5. A top-valued evaluation skips registering its collected dependencies, leaving
+   the equation with no outgoing edges. Its value cannot grow further under the
+   domain/monotonicity contract, but it remains private to the run in `mTransient`
+   until successful completion.
+6. Queue exhaustion means all demanded equations are stable. After the final
+   cancellation check, publish `mTransient` into `mFixed`. The `finally` cleanup
+   clears the transient table, every parent/child set and its backing map, the
+   graph tables, and workset/membership bookkeeping. Earlier uncaught failure or
+   cancellation reaches the same cleanup without publishing those results.
 
 Self-dependencies participate in the same rules. A changed self-dependent node
 is requeued; an unchanged bottom cycle stabilizes at bottom. A top-valued node
-does not repeatedly notify itself. Queue flags prevent duplicate work when
+does not repeatedly notify itself. Queued membership prevents duplicate work when
 several children change before their shared parent is reevaluated.
 
 Under stable monotone equations, increasing dependency valuations cannot make a
@@ -151,9 +171,9 @@ abstraction or termination of the program being analyzed.
 | Baseline finding | Correction and regression |
 |---|---|
 | Nested public `apply` bypassed dependency tracking and incremented `activeCount` without balancing it. The earlier probe returned `false` for equations whose least solution was `true`, including a subsequent query. | Reject all nested public calls before accessing cache/state; use the proper callback. Test cached/uncached nesting and recovery. |
-| An RHS exception left a polled transient node unscheduled. A retry could publish bottom without reevaluating it; partial top results could already have entered the permanent table. | Run-local graph and delayed publication. Test exceptions, `Error`, lattice failure, retry and preservation of earlier completed cache. |
+| An RHS exception left a polled transient node unscheduled. A retry could publish bottom without reevaluating it; partial top results could already have entered the permanent table. | Keep all new values in `mTransient` until successful publication, and clear transient state in `finally`. Test exceptions, `Error`, lattice failure, retry and preservation of earlier completed cache. |
 | Request expiry used only an assertion, and an exception bypassed expiry entirely. | Runtime owner-thread/lifetime checks and `finally` closure. Test successful/failed RHS, later equations, wrong threads and a separate `-da` JVM. |
-| Work notifications could enqueue duplicate observers without detaching old dependencies. Dependency tables survived completed runs. | Canonical nodes, unique queue membership, detach-on-enqueue and run cleanup. Test shared/removed dependencies and supplied-map cleanup. This was an invariant/retention problem; no separate valid-callback wrong-result case was established from duplicate scheduling alone. |
+| Work notifications could enqueue duplicate observers without detaching old dependencies. Dependency tables survived completed runs. | Preserve variable-keyed maps/sets; add unique queue membership, detach-on-enqueue and `finally` cleanup of graph sets and tables. Test shared/removed dependencies and supplied-map cleanup. This was an invariant/retention problem; no separate valid-callback wrong-result case was established from duplicate scheduling alone. |
 | Top recognition used reference identity. | Use domain equality; test fresh equivalent top values, including a custom equality different from `Object.equals`. |
 | Null values were confused with absent cache entries. | Reject null properties/bottom/results and document non-null keys. Optional missing top remains supported. |
 | There was no cooperative cancellation or protection against concurrent public entry. | Add cancellation overload and fail-fast active-call guard; test cancellation before cache access, during iteration, after RHS, before publication, caught cancellation and subsequent reuse. |
@@ -169,10 +189,10 @@ invariants that matter for dependable clients.
 
 Existing constructors and `Function<S,T>` use remain available, with the default
 identity semantics unchanged. Existing proper-callback SLG and unification tests
-must continue to pass. The map-factory parameter retains a raw `Map` bound for
-source compatibility with existing `Supplier<Map>` variables. Internally it uses
-wildcard generics, with the value-polymorphic cast confined to one checked
-construction helper. A compile-time regression exercises this legacy call form.
+must continue to pass. The map-factory parameter continues to accept existing
+`Supplier<Map>` variables. A compile-time regression exercises this legacy call
+form. The factory's value-polymorphic contract applies to property tables,
+dependency tables and backing maps for variable sets.
 
 Intentional tightening: null variables/properties are rejected; all public
 reentrancy, including cached nested reads, is rejected; stale/cross-thread

@@ -333,17 +333,31 @@ class FixerContractTest {
                 () -> new HashMap<>(Map.of("preexisting", true))));
 
         var permanent = new HashMap<Object, Object>();
-        var reusePermanent = new AtomicBoolean(true);
+        assertThrows(IllegalArgumentException.class, () -> {
+            // Eager constructors may reject sharing immediately; lazy allocation
+            // must reject it before the first equation is evaluated.
+            var sharedMaps = new Fixer<String, Boolean>((key, request) -> {
+                fail("A shared map must be rejected before evaluating equations");
+                return true;
+            }, Lattice.BooleanLattice, () -> permanent);
+            sharedMaps.apply("root");
+        });
+        assertTrue(permanent.isEmpty());
+
+        var rejectDuringRun = new AtomicBoolean(false);
         var evaluations = new AtomicInteger();
         var fixer = new Fixer<String, Boolean>((key, request) -> {
             evaluations.incrementAndGet();
             return true;
-        }, Lattice.BooleanLattice, () -> reusePermanent.get() ? permanent : new HashMap<>());
+        }, Lattice.BooleanLattice, () -> rejectDuringRun.get()
+                ? new HashMap<>(Map.of("preexisting", true)) : new HashMap<>());
 
+        // Construction receives valid maps regardless of how eagerly it allocates.
+        // Rejection during solving must also release the public-call gate.
+        rejectDuringRun.set(true);
         assertThrows(IllegalArgumentException.class, () -> fixer.apply("root"));
-        assertEquals(0, evaluations.get(), "A shared map must be rejected before evaluating equations");
-        assertTrue(permanent.isEmpty());
-        reusePermanent.set(false);
+        assertEquals(0, evaluations.get(), "Malformed transient storage must be rejected before evaluating equations");
+        rejectDuringRun.set(false);
         assertTrue(fixer.apply("root"), "A rejected map factory must release the active-call gate");
         assertEquals(1, evaluations.get());
     }
