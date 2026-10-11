@@ -1,0 +1,170 @@
+# JMH version: 1.37
+# VM version: JDK 23.0.2, OpenJDK 64-Bit Server VM, 23.0.2+7-jvmci-b01
+# VM invoker: /Users/cip/Library/Java/JavaVirtualMachines/graalvm-ce-23.0.2/Contents/Home/bin/java
+# VM options: -Xms256m -Xmx256m -XX:+UseG1GC
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 500 ms each
+# Measurement: 5 iterations, 500 ms each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: obp3.bench.fixer.FixerBenchmark.coldSolve
+# Parameters: (mapMode = identity, workload = independent)
+
+# Run progress: 0.00% complete, ETA 00:00:12
+# Fork: 1 of 3
+# Warmup Iteration   1: 85.008 us/op
+# Warmup Iteration   2: 81.767 us/op
+# Warmup Iteration   3: 75.662 us/op
+Iteration   1: 75.517 us/op
+                 gc.alloc.rate:      2705.849 MB/sec
+                 gc.alloc.rate.norm: 214305.043 B/op
+                 gc.count:           9.000 counts
+                 gc.time:            3.000 ms
+
+Iteration   2: 76.640 us/op
+                 gc.alloc.rate:      2666.179 MB/sec
+                 gc.alloc.rate.norm: 214305.054 B/op
+                 gc.count:           9.000 counts
+                 gc.time:            4.000 ms
+
+Iteration   3: 76.544 us/op
+                 gc.alloc.rate:      2669.421 MB/sec
+                 gc.alloc.rate.norm: 214305.052 B/op
+                 gc.count:           9.000 counts
+                 gc.time:            3.000 ms
+
+Iteration   4: 76.767 us/op
+                 gc.alloc.rate:      2661.614 MB/sec
+                 gc.alloc.rate.norm: 214305.059 B/op
+                 gc.count:           9.000 counts
+                 gc.time:            3.000 ms
+
+Iteration   5: 76.396 us/op
+                 gc.alloc.rate:      2674.704 MB/sec
+                 gc.alloc.rate.norm: 214305.059 B/op
+                 gc.count:           9.000 counts
+                 gc.time:            3.000 ms
+
+
+# Run progress: 33.33% complete, ETA 00:00:08
+# Fork: 2 of 3
+# Warmup Iteration   1: 85.793 us/op
+# Warmup Iteration   2: 75.003 us/op
+# Warmup Iteration   3: 79.391 us/op
+Iteration   1: 75.042 us/op
+                 gc.alloc.rate:      2722.972 MB/sec
+                 gc.alloc.rate.norm: 214305.031 B/op
+                 gc.count:           10.000 counts
+                 gc.time:            3.000 ms
+
+Iteration   2: 81.819 us/op
+                 gc.alloc.rate:      2497.229 MB/sec
+                 gc.alloc.rate.norm: 214305.125 B/op
+                 gc.count:           8.000 counts
+                 gc.time:            3.000 ms
+
+Iteration   3: 75.210 us/op
+                 gc.alloc.rate:      2716.846 MB/sec
+                 gc.alloc.rate.norm: 214305.040 B/op
+                 gc.count:           9.000 counts
+                 gc.time:            4.000 ms
+
+Iteration   4: 74.892 us/op
+                 gc.alloc.rate:      2728.234 MB/sec
+                 gc.alloc.rate.norm: 214305.039 B/op
+                 gc.count:           9.000 counts
+                 gc.time:            3.000 ms
+
+Iteration   5: 74.737 us/op
+                 gc.alloc.rate:      2734.070 MB/sec
+                 gc.alloc.rate.norm: 214305.031 B/op
+                 gc.count:           9.000 counts
+                 gc.time:            3.000 ms
+
+
+# Run progress: 66.67% complete, ETA 00:00:04
+# Fork: 3 of 3
+# Warmup Iteration   1: 82.428 us/op
+# Warmup Iteration   2: 74.172 us/op
+# Warmup Iteration   3: 73.488 us/op
+Iteration   1: 73.518 us/op
+                 gc.alloc.rate:      2779.375 MB/sec
+                 gc.alloc.rate.norm: 214305.018 B/op
+                 gc.count:           9.000 counts
+                 gc.time:            3.000 ms
+
+Iteration   2: 78.205 us/op
+                 gc.alloc.rate:      2612.824 MB/sec
+                 gc.alloc.rate.norm: 214305.078 B/op
+                 gc.count:           8.000 counts
+                 gc.time:            3.000 ms
+
+Iteration   3: 82.338 us/op
+                 gc.alloc.rate:      2481.059 MB/sec
+                 gc.alloc.rate.norm: 214305.131 B/op
+                 gc.count:           9.000 counts
+                 gc.time:            4.000 ms
+
+Iteration   4: 77.430 us/op
+                 gc.alloc.rate:      2638.124 MB/sec
+                 gc.alloc.rate.norm: 214305.064 B/op
+                 gc.count:           8.000 counts
+                 gc.time:            2.000 ms
+
+Iteration   5: 73.058 us/op
+                 gc.alloc.rate:      2796.883 MB/sec
+                 gc.alloc.rate.norm: 214305.005 B/op
+                 gc.count:           10.000 counts
+                 gc.time:            4.000 ms
+
+
+
+Result "obp3.bench.fixer.FixerBenchmark.coldSolve":
+  76.541 ±(99.9%) 2.820 us/op [Average]
+  (min, avg, max) = (73.058, 76.541, 82.338), stdev = 2.638
+  CI (99.9%): [73.721, 79.361] (assumes normal distribution)
+
+Secondary result "obp3.bench.fixer.FixerBenchmark.coldSolve:gc.alloc.rate":
+  2672.359 ±(99.9%) 95.492 MB/sec [Average]
+  (min, avg, max) = (2481.059, 2672.359, 2796.883), stdev = 89.324
+  CI (99.9%): [2576.866, 2767.851] (assumes normal distribution)
+
+Secondary result "obp3.bench.fixer.FixerBenchmark.coldSolve:gc.alloc.rate.norm":
+  214305.055 ±(99.9%) 0.037 B/op [Average]
+  (min, avg, max) = (214305.005, 214305.055, 214305.131), stdev = 0.035
+  CI (99.9%): [214305.018, 214305.092] (assumes normal distribution)
+
+Secondary result "obp3.bench.fixer.FixerBenchmark.coldSolve:gc.count":
+  134.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (8.000, 8.933, 10.000), stdev = 0.594
+  CI (99.9%): [134.000, 134.000] (assumes normal distribution)
+
+Secondary result "obp3.bench.fixer.FixerBenchmark.coldSolve:gc.time":
+  48.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (2.000, 3.200, 4.000), stdev = 0.561
+  CI (99.9%): [48.000, 48.000] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:00:12
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+NOTE: Current JVM experimentally supports Compiler Blackholes, and they are in use. Please exercise
+extra caution when trusting the results, look into the generated code to check the benchmark still
+works, and factor in a small probability of new VM bugs. Additionally, while comparisons between
+different JVMs are already problematic, the performance difference caused by different Blackhole
+modes can be very significant. Please make sure you use the consistent Blackhole mode for comparisons.
+
+Benchmark                                    (mapMode)   (workload)  Mode  Cnt       Score    Error   Units
+FixerBenchmark.coldSolve                      identity  independent  avgt   15      76.541 ±  2.820   us/op
+FixerBenchmark.coldSolve:gc.alloc.rate        identity  independent  avgt   15    2672.359 ± 95.492  MB/sec
+FixerBenchmark.coldSolve:gc.alloc.rate.norm   identity  independent  avgt   15  214305.055 ±  0.037    B/op
+FixerBenchmark.coldSolve:gc.count             identity  independent  avgt   15     134.000           counts
+FixerBenchmark.coldSolve:gc.time              identity  independent  avgt   15      48.000               ms
+
+Benchmark result is saved to /Users/cip/Playfield/repositories/obp3/obp3-core/benchmarks/fixer/results/2026-10-12-graal23/minimal-jmh-08.json

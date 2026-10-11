@@ -1,0 +1,10 @@
+verified,identity,chain
+verified,identity,booleanCycle
+verified,identity,powersetRing
+verified,identity,independent
+verified,identity,topFanout
+verified,structural,chain
+verified,structural,booleanCycle
+verified,structural,powersetRing
+verified,structural,independent
+verified,structural,topFanout

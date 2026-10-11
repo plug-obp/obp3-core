@@ -6,8 +6,12 @@ obligations, failure/cancellation behavior and qualification evidence.
 The baseline audited was `ebce326e00b7be217ae0c58f41881ece29dc4690`; its
 [original source remains preserved](https://github.com/plug-obp/obp3-core/blob/ebce326e00b7be217ae0c58f41881ece29dc4690/obp3-algos/src/main/java/obp3/fixer/Fixer.java).
 The current fixes retain that implementation's map-based structure. The broader
-`Node`/`Run` refactor is preserved separately on `codex/fixer-refactor` at
-[`7f7dab9a3c184803760764d1e7247346ad8b6af8`](https://github.com/plug-obp/obp3-core/commit/7f7dab9a3c184803760764d1e7247346ad8b6af8).
+`Node`/`Run` prototype was measured at
+[`7f7dab9a3c184803760764d1e7247346ad8b6af8`](https://github.com/plug-obp/obp3-core/commit/7f7dab9a3c184803760764d1e7247346ad8b6af8);
+further refactor work is kept separately on `codex/fixer-refactor`. The
+[refactor assessment](fixer-refactor-evaluation.md) records its necessity,
+measured tradeoffs and limits. The pinned measurement does not depend on the
+proposal branch's current tip.
 
 ## What the solver computes
 
