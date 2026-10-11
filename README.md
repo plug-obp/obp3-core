@@ -6,3 +6,6 @@
 
 A Java 23 implementation of OBP3.
 
+See [Fixer contracts and qualification](docs/fixer.md) for the demand-driven
+fixed-point solver, lifecycle guarantees, examples and regression coverage.
+

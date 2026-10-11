@@ -10,10 +10,6 @@ import java.util.*;
 import java.util.function.Function;
 
 public class Unificator {
-    final Fixer<Var, UnificationAnswer<Term>> fixer = new Fixer<>(
-            this::solve,
-            new Lattice<>(UnificationAnswer.unknown(), Objects::equals));
-
     public static void main(String[] args) {
         Unificator unificator = new Unificator();
         Map<Term, Term> constraints = Map.of(
@@ -50,10 +46,13 @@ public class Unificator {
         System.out.println("X occurs in: " + no + ", " + yes);
     }
 
+    /** Each returned valuation retains its own equations and memoized fixed points. */
     Function<Var, UnificationAnswer<Term>> solveTop(Map<Term, Term> constraints) {
         // Preprocess: decompose all structural constraints into atomic constraints
-        this.constraints = decomposeConstraints(constraints);
-        return fixer;
+        var snapshot = decomposeConstraints(constraints);
+        return new Fixer<>(
+                (variable, request) -> solve(variable, request, snapshot),
+                new Lattice<>(UnificationAnswer.unknown(), Objects::equals));
     }
 
     /**
@@ -87,10 +86,10 @@ public class Unificator {
         return decomposed;
     }
 
-    Map<Term, java.util.Set<Term>> constraints;
-    SubstitutionMaker substitutionMaker = new SubstitutionMaker();
+    private final SubstitutionMaker substitutionMaker = new SubstitutionMaker();
 
-    UnificationAnswer<Term> solve(Var v, Function<Var, UnificationAnswer<Term>> mapper) {
+    private UnificationAnswer<Term> solve(Var v, Function<Var, UnificationAnswer<Term>> mapper,
+                                          Map<Term, Set<Term>> constraints) {
         // Collect all candidate terms for variable v by examining all constraints
         var candidates = new HashSet<Term>();
 
