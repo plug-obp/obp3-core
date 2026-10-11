@@ -1,6 +1,12 @@
 package obp3.fixer;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
@@ -8,236 +14,224 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-/// Heavily inspired by:
-/// - FRANCOIS POTTIER,<a href="https://gallium.inria.fr/~fpottier/publis/fpottier-fix.pdf"> Lazy Least Fixed Points in ML</a>
-/// - <a href="https://gitlab.inria.fr/fpottier/fix">OCAML Code</a>
-///
-/// Computes least solutions of fixed, pure monotone equations with finite demand
-/// and finite ascending chains. Properties must be non-null and immutable.
-/// Dependency reads use the supplied synchronous request, never public apply.
-/// Completed solutions are cached: changing equations requires a new Fixer.
-/// Failed/cancelled runs discard new results and preserve earlier completed ones.
-/// Only one public call may be active; callbacks expire after their own RHS and
-/// must stay on its thread. These guards do not depend on Java assertions.
+/**
+ * Demand-driven least solutions of a fixed system of monotone equations.
+ * Inspired by Francois Pottier's <em>Lazy Least Fixed Points in ML</em>.
+ *
+ * <p>An equation receives its variable and a synchronous {@code request} function
+ * for reading approximations of other variables. It must use that function, not
+ * recursively call {@link #apply(Object)}. Equations must be pure, monotone and
+ * stable for this solver's lifetime, demand finitely many variables, and use a
+ * property order with finite ascending chains. Properties, including bottom,
+ * must be immutable (or treated as immutable). The solver does not supply a join,
+ * check monotonicity or widen values.
+ *
+ * <p>Completed solutions are memoized for this equation system. A new program,
+ * graph or model requires a new solver. Failed or cancelled equation evaluation
+ * discards the entire current run, including newly discovered maximal values;
+ * earlier completed solutions remain cached. External effects of client code
+ * cannot be rolled back.
+ *
+ * <p>Only one public call may be active. Reentrant and concurrent calls fail
+ * immediately, including cached reads. A request is valid only on its originating
+ * thread during its own equation invocation. These checks do not depend on Java
+ * assertions. Sequential use from different threads is allowed.
+ *
+ * @param <S> non-null variables with stable identity/equality under the chosen map
+ * @param <T> non-null immutable properties
+ */
+public class Fixer<S, T> implements Function<S, T> {
+    private final Lattice<T> lattice;
+    private final BiFunction<S, Function<S, T>, T> function;
+    private final Supplier<? extends Map<?, ?>> mapSupplier;
+    private final Map<S, T> fixed;
+    private final AtomicBoolean active = new AtomicBoolean();
 
-
-public class Fixer<S, T> implements Function<S, T>{
-    Lattice<T> lattice;
-    BiFunction<S, Function<S, T>, T> function;
-    Supplier<? extends Map> mapSupplier;
-
-    /// The permanent table maps variables that have reached a fixed point to properties. It persists forever.
-    Map<S, T> mFixed;
-
-    /// The transient table maps variables that have not yet reached a
-    /// fixed point to nodes. At the beginning of a run, it is empty.
-    /// It fills up during a run.
-    /// At the end of a run, it is copied into the permanent table and cleared.
-    Map<S, T> mTransient;
-    /// Records the observers of a node (The nodes from which reachable)
-    /// The two adjacency tables record the dependency graph in both directions.
-    Map<S, Set<S>> mParents;
-    Map<S, Set<S>> mChildren;
-
-    /// The workset is based on a Queue, but it could just as well be based on a
-    ///    Stack. A textual replacement is possible. It could also be based on a
-    ///    priority queue, provided a sensible way of assigning priorities could
-    ///    be found.
-    ///
-    /// A node in the workset has no successors.
-    /// NC: The idea is that when a node gets in the workset, it is like newly discovered - so we forget its successors
-    ///    (It can have predecessors.)
-    ///    In other words, a predecessor (an observer) of some node is never in the workset.
-    ///    Furthermore, a node never appears twice in the workset.
-    ///
-    /// When a variable broadcasts a signal, all of its predecessors (observers) receive the signal.
-    ///    Any variable that receives the signal loses all of its
-    ///    successors (that is, it ceases to observe anything) and is inserted into
-    ///    the workset. This preserves the above invariant.
-    Queue<S> mWorkset = new LinkedList<>();
-    Set<S> mQueued;
-
+    /** Uses reference identity for variables; use {@code HashMap::new} for value equality. */
     public Fixer(BiFunction<S, Function<S, T>, T> function, Lattice<T> lattice) {
         this(function, lattice, IdentityHashMap::new);
     }
 
-    /// The default constructor uses identity keys; use HashMap::new for structural keys.
-    /// The factory must supply fresh, empty, mutable, strongly retaining maps with
-    /// consistent key equivalence, unrestricted value types and nonthrowing operations.
-    public Fixer(BiFunction<S, Function<S, T>, T> function, Lattice<T> lattice, Supplier<? extends Map> mapSupplier) {
+    /**
+     * Uses the supplied map semantics for variable equality throughout the solver.
+     * The factory must return a fresh, empty, mutable, strongly retaining map on
+     * every call, with the same key equivalence and no value-type restrictions.
+     * Maps must not be retained or mutated by the caller; keys and map operations
+     * must obey their ordinary stable, non-throwing contracts.
+     */
+    @SuppressWarnings("rawtypes") // Preserve source compatibility with legacy Supplier<Map> callers.
+    public Fixer(BiFunction<S, Function<S, T>, T> function, Lattice<T> lattice,
+                 Supplier<? extends Map> mapSupplier) {
         this.function = Objects.requireNonNull(function, "function");
         this.lattice = Objects.requireNonNull(lattice, "lattice");
-        this.mapSupplier = Objects.requireNonNull(mapSupplier, "mapSupplier");
-        this.mFixed = newMap();
-        this.mTransient = newMap();
-        this.mParents = newMap();
-        this.mChildren = newMap();
-        this.mQueued = Collections.newSetFromMap(newMap());
+        var checkedSupplier = Objects.requireNonNull(mapSupplier, "mapSupplier");
+        this.mapSupplier = checkedSupplier::get;
+        this.fixed = newMap();
     }
 
     @SuppressWarnings("unchecked")
     private <V> Map<S, V> newMap() {
+        // The factory is value-polymorphic by contract; keep the single cast here.
         Map<?, ?> map = Objects.requireNonNull(mapSupplier.get(), "mapSupplier result");
         if (!map.isEmpty()) throw new IllegalArgumentException("mapSupplier must return empty maps");
-        if (map == mFixed || map == mTransient || map == mParents || map == mChildren)
-            throw new IllegalArgumentException("mapSupplier must return fresh maps");
         return (Map<S, V>) map;
     }
 
-    /// The flag 'inactive' prevents reentrant calls by the client.
-    private final AtomicBoolean inactive = new AtomicBoolean(true);
-    private BooleanSupplier cancellationRequested;
-    private boolean cancelled;
-
-    /// Invocations of 'apply' trigger the fixed point computation.
+    /** Computes or retrieves a completed solution; no cancellation is requested. */
     @Override
-    public T apply(S node) {
-        return apply(node, () -> false);
+    public T apply(S variable) {
+        return apply(variable, () -> false);
     }
 
-    /// Cooperative cancellation never returns a partial result. Once observed it
-    /// stays latched for this run, even if an RHS catches CancellationException.
-    /// Blocking client code cannot be preempted; cancellation needs a checkpoint.
-    public T apply(S node, BooleanSupplier cancellationRequested) {
-        Objects.requireNonNull(node, "node");
+    /**
+     * Computes a solution with cooperative cancellation. Cancellation is checked
+     * before cache access, between equations, at requests and before publication.
+     * It throws {@link CancellationException}, never returns a partial solution,
+     * and leaves the solver reusable. Once observed, cancellation is latched for
+     * the run even if an equation catches the exception. A blocking equation
+     * which does not request anything cannot be preempted by this mechanism.
+     *
+     * @param variable variable to solve
+     * @param cancellationRequested side-effect-free cancellation predicate
+     * @return the least solution under the class contract
+     */
+    public T apply(S variable, BooleanSupplier cancellationRequested) {
+        Objects.requireNonNull(variable, "variable");
         Objects.requireNonNull(cancellationRequested, "cancellationRequested");
-        if (!inactive.compareAndSet(true, false))
+        if (!active.compareAndSet(false, true))
             throw new IllegalStateException("Fixer.apply is already active; use the equation's request callback");
-        boolean solving = false;
+        Run run = null;
         try {
+            if (cancellationRequested.getAsBoolean()) throw new CancellationException("Fixer cancelled");
+            T cached = fixed.get(variable);
+            if (cached != null) return cached;
+            run = new Run(cancellationRequested);
+            Node root = run.node(variable);
+            while (!run.work.isEmpty()) {
+                run.checkCancellation();
+                Node current = run.work.removeFirst();
+                current.queued = false;
+                run.solve(current);
+            }
+            run.checkCancellation();
+            // No callback, equality check or cancellation predicate runs during
+            // publication. Only a fully quiescent run enters the permanent cache.
+            for (Node node : run.nodes.values()) fixed.put(node.variable, node.value);
+            return root.value;
+        } finally {
+            if (run != null) run.discard();
+            active.set(false);
+        }
+    }
+
+    /** Canonical per-run node identity also governs dependency sets and the queue. */
+    private final class Node {
+        final S variable;
+        final Set<Node> parents = new LinkedHashSet<>();
+        final Set<Node> children = new LinkedHashSet<>();
+        T value = lattice.bottom();
+        boolean queued;
+        boolean maximal;
+
+        Node(S variable) { this.variable = variable; }
+
+        void detachChildren() {
+            for (Node child : children) child.parents.remove(this);
+            children.clear();
+        }
+    }
+
+    private final class Run {
+        final Map<S, Node> nodes = newMap();
+        final ArrayDeque<Node> work = new ArrayDeque<>();
+        final Thread owner = Thread.currentThread();
+        final BooleanSupplier cancellationRequested;
+        boolean cancelled;
+
+        Run(BooleanSupplier cancellationRequested) {
+            if ((Object) nodes == fixed)
+                throw new IllegalArgumentException("mapSupplier must return fresh maps");
             this.cancellationRequested = cancellationRequested;
-            checkCancellation();
-            // if the node is fixed already just return it.
-            var property = mFixed.get(node);
-            if (property != null) { return property; }
-            solving = true;
-            ensureTransient(node);
-            // while we have work to do just do it,
-            // - starting either at the node that we just added, if the workset was empty and node was not already transient
-            // - or continue with the workset in the defined 'order' (FIFO here).
-            while (!mWorkset.isEmpty()) {
-                checkCancellation();
-                var current = mWorkset.poll();
-                mQueued.remove(current);
-                solve(current);
+        }
+
+        void checkCancellation() {
+            if (cancelled || cancellationRequested.getAsBoolean()) {
+                cancelled = true;
+                throw new CancellationException("Fixer cancelled");
             }
+        }
 
-            // we are done for this node.
-            // copies the transient table into the permanent table, and
-            //    empties the transient table.
-            //    Dependency edges can then be reclaimed; completed values stay cached.
-            checkCancellation();
-            mFixed.putAll(mTransient);
-            return mFixed.get(node);
-        } finally {
-            if (solving) {
-                mTransient.clear();
-                mParents.values().forEach(Set::clear);
-                mChildren.values().forEach(Set::clear);
-                mParents.clear();
-                mChildren.clear();
-                mWorkset.clear();
-                mQueued.clear();
+        Node node(S variable) {
+            Node node = nodes.get(variable);
+            if (node == null) {
+                node = new Node(variable);
+                nodes.put(variable, node);
+                enqueue(node);
             }
-            this.cancellationRequested = null;
-            cancelled = false;
-            inactive.set(true);
+            return node;
         }
-    }
 
-    private void checkCancellation() {
-        if (cancelled || cancellationRequested.getAsBoolean()) {
-            cancelled = true;
-            throw new CancellationException("Fixer cancelled");
+        void enqueue(Node node) {
+            if (node.queued || node.maximal) return;
+            // A queued equation observes nothing until its next evaluation.
+            node.detachChildren();
+            node.queued = true;
+            work.addLast(node);
         }
-    }
 
-    void ensureTransient(S node) {
-        // if a node is already transient, just return.
-        if (mTransient.containsKey(node)) { return; }
-        // create a transient node starting it at the bottom of the lattice.
-        mTransient.put(node, lattice.bottom());
-        mParents.put(node, Collections.newSetFromMap(newMap()) );
-        mChildren.put(node, Collections.newSetFromMap(newMap()) );
-        enqueue(node);
-    }
-
-    void enqueue(S node) {
-        if (!mQueued.add(node)) return;
-        // Queued nodes cease observing their old dependencies until reevaluation.
-        Set<S> oldChildren = mChildren.get(node);
-        for (S oldChild : oldChildren) {
-            mParents.get(oldChild).remove(node);
-        }
-        oldChildren.clear();
-        mWorkset.add(node);
-    }
-    void solve(S current) {
-        if (mFixed.get(current) != null) return;
-        final List<S> currentChildren = new ArrayList<>();
-
-        try {
-            // The flag [alive] is used to prevent the client from invoking [request] after this interaction phase is over.
-            final boolean[] alive = {true};
-            final Thread owner = Thread.currentThread();
-            Function<S, T> requestFunction = (S node) -> {
-                if (Thread.currentThread() != owner || !alive[0])
-                    throw new IllegalStateException("Equation request is expired or used on another thread");
-                Objects.requireNonNull(node, "node");
-                checkCancellation();
-                var property = mFixed.get(node);
-                if (property != null) { return property; }
-                ensureTransient(node);
-                currentChildren.add(node);
-                return mTransient.get(node);
-            };
-
-            T newProperty;
+        void solve(Node current) {
+            Request request = new Request(current);
+            T next;
             try {
-                newProperty = Objects.requireNonNull(function.apply(current, requestFunction), "equation result");
+                next = Objects.requireNonNull(function.apply(current.variable, request), "equation result");
             } finally {
-                alive[0] = false;
+                request.close();
             }
             checkCancellation();
-
-            //     If we have gathered no children in the list [children], then this node must have stabilized.
-            //     If [new_property] is maximal, then this node must have stabilized.
-            //
-            //     If this node has stabilized, then it need not observe anymore, so the call to [set_successors] is skipped.
-            //     In practice, this seems to be a minor optimization. In the particular case where every node stabilizes at
-            //     the very first call to [rhs], this means that no edges are ever built.
-            //     This particular case is unlikely, as it means that we are just doing memoization,
-            //     not a true fixed point computation.
-            //
-            //     Even maximal results stay transient until the whole run succeeds,
-            //     so a later exception or cancellation cannot publish partial results.
-
-            var isMaximal = lattice.isMaximal(newProperty);
-            if (!isMaximal) {
-                //register new parents/children
-                for (S child : currentChildren) {
-                    mParents.get(child).add(current);
-                    mChildren.get(current).add(child);
-                }
-
-                // If the updated value differs from the previous value, record
-                // the updated value and send a signal to all observers of [node].
-                if (!lattice.equality().test(mTransient.get(current), newProperty)) {
-                    mTransient.put(current, newProperty);
-                    //signal the parents because the current value changed
-                    for (S parent : new ArrayList<>(mParents.get(current))) enqueue(parent);
-                }
-            } else {
-                //current got at the top of the lattice
-                var oldProperty = mTransient.put(current, newProperty);
-                if (!lattice.equality().test(oldProperty, newProperty)) {
-                    //signal the parents because the current value changed
-                    for (S parent : new ArrayList<>(mParents.get(current))) enqueue(parent);
-                }
+            boolean changed = !lattice.equality().test(current.value, next);
+            current.maximal = lattice.isMaximal(next);
+            current.value = next;
+            if (current.maximal) current.detachChildren();
+            if (changed) {
+                // Enqueuing an observer removes it from this parents set.
+                for (Node parent : List.copyOf(current.parents)) enqueue(parent);
             }
-        } finally {
-            // A retained, expired callback must not retain its collected dependencies.
-            currentChildren.clear();
+        }
+
+        void discard() {
+            // Also release the graph if a client retains an expired request.
+            for (Node node : nodes.values()) {
+                node.parents.clear();
+                node.children.clear();
+            }
+            nodes.clear();
+            work.clear();
+        }
+
+        private final class Request implements Function<S, T> {
+            private Node observer;
+
+            Request(Node observer) { this.observer = observer; }
+
+            @Override
+            public T apply(S variable) {
+                if (Thread.currentThread() != owner)
+                    throw new IllegalStateException("Equation requests must stay on their originating thread");
+                if (observer == null)
+                    throw new IllegalStateException("Equation request has expired");
+                Objects.requireNonNull(variable, "variable");
+                checkCancellation();
+                T cached = fixed.get(variable);
+                if (cached != null) return cached;
+                Node dependency = node(variable);
+                if (!dependency.maximal) {
+                    observer.children.add(dependency);
+                    dependency.parents.add(observer);
+                }
+                return dependency.value;
+            }
+
+            void close() { observer = null; }
         }
     }
 }
