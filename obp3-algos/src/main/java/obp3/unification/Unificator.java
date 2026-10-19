@@ -67,6 +67,10 @@ public class Unificator {
             var entry = workQueue.poll();
             var lhs = entry.getKey();
             var rhs = entry.getValue();
+
+            if (termEq(lhs, rhs)) {
+                continue;
+            }
             
             // If both sides are Apps with same name and arity, decompose
             if (lhs instanceof App(String lName, List<Term> lArgs) &&

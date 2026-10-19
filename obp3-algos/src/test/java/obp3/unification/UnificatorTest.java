@@ -49,6 +49,7 @@ class UnificatorTest {
         assertEquals(new App("a"), result.toOptional().get());
     }
 
+
     @Test
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
     void testChainedUnification() {
@@ -135,6 +136,30 @@ class UnificatorTest {
         var yResult = valuation.apply(new Var("Y"));
         
         assertTrue(yResult.isUnknown(), "Y should be unknown (free variable)");
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    void testIdentityConstraintLeavesVariableUnconstrained() {
+        var unificator = new Unificator();
+        var x = new Var("X");
+        var valuation = unificator.solveTop(Map.of(x, x));
+
+        assertTrue(valuation.apply(x).isUnknown(),
+                "X = X should leave X unconstrained rather than fail the occurs check");
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    void testDecomposedIdentityConstraintLeavesVariableUnconstrained() {
+        var unificator = new Unificator();
+        var x = new Var("X");
+        var valuation = unificator.solveTop(Map.of(
+                new App("f", x), new App("f", x)
+        ));
+
+        assertTrue(valuation.apply(x).isUnknown(),
+                "Decomposing f(X) = f(X) should not introduce an occurs-check failure");
     }
     
     @Test
@@ -650,4 +675,3 @@ class UnificatorTest {
         assertEquals(new App("b"), zResult.toOptional().get());
     }
 }
-

@@ -17,7 +17,7 @@ The central implementation module. It depends on `obp3-runtime` and owns graph t
 - `obp3.scc`: two Tarjan implementations. `tarjan1/` embeds SCC data in the DFS configuration; `tarjan2/` separates algorithm state into [`TarjanMemory`](../obp3-algos/src/main/java/obp3/scc/tarjan2/TarjanMemory.java) and callbacks.
 - `obp3.modelchecking`: result/status contracts, safety DFS, Büchi nested-DFS variants (`naive`, `cvwy92`, `gs09`, separated and CDLP05 variants), and builder/model APIs under `tools/`.
 - `obp3.fixer`: generic lattice/fixpoint evaluation. [`Fixer`](../obp3-algos/src/main/java/obp3/fixer/Fixer.java) owns transient/fixed tables and dependency edges; [`Lattice`](../obp3-algos/src/main/java/obp3/fixer/Lattice.java) defines bottom/top/equality.
-- `obp3.unification`: term unification, answer values, occurs checking, and substitution. Syntax types are in `unification/syntax/`.
+- `obp3.unification`: term unification, answer values, occurs checking, and substitution. Syntactically identical equations such as `X = X` impose no binding and are discarded, including identities exposed by structural decomposition. Syntax types are in `unification/syntax/`.
 - `obp3.uslg.syntax`: substitutions, rules, answer sets, alpha-equivalence, and the tabled SLG solver.
 - `obp3.datastructures.collections.linearscan`: linear-probing set/map and shared tombstone/growth logic.
 - `obp3.hashcons`: hash-consing abstractions and lambda-term examples, including wrapper/no-wrapper/expando approaches.
@@ -47,5 +47,4 @@ Run with `./gradlew :obp3-algos:test` from the project root.
 - `Hashable.fromComparator(comparator, hashFunction)` requires a caller-supplied hash consistent with the comparator. `withPositiveHash()` uses `Math.abs`, which leaves `Integer.MIN_VALUE` negative; the linear table later uses `% capacity` as an array index. Existing tests miss this combination (capacity 16 masks the negative remainder for this integer).
 - `LinearScanHashMap.keySet()`, `values()`, and `entrySet()` build detached snapshots, and entries are copies. This differs from the backed views required by `Map`; also review `equals`/`hashCode` for the custom map and set.
 - `PeekableIterator` uses null as its no-cached-value marker, so a real null value cannot be reliably peeked. Its callers include relational BFS/DFS.
-- `Unificator.solve` should have a regression for `X = X`; the candidate may then be rejected by the occurs check. Its fixpoint is stored on the instance, so also review repeated `solveTop` use if that lifecycle becomes public.
 - Raw `Map`/`Function` types in `Fixer` and `ModelCheckerBuilder` weaken type safety and produce IDE diagnostics. Prefer fixing these while touching those APIs, with focused tests.
