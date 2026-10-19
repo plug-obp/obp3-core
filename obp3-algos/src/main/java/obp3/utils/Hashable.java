@@ -183,7 +183,8 @@ public interface Hashable<T> {
     
     /**
      * Returns a hashable that always returns positive hash codes by taking the
-     * absolute value of the underlying hash.
+     * absolute value of the underlying hash
+     * ({@code Integer.MIN_VALUE} is mapped to {@code Integer.MAX_VALUE}).
      * 
      * @return a hashable that produces non-negative hash codes
      */
@@ -192,7 +193,9 @@ public interface Hashable<T> {
         return new Hashable<T>() {
             @Override
             public int hash(T x) {
-                return Math.abs(parent.hash(x));
+                int h = parent.hash(x);
+                // Math.abs(Integer.MIN_VALUE) is still negative
+                return h == Integer.MIN_VALUE ? Integer.MAX_VALUE : Math.abs(h);
             }
             
             @Override

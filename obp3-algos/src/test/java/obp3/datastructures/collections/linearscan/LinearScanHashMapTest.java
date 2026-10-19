@@ -877,4 +877,23 @@ class LinearScanHashMapTest {
         assertEquals(0, map.size());
         assertTrue(map.isEmpty());
     }
+
+    @Test
+    @DisplayName("Map should handle Integer.MIN_VALUE hashes with non-power-of-two capacities")
+    void testMinValueHashNonPowerOfTwoCapacity() {
+        for (int capacity : new int[]{3, 5, 7, 10, 13}) {
+            Hashable<Integer> minHash = new Hashable<>() {
+                @Override public int hash(Integer x) { return Integer.MIN_VALUE; }
+                @Override public boolean equal(Integer a, Integer b) { return a.equals(b); }
+            };
+            LinearScanHashMap<Integer, String> m = new LinearScanHashMap<>(capacity, minHash);
+            for (int i = 0; i < 20; i++) {
+                assertNull(m.put(i, "v" + i));
+            }
+            assertEquals(20, m.size());
+            for (int i = 0; i < 20; i++) {
+                assertEquals("v" + i, m.get(i));
+            }
+        }
+    }
 }

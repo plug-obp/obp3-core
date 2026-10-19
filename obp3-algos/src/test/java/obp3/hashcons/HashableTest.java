@@ -139,9 +139,17 @@ class HashableTest {
         Hashable<Integer> hashable = x -> Integer.MIN_VALUE;
         Hashable<Integer> positive = hashable.withPositiveHash();
         
-        // Math.abs(Integer.MIN_VALUE) is still negative, but should work
-        int result = positive.hash(0);
-        assertTrue(result >= 0 || result == Integer.MIN_VALUE);
+        assertTrue(positive.hash(0) >= 0);
+    }
+
+    @Test
+    @DisplayName("withPositiveHash() should never return a negative value")
+    void testWithPositiveHashNeverNegative() {
+        int[] samples = {Integer.MIN_VALUE, Integer.MIN_VALUE + 1, -1, 0, 1, Integer.MAX_VALUE};
+        for (int sample : samples) {
+            Hashable<Integer> positive = ((Hashable<Integer>) x -> sample).withPositiveHash();
+            assertTrue(positive.hash(0) >= 0, "negative hash for " + sample);
+        }
     }
 
     @Test

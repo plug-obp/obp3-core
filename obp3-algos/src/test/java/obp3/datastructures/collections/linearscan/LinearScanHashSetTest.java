@@ -249,6 +249,16 @@ class LinearScanHashSetTest {
     }
 
     @Test
+    @DisplayName("Set should handle Integer.MIN_VALUE with non-power-of-two capacity")
+    void testMinValueNonPowerOfTwoCapacity() {
+        LinearScanHashSet<Integer> intSet = new LinearScanHashSet<>(7);
+        assertTrue(intSet.add(Integer.MIN_VALUE));
+        assertTrue(intSet.contains(Integer.MIN_VALUE));
+        assertFalse(intSet.add(Integer.MIN_VALUE));
+        assertEquals(1, intSet.size());
+    }
+
+    @Test
     @DisplayName("Set should handle hash code edge cases")
     void testHashCodeEdgeCases() {
         LinearScanHashSet<Integer> intSet = new LinearScanHashSet<>(16);
@@ -754,5 +764,22 @@ class LinearScanHashSetTest {
         set.clear();
         assertEquals(0, set.size());
         assertTrue(set.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Set should handle Integer.MIN_VALUE hashes across growth")
+    void testMinValueHashWithGrowth() {
+        Hashable<Integer> minHash = new Hashable<>() {
+            @Override public int hash(Integer x) { return Integer.MIN_VALUE; }
+            @Override public boolean equal(Integer a, Integer b) { return a.equals(b); }
+        };
+        LinearScanHashSet<Integer> s = new LinearScanHashSet<>(5, minHash);
+        for (int i = 0; i < 30; i++) {
+            assertTrue(s.add(i));
+        }
+        assertEquals(30, s.size());
+        for (int i = 0; i < 30; i++) {
+            assertTrue(s.contains(i));
+        }
     }
 }

@@ -279,8 +279,9 @@ public abstract class AbstractLinearProbingTable<K> {
      * @return a SearchResult containing the index if found, or notFound() if not present
      */
     protected SearchResult findSlot(K key) {
+        // floorMod keeps the index in [0, capacity) even for negative hashes (e.g. Integer.MIN_VALUE)
         int theHash = hashable.hash(key);
-        int theIndex = theHash % capacity;
+        int theIndex = Math.floorMod(theHash, capacity);
 
         // Check for empty slot at index
         if (items[theIndex] == EMPTY) {
@@ -334,7 +335,7 @@ public abstract class AbstractLinearProbingTable<K> {
      */
     protected InsertionSlot findInsertionSlot(K key) {
         int theHash = hashable.hash(key);
-        int theIndex = theHash % capacity;
+        int theIndex = Math.floorMod(theHash, capacity);
         int firstDeletedIndex = -1;
 
         // Check for empty slot at index
@@ -449,7 +450,7 @@ public abstract class AbstractLinearProbingTable<K> {
      * @param hash        the hash code of the item's key
      */
     protected void internalRehashInsert(Object[] array, int arrayLength, Object item, int hash) {
-        int theIndex = hash % arrayLength;
+        int theIndex = Math.floorMod(hash, arrayLength);
         
         // Check for empty slot at index
         if (array[theIndex] == EMPTY) {
