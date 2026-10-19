@@ -229,43 +229,216 @@ public class LinearScanHashMap<K, V> extends AbstractLinearProbingTable<K> imple
         return false;
     }
 
+    /**
+     * Returns a live view of the keys. Removals through the view (including its iterator)
+     * mutate this map; additions are unsupported.
+     */
     @Override
-    @SuppressWarnings("unchecked")
     public Set<K> keySet() {
-        Set<K> keys = new HashSet<>();
-        for (int i = 0; i < capacity; i++) {
-            if (isActiveSlot(i)) {
-                MapEntry<K, V> entry = (MapEntry<K, V>) items[i];
-                keys.add(entry.key);
-            }
-        }
-        return keys;
+        return new KeyView();
     }
 
+    /**
+     * Returns a live view of the values. Removals through the view (including its iterator)
+     * mutate this map; additions are unsupported.
+     */
     @Override
-    @SuppressWarnings("unchecked")
     public Collection<V> values() {
-        List<V> vals = new ArrayList<>(size);
-        for (int i = 0; i < capacity; i++) {
-            if (isActiveSlot(i)) {
-                MapEntry<K, V> entry = (MapEntry<K, V>) items[i];
-                vals.add(entry.value);
-            }
-        }
-        return vals;
+        return new ValuesView();
+    }
+
+    /**
+     * Returns a live view of the entries. Entries write {@code setValue} through to this map;
+     * removals through the view mutate this map; additions are unsupported.
+     */
+    @Override
+    public Set<Map.Entry<K, V>> entrySet() {
+        return new EntryView();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Set<Map.Entry<K, V>> entrySet() {
-        Set<Map.Entry<K, V>> entries = new HashSet<>();
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Map<?, ?> other) || other.size() != size) {
+            return false;
+        }
+        try {
+            for (int i = 0; i < capacity; i++) {
+                if (isActiveSlot(i)) {
+                    @SuppressWarnings("unchecked")
+                    MapEntry<K, V> e = (MapEntry<K, V>) items[i];
+                    if (e.value == null ? !(other.get(e.key) == null && other.containsKey(e.key))
+                                        : !e.value.equals(other.get(e.key))) {
+                        return false;
+                    }
+                }
+            }
+        } catch (ClassCastException | NullPointerException ex) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 0;
         for (int i = 0; i < capacity; i++) {
             if (isActiveSlot(i)) {
-                MapEntry<K, V> entry = (MapEntry<K, V>) items[i];
-                entries.add(new AbstractMap.SimpleEntry<>(entry.key, entry.value));
+                h += items[i].hashCode();
             }
         }
-        return entries;
+        return h;
+    }
+
+    /** Iterates over active slots and supports {@link Iterator#remove()}. */
+    private abstract class SlotIterator<T> implements Iterator<T> {
+        private int next = advance(0);
+        private int last = -1;
+
+        private int advance(int from) {
+            while (from < capacity && !isActiveSlot(from)) {
+                from++;
+            }
+            return from;
+        }
+
+        abstract T project(MapEntry<K, V> entry);
+
+        @Override
+        public boolean hasNext() {
+            return next < capacity;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public T next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            last = next;
+            next = advance(next + 1);
+            return project((MapEntry<K, V>) items[last]);
+        }
+
+        @Override
+        public void remove() {
+            if (last < 0) {
+                throw new IllegalStateException();
+            }
+            removeAtIndex(last);
+            last = -1;
+        }
+    }
+
+    private final class KeyView extends AbstractSet<K> {
+        @Override
+        public Iterator<K> iterator() {
+            return new SlotIterator<K>() {
+                @Override
+                K project(MapEntry<K, V> entry) {
+                    return entry.key;
+                }
+            };
+        }
+
+        @Override
+        public int size() {
+            return size;
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            return containsKey(o);
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            if (!containsKey(o)) {
+                return false;
+            }
+            LinearScanHashMap.this.remove(o);
+            return true;
+        }
+
+        @Override
+        public void clear() {
+            LinearScanHashMap.this.clear();
+        }
+    }
+
+    private final class ValuesView extends AbstractCollection<V> {
+        @Override
+        public Iterator<V> iterator() {
+            return new SlotIterator<V>() {
+                @Override
+                V project(MapEntry<K, V> entry) {
+                    return entry.value;
+                }
+            };
+        }
+
+        @Override
+        public int size() {
+            return size;
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            return containsValue(o);
+        }
+
+        @Override
+        public void clear() {
+            LinearScanHashMap.this.clear();
+        }
+    }
+
+    private final class EntryView extends AbstractSet<Map.Entry<K, V>> {
+        @Override
+        public Iterator<Map.Entry<K, V>> iterator() {
+            return new SlotIterator<Map.Entry<K, V>>() {
+                @Override
+                Map.Entry<K, V> project(MapEntry<K, V> entry) {
+                    return entry;
+                }
+            };
+        }
+
+        @Override
+        public int size() {
+            return size;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public boolean contains(Object o) {
+            if (!(o instanceof Map.Entry<?, ?> e)) {
+                return false;
+            }
+            SearchResult r = findSlot((K) e.getKey());
+            return r.found && Objects.equals(((MapEntry<K, V>) items[r.index]).value, e.getValue());
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public boolean remove(Object o) {
+            if (!(o instanceof Map.Entry<?, ?> e)) {
+                return false;
+            }
+            SearchResult r = findSlot((K) e.getKey());
+            if (r.found && Objects.equals(((MapEntry<K, V>) items[r.index]).value, e.getValue())) {
+                removeAtIndex(r.index);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void clear() {
+            LinearScanHashMap.this.clear();
+        }
     }
 
     /**
@@ -274,13 +447,41 @@ public class LinearScanHashMap<K, V> extends AbstractLinearProbingTable<K> imple
      * @param <K> the type of the key
      * @param <V> the type of the value
      */
-    private static class MapEntry<K, V> {
+    private static class MapEntry<K, V> implements Map.Entry<K, V> {
         K key;
         V value;
 
         MapEntry(K key, V value) {
             this.key = key;
             this.value = value;
+        }
+
+        @Override
+        public K getKey() {
+            return key;
+        }
+
+        @Override
+        public V getValue() {
+            return value;
+        }
+
+        @Override
+        public V setValue(V newValue) {
+            V old = value;
+            value = newValue;
+            return old;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof Map.Entry<?, ?> e
+                    && Objects.equals(key, e.getKey()) && Objects.equals(value, e.getValue());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(key) ^ Objects.hashCode(value);
         }
 
         @Override

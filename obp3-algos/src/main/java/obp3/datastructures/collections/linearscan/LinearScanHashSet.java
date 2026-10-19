@@ -208,12 +208,19 @@ public class LinearScanHashSet<K> extends AbstractLinearProbingTable<K> implemen
     @Override
     public Iterator<K> iterator() {
         return new Iterator<K>() {
-            private int currentIndex = 0;
-            private int itemsReturned = 0;
+            private int next = advance(0);
+            private int last = -1;
+
+            private int advance(int from) {
+                while (from < capacity && !isActiveSlot(from)) {
+                    from++;
+                }
+                return from;
+            }
 
             @Override
             public boolean hasNext() {
-                return itemsReturned < size;
+                return next < capacity;
             }
 
             @Override
@@ -222,22 +229,46 @@ public class LinearScanHashSet<K> extends AbstractLinearProbingTable<K> implemen
                 if (!hasNext()) {
                     throw new NoSuchElementException();
                 }
-                
-                // Find next non-empty, non-deleted item
-                while (currentIndex < capacity && !isActiveSlot(currentIndex)) {
-                    currentIndex++;
+                last = next;
+                next = advance(next + 1);
+                return (K) items[last];
+            }
+
+            @Override
+            public void remove() {
+                if (last < 0) {
+                    throw new IllegalStateException();
                 }
-                
-                if (currentIndex >= capacity) {
-                    throw new NoSuchElementException();
-                }
-                
-                K item = (K) items[currentIndex];
-                currentIndex++;
-                itemsReturned++;
-                return item;
+                removeAtIndex(last);
+                last = -1;
             }
         };
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Set<?> other) || other.size() != size) {
+            return false;
+        }
+        try {
+            return containsAll(other);
+        } catch (ClassCastException | NullPointerException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 0;
+        for (int i = 0; i < capacity; i++) {
+            if (isActiveSlot(i)) {
+                h += Objects.hashCode(items[i]);
+            }
+        }
+        return h;
     }
 
     @Override
