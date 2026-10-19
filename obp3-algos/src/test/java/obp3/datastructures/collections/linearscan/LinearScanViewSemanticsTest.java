@@ -197,4 +197,44 @@ class LinearScanViewSemanticsTest {
         set.add(1);
         assertThrows(IllegalStateException.class, () -> set.iterator().remove());
     }
+
+    private static final obp3.utils.Hashable<String> CASE_INSENSITIVE = new obp3.utils.Hashable<>() {
+        @Override
+        public int hash(String x) {
+            return x == null ? 0 : x.toLowerCase().hashCode();
+        }
+
+        @Override
+        public boolean equal(String x, String y) {
+            return x == null ? y == null : x.equalsIgnoreCase(y);
+        }
+    };
+
+    @Test
+    @DisplayName("Set equals/hashCode honor a custom Hashable consistently")
+    void setCustomHashable() {
+        LinearScanHashSet<String> s1 = new LinearScanHashSet<>(8, CASE_INSENSITIVE);
+        LinearScanHashSet<String> s2 = new LinearScanHashSet<>(8, CASE_INSENSITIVE);
+        s1.addAll(List.of("A", "b"));
+        s2.addAll(List.of("a", "B"));
+        assertEquals(s1, s2);
+        assertEquals(s1.hashCode(), s2.hashCode());
+        s2.add("c");
+        assertNotEquals(s1, s2);
+    }
+
+    @Test
+    @DisplayName("Map equals/hashCode honor a custom Hashable consistently")
+    void mapCustomHashable() {
+        LinearScanHashMap<String, Integer> m1 = new LinearScanHashMap<>(8, CASE_INSENSITIVE);
+        LinearScanHashMap<String, Integer> m2 = new LinearScanHashMap<>(8, CASE_INSENSITIVE);
+        m1.put("A", 1);
+        m1.put("b", 2);
+        m2.put("a", 1);
+        m2.put("B", 2);
+        assertEquals(m1, m2);
+        assertEquals(m1.hashCode(), m2.hashCode());
+        m2.put("B", 3);
+        assertNotEquals(m1, m2);
+    }
 }

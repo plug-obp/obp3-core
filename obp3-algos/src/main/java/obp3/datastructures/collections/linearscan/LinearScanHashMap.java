@@ -256,6 +256,11 @@ public class LinearScanHashMap<K, V> extends AbstractLinearProbingTable<K> imple
         return new EntryView();
     }
 
+    /**
+     * Compares with another map. Keys are matched using this map's {@link Hashable};
+     * values are compared with {@link Objects#equals}. Symmetry with foreign maps holds
+     * only when the {@code Hashable} agrees with standard equality.
+     */
     @Override
     public boolean equals(Object o) {
         if (o == this) {
@@ -265,14 +270,11 @@ public class LinearScanHashMap<K, V> extends AbstractLinearProbingTable<K> imple
             return false;
         }
         try {
-            for (int i = 0; i < capacity; i++) {
-                if (isActiveSlot(i)) {
-                    @SuppressWarnings("unchecked")
-                    MapEntry<K, V> e = (MapEntry<K, V>) items[i];
-                    if (e.value == null ? !(other.get(e.key) == null && other.containsKey(e.key))
-                                        : !e.value.equals(other.get(e.key))) {
-                        return false;
-                    }
+            for (Map.Entry<?, ?> e : other.entrySet()) {
+                @SuppressWarnings("unchecked")
+                SearchResult r = findSlot((K) e.getKey());
+                if (!r.found || !Objects.equals(((MapEntry<K, V>) items[r.index]).value, e.getValue())) {
+                    return false;
                 }
             }
         } catch (ClassCastException | NullPointerException ex) {
@@ -281,12 +283,18 @@ public class LinearScanHashMap<K, V> extends AbstractLinearProbingTable<K> imple
         return true;
     }
 
+    /**
+     * Sum over entries of {@code hashable.hash(key) ^ Objects.hashCode(value)}, consistent
+     * with {@link #equals(Object)}; equals {@link HashMap#hashCode()} for standard hashables.
+     */
     @Override
+    @SuppressWarnings("unchecked")
     public int hashCode() {
         int h = 0;
         for (int i = 0; i < capacity; i++) {
             if (isActiveSlot(i)) {
-                h += items[i].hashCode();
+                MapEntry<K, V> e = (MapEntry<K, V>) items[i];
+                h += userHashable.hash(e.key) ^ Objects.hashCode(e.value);
             }
         }
         return h;

@@ -88,6 +88,9 @@ public abstract class AbstractLinearProbingTable<K> {
      * Hashable instance for computing hash codes and testing key equality.
      */
     protected final Hashable<K> hashable;
+
+    /** The caller-supplied hashable (unwrapped), used for equals/hashCode. */
+    protected final Hashable<K> userHashable;
     
     /**
      * Maximum load factor before triggering growth.
@@ -121,6 +124,7 @@ public abstract class AbstractLinearProbingTable<K> {
      */
     protected AbstractLinearProbingTable(int capacity, Hashable<K> hashable, double maxLoadFactor, int growthFactor) {
         this.capacity = capacity;
+        this.userHashable = hashable;
         this.hashable = hashable.withPositiveHash();
         this.maxLoadFactor = maxLoadFactor;
         this.growthFactor = growthFactor;

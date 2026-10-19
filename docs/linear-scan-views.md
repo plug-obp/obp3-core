@@ -26,3 +26,12 @@
   supplied to the constructor, so that they interoperate with other `Map`/`Set` implementations.
 - Iterators are not fail-fast: structural modification other than via `Iterator.remove()`
   (e.g. `put` triggering a rehash) during iteration gives undefined results.
+
+## Equality and hashing with a custom `Hashable` (follow-up)
+- `equals` matches keys/elements with the table's own `Hashable`; map values use `Objects.equals`.
+- `hashCode` uses the caller-supplied `Hashable` (`userHashable`, not the internal
+  positive-hash wrapper), so `equals` implies equal `hashCode` for any valid `Hashable`.
+  With `Hashable.standard()` the results equal those of `HashMap`/`HashSet`.
+- Symmetry with foreign `Map`/`Set` implementations only holds when the `Hashable`
+  agrees with standard equality (inherent to custom equivalence relations).
+- Tests: `setCustomHashable`, `mapCustomHashable` (case-insensitive `Hashable`).

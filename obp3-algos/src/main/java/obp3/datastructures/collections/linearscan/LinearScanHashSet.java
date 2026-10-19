@@ -245,6 +245,10 @@ public class LinearScanHashSet<K> extends AbstractLinearProbingTable<K> implemen
         };
     }
 
+    /**
+     * Compares with another set; membership is decided by this set's {@link Hashable}.
+     * Symmetry with foreign sets holds only when the {@code Hashable} agrees with standard equality.
+     */
     @Override
     public boolean equals(Object o) {
         if (o == this) {
@@ -260,12 +264,14 @@ public class LinearScanHashSet<K> extends AbstractLinearProbingTable<K> implemen
         }
     }
 
+    /** Sum of {@code hashable.hash(e)}, consistent with {@link #equals(Object)}. */
     @Override
+    @SuppressWarnings("unchecked")
     public int hashCode() {
         int h = 0;
         for (int i = 0; i < capacity; i++) {
             if (isActiveSlot(i)) {
-                h += Objects.hashCode(items[i]);
+                h += userHashable.hash((K) items[i]);
             }
         }
         return h;
