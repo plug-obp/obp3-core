@@ -1,6 +1,5 @@
 package obp3.des;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -43,16 +42,10 @@ public class DESConfiguration<D extends Clonable<D>> implements Clonable<DESConf
     }
 
     List<Event<D>> getNextEvents(long delta) {
-        //no events available
-        if (events.isEmpty()) { return List.of(); }
-        //only the events before the end time
-        if (events.peek().time() > endTime) { return List.of(); }
-        List<Event<D>> nextEvents = new ArrayList<>();
-        //get all events with the same time
-        while (!events.isEmpty() && events.peek().time() == currentTime + delta) {
-            nextEvents.add(events.poll());
-        }
-        return nextEvents;
+        if (events.isEmpty() || events.peek().time() > endTime) { return List.of(); }
+        return events.stream()
+                .filter(event -> event.time() == currentTime + delta)
+                .toList();
     }
 
     void processEvent(Event<D> event) {
