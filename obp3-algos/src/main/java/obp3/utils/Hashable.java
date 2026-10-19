@@ -126,18 +126,22 @@ public interface Hashable<T> {
 
     /**
      * Returns a hashable based on a comparator. Two objects are considered equal
-     * if the comparator returns 0 when comparing them.
+     * if the comparator returns 0 when comparing them. A hash function is required
+     * because a comparator alone cannot yield a consistent hash: the supplied function
+     * must map objects the comparator considers equal to the same hash code.
      * 
      * @param <T> the type of objects
      * @param comparator the comparator to use for equality testing
+     * @param hashFunction a hash function consistent with the comparator
      * @return a hashable based on the comparator
      */
-    static <T> Hashable<T> fromComparator(Comparator<? super T> comparator) {
+    static <T> Hashable<T> fromComparator(Comparator<? super T> comparator, ToIntFunction<? super T> hashFunction) {
         Objects.requireNonNull(comparator, "comparator must not be null");
+        Objects.requireNonNull(hashFunction, "hashFunction must not be null");
         return new Hashable<T>() {
             @Override
             public int hash(T x) {
-                return Objects.hashCode(x);
+                return x == null ? 0 : hashFunction.applyAsInt(x);
             }
             
             @Override

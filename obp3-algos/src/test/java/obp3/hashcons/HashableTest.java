@@ -51,12 +51,13 @@ class HashableTest {
     @Test
     @DisplayName("fromComparator() should use comparator for equality")
     void testFromComparator() {
-        Hashable<String> hashable = Hashable.fromComparator(String.CASE_INSENSITIVE_ORDER);
+        Hashable<String> hashable = Hashable.fromComparator(String.CASE_INSENSITIVE_ORDER, str -> str.toLowerCase().hashCode());
         
         // Test equality based on comparator
         assertTrue(hashable.equal("test", "TEST"));
         assertTrue(hashable.equal("Hello", "hello"));
         assertFalse(hashable.equal("test", "other"));
+        assertEquals(hashable.hash("test"), hashable.hash("TEST"));
         assertTrue(hashable.equal(null, null));
         assertFalse(hashable.equal("test", null));
         assertFalse(hashable.equal(null, "test"));
@@ -66,7 +67,7 @@ class HashableTest {
     @DisplayName("fromComparator() should throw NPE for null comparator")
     void testFromComparatorNull() {
         assertThrows(NullPointerException.class, () -> {
-            Hashable.fromComparator(null);
+            Hashable.fromComparator(null, Object::hashCode);
         });
     }
 
@@ -213,7 +214,7 @@ class HashableTest {
         
         // Compare only by age
         Comparator<Person> ageComparator = Comparator.comparingInt(Person::age);
-        Hashable<Person> hashable = Hashable.fromComparator(ageComparator);
+        Hashable<Person> hashable = Hashable.fromComparator(ageComparator, Person::age);
         
         Person p1 = new Person("Alice", 30);
         Person p2 = new Person("Bob", 30);

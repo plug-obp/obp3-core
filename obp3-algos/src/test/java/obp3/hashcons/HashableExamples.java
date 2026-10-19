@@ -47,7 +47,7 @@ public class HashableExamples {
      */
     public static void exampleComparatorHashable() {
         // Case-insensitive string comparison
-        var hashable = Hashable.fromComparator(String.CASE_INSENSITIVE_ORDER);
+        var hashable = Hashable.fromComparator(String.CASE_INSENSITIVE_ORDER, str -> str.toLowerCase().hashCode());
         var set = new LinearScanHashSet<>(16, hashable);
         
         set.add("Hello");

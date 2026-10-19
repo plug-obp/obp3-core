@@ -44,7 +44,7 @@ Run with `./gradlew :obp3-algos:test` from the project root.
 ## Static Review Notes
 
 - The GS09 checker accepts a reducer but its `BuchiGS09BlueConfiguration` looks up and stores colors by original `V` vertices rather than reduced `A` values. Add tests with distinct vertices mapping to one reduced value before relying on state reduction in this checker.
-- `Hashable.fromComparator` hashes with object hash while equality follows the comparator. `withPositiveHash()` uses `Math.abs`, which leaves `Integer.MIN_VALUE` negative; the linear table later uses `% capacity` as an array index. Existing tests miss this combination (capacity 16 masks the negative remainder for this integer).
+- `Hashable.fromComparator(comparator, hashFunction)` requires a caller-supplied hash consistent with the comparator. `withPositiveHash()` uses `Math.abs`, which leaves `Integer.MIN_VALUE` negative; the linear table later uses `% capacity` as an array index. Existing tests miss this combination (capacity 16 masks the negative remainder for this integer).
 - `LinearScanHashMap.keySet()`, `values()`, and `entrySet()` build detached snapshots, and entries are copies. This differs from the backed views required by `Map`; also review `equals`/`hashCode` for the custom map and set.
 - `PeekableIterator` uses null as its no-cached-value marker, so a real null value cannot be reliably peeked. Its callers include relational BFS/DFS.
 - `Unificator.solve` should have a regression for `X = X`; the candidate may then be rejected by the occurs check. Its fixpoint is stored on the instance, so also review repeated `solveTop` use if that lifecycle becomes public.
