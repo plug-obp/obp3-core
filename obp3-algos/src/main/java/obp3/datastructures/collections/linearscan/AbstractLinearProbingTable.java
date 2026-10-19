@@ -114,6 +114,9 @@ public abstract class AbstractLinearProbingTable<K> {
      */
     protected int size;
 
+    /** Incremented on every structural change (insert, removal, clear, rehash); used by fail-fast iterators. */
+    protected int modCount;
+
     /**
      * Constructs a new AbstractLinearProbingTable with the specified parameters.
      *
@@ -194,6 +197,7 @@ public abstract class AbstractLinearProbingTable<K> {
     public void clear() {
         Arrays.fill(items, EMPTY);
         size = 0;
+        modCount++;
     }
 
     @Override
@@ -435,6 +439,7 @@ public abstract class AbstractLinearProbingTable<K> {
         
         capacity = newCapacity;
         items = newArray;
+        modCount++;
     }
 
     /**
@@ -493,6 +498,7 @@ public abstract class AbstractLinearProbingTable<K> {
     protected void removeAtIndex(int index) {
         items[index] = DELETED;
         size--;
+        modCount++;
     }
 
     /**

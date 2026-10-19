@@ -124,21 +124,20 @@ public class LinearScanHashMap<K, V> extends AbstractLinearProbingTable<K> imple
     @SuppressWarnings("unchecked")
     @Override
     public V put(K key, V value) {
-        checkAndGrow();
-        
-        InsertionSlot slot = findInsertionSlot(key);
-        
-        if (slot.exists) {
-            // Key already exists - update value
-            MapEntry<K, V> entry = (MapEntry<K, V>) items[slot.index];
+        // Updating an existing key is not a structural change and must not rehash
+        SearchResult existing = findSlot(key);
+        if (existing.found) {
+            MapEntry<K, V> entry = (MapEntry<K, V>) items[existing.index];
             V oldValue = entry.value;
             entry.value = value;
             return oldValue;
         }
-        
-        // Insert new entry
+
+        checkAndGrow();
+        InsertionSlot slot = findInsertionSlot(key);
         items[slot.index] = new MapEntry<>(key, value);
         size++;
+        modCount++;
         return null;
     }
 
@@ -208,6 +207,7 @@ public class LinearScanHashMap<K, V> extends AbstractLinearProbingTable<K> imple
     public void clear() {
         Arrays.fill(items, EMPTY);
         size = 0;
+        modCount++;
     }
 
     @Override
@@ -304,6 +304,7 @@ public class LinearScanHashMap<K, V> extends AbstractLinearProbingTable<K> imple
     private abstract class SlotIterator<T> implements Iterator<T> {
         private int next = advance(0);
         private int last = -1;
+        private int expectedModCount = modCount;
 
         private int advance(int from) {
             while (from < capacity && !isActiveSlot(from)) {
@@ -322,6 +323,7 @@ public class LinearScanHashMap<K, V> extends AbstractLinearProbingTable<K> imple
         @Override
         @SuppressWarnings("unchecked")
         public T next() {
+            checkForComodification();
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
@@ -335,8 +337,16 @@ public class LinearScanHashMap<K, V> extends AbstractLinearProbingTable<K> imple
             if (last < 0) {
                 throw new IllegalStateException();
             }
+            checkForComodification();
             removeAtIndex(last);
             last = -1;
+            expectedModCount = modCount;
+        }
+
+        private void checkForComodification() {
+            if (modCount != expectedModCount) {
+                throw new ConcurrentModificationException();
+            }
         }
     }
 

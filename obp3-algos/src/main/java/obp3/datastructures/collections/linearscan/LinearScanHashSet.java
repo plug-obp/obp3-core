@@ -131,18 +131,16 @@ public class LinearScanHashSet<K> extends AbstractLinearProbingTable<K> implemen
      */
     @Override
     public boolean add(K element) {
-        checkAndGrow();
-        
-        InsertionSlot slot = findInsertionSlot(element);
-        
-        if (slot.exists) {
-            // Element already present
+        // An already-present element must not trigger a rehash
+        if (findSlot(element).found) {
             return false;
         }
-        
-        // Insert new element
+
+        checkAndGrow();
+        InsertionSlot slot = findInsertionSlot(element);
         items[slot.index] = element;
         size++;
+        modCount++;
         return true;
     }
 
@@ -210,6 +208,7 @@ public class LinearScanHashSet<K> extends AbstractLinearProbingTable<K> implemen
         return new Iterator<K>() {
             private int next = advance(0);
             private int last = -1;
+            private int expectedModCount = modCount;
 
             private int advance(int from) {
                 while (from < capacity && !isActiveSlot(from)) {
@@ -226,6 +225,9 @@ public class LinearScanHashSet<K> extends AbstractLinearProbingTable<K> implemen
             @Override
             @SuppressWarnings("unchecked")
             public K next() {
+                if (modCount != expectedModCount) {
+                    throw new ConcurrentModificationException();
+                }
                 if (!hasNext()) {
                     throw new NoSuchElementException();
                 }
@@ -239,8 +241,12 @@ public class LinearScanHashSet<K> extends AbstractLinearProbingTable<K> implemen
                 if (last < 0) {
                     throw new IllegalStateException();
                 }
+                if (modCount != expectedModCount) {
+                    throw new ConcurrentModificationException();
+                }
                 removeAtIndex(last);
                 last = -1;
+                expectedModCount = modCount;
             }
         };
     }

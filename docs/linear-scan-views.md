@@ -35,3 +35,19 @@
 - Symmetry with foreign `Map`/`Set` implementations only holds when the `Hashable`
   agrees with standard equality (inherent to custom equivalence relations).
 - Tests: `setCustomHashable`, `mapCustomHashable` (case-insensitive `Hashable`).
+
+## Fail-fast iterators (follow-up)
+**Problem:** iterators (set iterator and map key/value/entry view iterators) were not fail-fast;
+a `put`/`add` that rehashed the table during iteration silently produced skipped or repeated elements
+(the iterator held an index into the replaced array layout). Also, `put` of an *existing* key and
+`add` of an *existing* element could trigger a rehash purely because the table sat at the load threshold.
+
+**Fix:**
+- `AbstractLinearProbingTable.modCount` is bumped on insert, removal, `clear` and rehash.
+- Iterators snapshot `modCount` and throw `ConcurrentModificationException` from `next()`/`remove()`
+  on mismatch; `Iterator.remove()` re-syncs its own expected count.
+- `put`/`add` look up the key first; updating an existing key or re-adding an element is not structural
+  and no longer rehashes (so value updates during iteration, e.g. `Entry.setValue`, remain legal).
+- Like `HashMap`, fail-fast is best effort, not a guarantee.
+
+Tests: `LinearScanFailFastTest`.
