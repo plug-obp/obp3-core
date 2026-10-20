@@ -116,13 +116,16 @@ most isolated first). Baseline before starting: `./gradlew build` (632 tests pas
 - **Why now:** these are audit improvements 2 and 3. Writing down current behavior costs
   nothing and changes nothing; policy changes stay a separate decision.
 
-### 10. Characterization tests for untested, currently-correct code
+### 10. Characterization tests for untested, currently-correct code (DONE)
 - **Where:** new tests under `obp3-algos/src/test/java/obp3/` (BFS, plus the public builder
   happy path).
 - **Change:** port `BfsAndUtilityAudit` as a small exhaustive test: all directed 3-vertex graphs
   × all root subsets, four BFS implementations, reachability checked against a closure computed
   in the test (16,384 runs in the audit, 0 mismatches). Measure runtime first; keep it only if
   it is a few seconds, otherwise restrict to 2-vertex graphs plus a fixed seeded sample.
+- **Result:** `z2mc.traversal.bfs.TestBreadthFirstReachability` runs the full 3-vertex enumeration for all four
+  BFS variants (4 × 4,096 runs, ~30 ms total), so no reduction was needed. The public builder happy path
+  was not added here; it remains with item 5 (S1).
 - **Why:** closes the "no dedicated BFS tests" gap without touching production code and gives
   the later P1 work a safety net.
 

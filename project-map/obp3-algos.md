@@ -35,7 +35,7 @@ The central implementation module. It depends on `obp3-runtime` and owns graph t
 
 All discovered Java tests were under `src/test/java` in this module. Major groups:
 
-- `z2mc/traversal/`, `z2mc/scc/`, `z2mc/buchi/`, and `z2mc/safety/` for graph algorithms and model checking.
+- `z2mc/traversal/` (DFS in `dft/`; BFS reachability against an independent closure oracle in `bfs/`), `z2mc/scc/`, `z2mc/buchi/`, and `z2mc/safety/` for graph algorithms and model checking.
 - `obp3/datastructures/collections/linearscan/` and `obp3/hashcons/` for collections and hash-consing.
 - `obp3/unification/` and `obp3/uslg/syntax/` for terms, answers, substitutions, and logic solving.
 
