@@ -1,11 +1,12 @@
 package obp3.hashcons.example.lambda.hashcons.nowrapper.syntax;
 
+import obp3.hashcons.Arena;
 import obp3.hashcons.HashConsed;
 
 import java.util.Objects;
 
 public class Var implements Term {
-    int index; int tag = -1; int hashKey = -1;
+    int index; Arena arena; int tag = -1; int hashKey = -1;
     public Var(int index) {
         this.index = index;
     }
@@ -15,15 +16,22 @@ public class Var implements Term {
     }
 
     @Override
-    public HashConsed<Term> toHashCons(int tag, int hashKey) {
-        this.tag = tag;
-        this.hashKey = hashKey;
-        return this;
+    public HashConsed<Term> toHashCons(Arena arena, int tag, int hashKey) {
+        var copy = new Var(index);
+        copy.arena = arena;
+        copy.tag = tag;
+        copy.hashKey = hashKey;
+        return copy;
     }
 
     @Override
     public Term node() {
         return this;
+    }
+
+    @Override
+    public Arena arena() {
+        return arena;
     }
 
     @Override
@@ -45,13 +53,13 @@ public class Var implements Term {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Var var)) return false;
-        if (tag > 0 && var.tag > 0) return tag == var.tag;
+        if (HashConsed.sameArena(this, var)) return tag == var.tag;
         return index == var.index;
     }
 
     @Override
     public int hashCode() {
-        if (hashKey > 0) return hashKey;
+        if (isHashConsed()) return hashKey;
         return Objects.hash(index);
     }
 

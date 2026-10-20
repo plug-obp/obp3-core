@@ -782,4 +782,67 @@ class LinearScanHashSetTest {
             assertTrue(s.contains(i));
         }
     }
+
+    @Test
+    @DisplayName("removeAll(this) empties the set and reports modification")
+    void testRemoveAllSelf() {
+        set.add("a");
+        set.add("b");
+        set.add("c");
+        assertTrue(set.removeAll(set));
+        assertTrue(set.isEmpty());
+        assertFalse(set.contains("a"));
+    }
+
+    @Test
+    @DisplayName("removeAll(this) on empty and single-element sets")
+    void testRemoveAllSelfEmptyAndSingle() {
+        assertFalse(set.removeAll(set));
+        set.add("a");
+        assertTrue(set.removeAll(set));
+        assertTrue(set.isEmpty());
+    }
+
+    @Test
+    @DisplayName("removeAll(this) with collisions and tombstones leaves a usable set")
+    void testRemoveAllSelfWithCollisions() {
+        Hashable<Integer> constant = new Hashable<>() {
+            @Override public int hash(Integer x) { return 7; }
+            @Override public boolean equal(Integer a, Integer b) { return a.equals(b); }
+        };
+        LinearScanHashSet<Integer> s = new LinearScanHashSet<>(8, constant);
+        for (int i = 0; i < 6; i++) s.add(i);
+        s.remove(2);
+        s.remove(4);
+        assertTrue(s.removeAll(s));
+        assertEquals(0, s.size());
+        for (int i = 0; i < 6; i++) assertFalse(s.contains(i));
+        assertTrue(s.add(2));
+        assertTrue(s.contains(2));
+        assertEquals(1, s.size());
+    }
+
+    @Test
+    @DisplayName("removeAll with a different collection is unchanged")
+    void testRemoveAllOther() {
+        set.add("a");
+        set.add("b");
+        set.add("c");
+        assertTrue(set.removeAll(java.util.List.of("a", "c", "x")));
+        assertEquals(1, set.size());
+        assertTrue(set.contains("b"));
+        assertFalse(set.removeAll(java.util.List.of("x")));
+    }
+
+    @Test
+    @DisplayName("map key view removeAll with itself empties the map")
+    void testMapKeyViewRemoveAllSelf() {
+        LinearScanHashMap<String, Integer> map = new LinearScanHashMap<>(16);
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
+        var keys = map.keySet();
+        assertTrue(keys.removeAll(keys));
+        assertTrue(map.isEmpty());
+    }
 }

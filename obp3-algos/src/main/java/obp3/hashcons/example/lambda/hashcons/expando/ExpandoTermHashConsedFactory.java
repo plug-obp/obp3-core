@@ -1,6 +1,7 @@
 package obp3.hashcons.example.lambda.hashcons.expando;
 
 import obp3.hashcons.HashConsTable;
+import obp3.hashcons.Arena;
 import obp3.hashcons.HashConsed;
 import obp3.hashcons.example.lambda.TermFactory;
 import obp3.hashcons.example.lambda.syntax.App;
@@ -16,12 +17,12 @@ import java.util.function.ToIntFunction;
 public class ExpandoTermHashConsedFactory extends TermFactory {
     private final HashConsTable<Term> table;
 
-    record TermHashConsed(Term node, int tag, int hashKey) implements HashConsed<Term> {
+    record TermHashConsed(Term node, Arena arena, int tag, int hashKey) implements HashConsed<Term> {
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
             if (!(obj instanceof TermHashConsed other)) return false;
-            return this.tag == other.tag;
+            return HashConsed.equalityFunction(this, other);
         }
 
         @Override

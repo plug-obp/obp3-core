@@ -6,7 +6,7 @@ import obp3.runtime.sli.IRootedGraph;
 import obp3.runtime.sli.Step;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import org.junit.jupiter.api.Test;
-import z2mc.traversal.dft.RootedGraphExamples;
+import z2mc.traversal.RootedGraphExamples;
 
 import java.util.List;
 import java.util.Optional;

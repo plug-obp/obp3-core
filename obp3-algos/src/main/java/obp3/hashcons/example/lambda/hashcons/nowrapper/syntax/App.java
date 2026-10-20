@@ -1,11 +1,12 @@
 package obp3.hashcons.example.lambda.hashcons.nowrapper.syntax;
 
+import obp3.hashcons.Arena;
 import obp3.hashcons.HashConsed;
 
 import java.util.Objects;
 
 public class App implements Term {
-    Term left; Term right; int tag = -1; int hashKey = -1;
+    Term left; Term right; Arena arena; int tag = -1; int hashKey = -1;
     public App(Term left, Term right) {
         this.left = left;
         this.right = right;
@@ -16,15 +17,22 @@ public class App implements Term {
     }
 
     @Override
-    public HashConsed<Term> toHashCons(int tag, int hashKey) {
-        this.tag = tag;
-        this.hashKey = hashKey;
-        return this;
+    public HashConsed<Term> toHashCons(Arena arena, int tag, int hashKey) {
+        var copy = new App(left, right);
+        copy.arena = arena;
+        copy.tag = tag;
+        copy.hashKey = hashKey;
+        return copy;
     }
 
     @Override
     public Term node() {
         return this;
+    }
+
+    @Override
+    public Arena arena() {
+        return arena;
     }
 
     @Override
@@ -47,7 +55,7 @@ public class App implements Term {
         if (this == o) return true;
         if (!(o instanceof App app)) return false;
         //if hashConsed use the hashCons tag
-        if (tag > 0 && app.tag > 0) return tag == app.tag;
+        if (HashConsed.sameArena(this, app)) return tag == app.tag;
         //otherwise default to structural equality
         return Objects.equals(left, app.left) && Objects.equals(right, app.right);
     }
@@ -55,7 +63,7 @@ public class App implements Term {
     @Override
     public int hashCode() {
         //if hashConsed use the hashCons tag
-        if (hashKey > 0) return hashKey;
+        if (isHashConsed()) return hashKey;
         //otherwise structural hash
         return Objects.hash(left, right);
     }
