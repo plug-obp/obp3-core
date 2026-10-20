@@ -26,7 +26,7 @@ The central implementation module. It depends on `obp3-runtime` and owns graph t
 
 ## Useful Traces
 
-- To change DFS behavior, follow `DepthFirstTraversal` -> `IDepthFirstTraversalConfiguration` -> a semantics implementation -> its callback model. The ordinary test families are `z2mc/traversal/dft/TestDFTWhile.java`, `TestDFTDo.java`, `TestDFTRelational.java`, and `TestDFTTree.java`.
+- To change DFS behavior, follow `DepthFirstTraversal` -> `IDepthFirstTraversalConfiguration` -> a semantics implementation -> its callback model. The test families are `z2mc/traversal/dft/TestDFTWhile.java`, `TestDFTDo.java` and `TestDFTRelational.java` (all driven by `AbstractDFTTest`), sharing the traversal contract in `z2mc/traversal/AbstractTraversalTest.java` with the BFT tests.
 - To change a model checker, follow a checker class and its callbacks/configuration, then the `tools/` model/builder that selects it. Tests are under `z2mc/buchi/` and `z2mc/safety/`.
 - To change semantic composition, inspect `StepSynchronousProductSemantics` and the relation/graph adapters, then test at the consumer layer.
 - To change fixed-point or SLG behavior, start at `Fixer` and follow its `BiFunction`/`request` dependency graph; SLG tests are under `obp3/uslg/syntax/`.
@@ -35,7 +35,7 @@ The central implementation module. It depends on `obp3-runtime` and owns graph t
 
 All discovered Java tests were under `src/test/java` in this module. Major groups:
 
-- `z2mc/traversal/` (DFS in `dft/`, including exhaustive 3-vertex reachability/entry-callback checks in `TestDFTReachability`; BFS reachability against an independent closure oracle in `bfs/`), `z2mc/scc/`, `z2mc/buchi/`, and `z2mc/safety/` for graph algorithms and model checking.
+- `z2mc/traversal/` (shared `AbstractTraversalTest` contract with an exhaustive 3-vertex closure oracle; depth-first traversal in `dft/`, breadth-first traversal in `bft/`; common `RootedGraphExamples`), `z2mc/scc/`, `z2mc/buchi/`, and `z2mc/safety/` for graph algorithms and model checking.
 - `obp3/datastructures/collections/linearscan/` and `obp3/hashcons/` for collections and hash-consing.
 - `obp3/unification/` and `obp3/uslg/syntax/` for terms, answers, substitutions, and logic solving.
 

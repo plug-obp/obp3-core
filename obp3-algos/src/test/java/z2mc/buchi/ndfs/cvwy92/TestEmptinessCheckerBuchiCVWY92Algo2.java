@@ -4,7 +4,7 @@ import obp3.modelchecking.EmptinessCheckerAnswer;
 import obp3.modelchecking.buchi.ndfs.cvwy92.EmptinessCheckerBuchiCVWY92Algo2;
 import obp3.runtime.sli.IRootedGraph;
 import org.junit.jupiter.api.Test;
-import z2mc.traversal.dft.RootedGraphExamples;
+import z2mc.traversal.RootedGraphExamples;
 
 import java.util.List;
 import java.util.function.Predicate;

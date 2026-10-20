@@ -117,19 +117,25 @@ most isolated first). Baseline before starting: `./gradlew build` (632 tests pas
   nothing and changes nothing; policy changes stay a separate decision.
 
 ### 10. Characterization tests for untested, currently-correct code (DONE)
-- **Where:** new tests under `obp3-algos/src/test/java/obp3/` (BFS, plus the public builder
+- **Where:** new tests under `obp3-algos/src/test/java/obp3/` (BFT, plus the public builder
   happy path).
 - **Change:** port `BfsAndUtilityAudit` as a small exhaustive test: all directed 3-vertex graphs
-  × all root subsets, four BFS implementations, reachability checked against a closure computed
+  × all root subsets, four BFT implementations, reachability checked against a closure computed
   in the test (16,384 runs in the audit, 0 mismatches). Measure runtime first; keep it only if
   it is a few seconds, otherwise restrict to 2-vertex graphs plus a fixed seeded sample.
-- **Result:** `z2mc.traversal.bfs.TestBreadthFirstReachability` runs the full 3-vertex enumeration for all four
-  BFS variants (4 × 4,096 runs, ~30 ms total), so no reduction was needed. The public builder happy path
-  was not added here; it remains with item 5 (S1).
-- **DFS extension:** `z2mc.traversal.dft.TestDFTReachability` applies the same enumeration to the three DFS
-  algorithms (`WHILE`, `DO`, `RELATIONAL`), unreduced. Besides the known set, it checks that the entry callback
-  fires exactly once per reachable vertex and that every reported entry edge exists in the graph.
-- **Why:** closes the "no dedicated BFS tests" gap without touching production code and gives
+- **Result:** the traversal tests are now organised around one shared contract, so breadth-first (BFT) and
+  depth-first (DFT) traversals have the same coverage (the public builder happy path stays with item 5 (S1)):
+  - `z2mc.traversal.AbstractTraversalTest`: all named example graphs; the exhaustive 3-vertex enumeration
+    (all directed graphs × all root subsets) against an independent closure; each reachable vertex expanded
+    exactly once; partial results on early termination; a 20,000-vertex chain.
+  - `z2mc.traversal.bft.AbstractBFTTest` + `TestBFTWhile/Do/DoFlat/Relational`: adds tree graphs and configuration
+    invariants (known grows, frontier is known and duplicate free).
+  - `z2mc.traversal.dft.AbstractDFTTest` + `TestDFTWhile/Do/Relational`: adds callbacks, reduction, depth bounds,
+    tree graphs (no known set), and the once-per-vertex/existing-edge entry check. The former `TestDFTTree` cases
+    now run for every algorithm.
+  - `RootedGraphExamples` moved to `z2mc.traversal` because both families use it.
+  All unreduced; the full enumeration costs about 30 ms per variant.
+- **Why:** closes the "no dedicated BFT tests" gap without touching production code and gives
   the later P1 work a safety net.
 
 ## Reducer-related work is deferred

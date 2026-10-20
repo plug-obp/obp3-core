@@ -5,7 +5,7 @@ import obp3.scc.tarjan2.TarjanStronglyConnectedComponentsAlgoT;
 import obp3.runtime.sli.IRootedGraph;
 import obp3.traversal.dfs.DepthFirstTraversal;
 import org.junit.jupiter.api.Test;
-import z2mc.traversal.dft.RootedGraphExamples;
+import z2mc.traversal.RootedGraphExamples;
 
 import java.util.Map;
 import java.util.Set;

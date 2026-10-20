@@ -5,7 +5,7 @@ import obp3.modelchecking.buchi.ndfs.gs09.cdlp05.EmptinessCheckerBuchiGS09CDLP05
 import obp3.runtime.sli.IRootedGraph;
 import obp3.runtime.sli.Step;
 import org.junit.jupiter.api.Test;
-import z2mc.traversal.dft.RootedGraphExamples;
+import z2mc.traversal.RootedGraphExamples;
 
 import java.util.List;
 import java.util.Optional;
