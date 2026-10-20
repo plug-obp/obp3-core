@@ -59,7 +59,6 @@ These are observations from source inspection, not test-verified issue reports; 
 - `Hashable.fromComparator` takes an explicit hash function that must agree with the comparator; `withPositiveHash` does not make `Integer.MIN_VALUE` nonnegative. See [`Hashable`](../obp3-algos/src/main/java/obp3/utils/Hashable.java).
 - `LinearScanHashMap` returns detached `keySet`, `values`, and `entrySet` snapshots rather than backed `Map` views. Its custom map/set also need review for standard `equals`/`hashCode` contracts. See [`LinearScanHashMap`](../obp3-algos/src/main/java/obp3/datastructures/collections/linearscan/LinearScanHashMap.java).
 - The GS09 Büchi implementation accepts a reducer but its color/known map is keyed by original vertices. See [`EmptinessCheckerBuchiGS09`](../obp3-algos/src/main/java/obp3/modelchecking/buchi/ndfs/gs09/EmptinessCheckerBuchiGS09.java) and [`BuchiGS09BlueConfiguration`](../obp3-algos/src/main/java/obp3/modelchecking/buchi/ndfs/gs09/BuchiGS09BlueConfiguration.java).
-- [`PeekableIterator`](../obp3-algos/src/main/java/obp3/utils/PeekableIterator.java) uses `null` as its empty-cache marker, so peeking an actual null element is ambiguous.
 - `obp3-experiments` has no tests; the trace-inclusion operator currently has no in-repository construction/wiring path. JMH is configured to include only `FibonacciBench`, and `BFSBench` contains two identically implemented traversal methods under different names.
 
 ## Keeping This Map Useful

@@ -5,30 +5,31 @@ import java.util.Objects;
 
 public class PeekableIterator<X> implements Iterator<X> {
     X peeked;
+    boolean hasPeeked;
     Iterator<X> operand;
 
     public PeekableIterator(Iterator<X> operand) {
         this.operand = operand;
-        this.peeked = null;
     }
 
     @Override
     public boolean hasNext() {
-        if (peeked == null) return this.operand.hasNext();
-        return true;
+        return hasPeeked || this.operand.hasNext();
     }
 
     @Override
     public X next() {
-        if (peeked == null) return this.operand.next();
+        if (!hasPeeked) return this.operand.next();
         X value = peeked;
         peeked = null;
+        hasPeeked = false;
         return value;
     }
 
     public X peek() {
-        if (peeked == null) {
-            return peeked = this.operand.next();
+        if (!hasPeeked) {
+            peeked = this.operand.next();
+            hasPeeked = true;
         }
         return peeked;
     }
@@ -36,12 +37,12 @@ public class PeekableIterator<X> implements Iterator<X> {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof PeekableIterator<?> that)) return false;
-        return Objects.equals(peeked, that.peeked) && Objects.equals(operand, that.operand);
+        return hasPeeked == that.hasPeeked && Objects.equals(peeked, that.peeked) && Objects.equals(operand, that.operand);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(peeked, operand);
+        return Objects.hash(peeked, hasPeeked, operand);
     }
 
     @Override
