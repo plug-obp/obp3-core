@@ -126,6 +126,9 @@ most isolated first). Baseline before starting: `./gradlew build` (632 tests pas
 - **Result:** `z2mc.traversal.bfs.TestBreadthFirstReachability` runs the full 3-vertex enumeration for all four
   BFS variants (4 × 4,096 runs, ~30 ms total), so no reduction was needed. The public builder happy path
   was not added here; it remains with item 5 (S1).
+- **DFS extension:** `z2mc.traversal.dft.TestDFTReachability` applies the same enumeration to the three DFS
+  algorithms (`WHILE`, `DO`, `RELATIONAL`), unreduced. Besides the known set, it checks that the entry callback
+  fires exactly once per reachable vertex and that every reported entry edge exists in the graph.
 - **Why:** closes the "no dedicated BFS tests" gap without touching production code and gives
   the later P1 work a safety net.
 
