@@ -49,5 +49,8 @@ a `put`/`add` that rehashed the table during iteration silently produced skipped
 - `put`/`add` look up the key first; updating an existing key or re-adding an element is not structural
   and no longer rehashes (so value updates during iteration, e.g. `Entry.setValue`, remain legal).
 - Like `HashMap`, fail-fast is best effort, not a guarantee.
+- `LinearScanHashSet.removeAll(this)` is handled explicitly (clears the set; returns `true` iff it was
+  nonempty) since removing while iterating the argument would otherwise trip fail-fast after a partial
+  removal. Other arguments, including backed views, are unaffected (tests: `LinearScanHashSetTest`).
 
 Tests: `LinearScanFailFastTest`.

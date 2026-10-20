@@ -345,6 +345,11 @@ public class LinearScanHashSet<K> extends AbstractLinearProbingTable<K> implemen
 
     @Override
     public boolean removeAll(Collection<?> c) {
+        if (c == this) {
+            boolean wasEmpty = isEmpty();
+            clear();
+            return !wasEmpty;
+        }
         boolean modified = false;
         for (Object e : c) {
             if (remove(e)) {

@@ -47,7 +47,7 @@ most isolated first). Baseline before starting: `./gradlew build` (632 tests pas
 - **Test:** `[null, "next"]`: `peek()`→null, `next()`→null, `next()`→"next", `hasNext()`→false;
   plus the non-null cases to show unchanged behavior.
 
-### 4. LS2 – `LinearScanHashSet.removeAll(this)` throws after partial mutation
+### 4. LS2 – `LinearScanHashSet.removeAll(this)` throws after partial mutation (DONE)
 - **Where:** `LinearScanHashSet.java:347-355`.
 - **Change:** when `c == this`, `clear()` and return `!wasEmpty`. Otherwise unchanged.
   (A general "snapshot the argument" copy is not needed; only aliasing breaks.)
