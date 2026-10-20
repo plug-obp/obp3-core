@@ -47,17 +47,23 @@ public interface HashConsed<T> {
         return a.isHashConsed() && b.isHashConsed() && a.arena() != null && a.arena() == b.arena();
     }
 
-    /** Tag equality within one arena, equality of the underlying nodes otherwise. */
+    /**
+     * Tag equality within one arena. Otherwise ordinary equality of the underlying nodes,
+     * restricted to pairs with equal {@link #hashCodeFunction} so that equal values always hash equally.
+     */
     static boolean equalityFunction (Object a, Object b) {
         if (a == b) return true;
         if (a == null || b == null) return false;
         if (a instanceof HashConsed<?> ahc && b instanceof HashConsed<?> bhc) {
-            return sameArena(ahc, bhc) ? ahc.tag() == bhc.tag() : ahc.node().equals(bhc.node());
+            if (sameArena(ahc, bhc)) return ahc.tag() == bhc.tag();
+            return hashCodeFunction(a) == hashCodeFunction(b) && ahc.node().equals(bhc.node());
         }
-        return a.equals(b);
+        return hashCodeFunction(a) == hashCodeFunction(b) && a.equals(b);
     }
+
+    /** The interning hash key for interned values, the ordinary hash code otherwise (including the -1 sentinel). */
     static <T> int hashCodeFunction(T o) {
-        return o instanceof HashConsed<?> hc ? hc.hashKey() : o.hashCode();
+        return o instanceof HashConsed<?> hc && hc.isHashConsed() ? hc.hashKey() : o.hashCode();
     }
 
     static <T> Hashable<T> hashable() {

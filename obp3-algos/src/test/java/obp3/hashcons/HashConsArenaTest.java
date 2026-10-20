@@ -126,4 +126,38 @@ class HashConsArenaTest {
         public int hashKey() { return -1; }
         @Override public boolean isHashConsed() { return false; }
     }
+
+    @Test
+    void rawAndInternedDirectTermsAgreeOnEqualityAndHash() {
+        var h = HashConsed.<Term>hashable();
+        Term raw = new obp3.hashcons.example.lambda.hashcons.nowrapper.syntax.Var(1);
+        Term interned = new DirectTermHashConsedFactory().var(1);
+        assertFalse(raw.isHashConsed());
+        assertNotEquals(-1, h.hash(raw));
+        assertEquals(h.hash(raw), h.hash(interned));
+        assertTrue(h.equal(raw, interned));
+        assertTrue(h.equal(interned, raw));
+    }
+
+    @Test
+    void equalImpliesEqualHashAcrossRawAndInterned() {
+        var h = HashConsed.<Term>hashable();
+        var f1 = new DirectTermHashConsedFactory();
+        var f2 = new DirectTermHashConsedFactory();
+        Term[] values = {
+                new obp3.hashcons.example.lambda.hashcons.nowrapper.syntax.Var(1),
+                new obp3.hashcons.example.lambda.hashcons.nowrapper.syntax.Var(2),
+                f1.var(1), f1.var(2), f2.var(1), f2.var(2), f2.var(9), f1.lambda(f1.var(1))
+        };
+        for (var x : values) for (var y : values) {
+            if (h.equal(x, y)) assertEquals(h.hash(x), h.hash(y), x + " vs " + y);
+        }
+    }
+
+    @Test
+    void linearScanSetFindsInternedValueWhenRawWasInserted() {
+        var set = new obp3.datastructures.collections.linearscan.LinearScanHashSet<Term>(10, HashConsed.<Term>hashable());
+        set.add(new obp3.hashcons.example.lambda.hashcons.nowrapper.syntax.Var(1));
+        assertTrue(set.contains(new DirectTermHashConsedFactory().var(1)));
+    }
 }

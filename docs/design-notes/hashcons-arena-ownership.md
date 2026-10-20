@@ -22,6 +22,13 @@
 - Hash codes of interned values use `isHashConsed()`, not `hashKey > 0`, and equal ordinary
   hashes are guaranteed across arenas (hashKey is the structural hash at interning time).
 
+## Follow-up: raw vs interned hashing (review 3.1)
+`hashCodeFunction` used `hashKey()` for any `HashConsed`, including uninterned values (sentinel `-1`),
+so a raw and an interned structurally equal value were equal but hashed differently. The helper now
+uses `hashKey()` only when `isHashConsed()`, and the non-same-arena equality fallback additionally
+requires equal helper hashes, so equal implies same hash even if a table's custom hashable differs
+from `hashCode()`.
+
 ## Extending a table without copying
 Only safe if the storage has exactly one live owner, the same hashable and maker, and the
 allocator moves with it (e.g. consuming the source table so it is never used again). Not provided.
