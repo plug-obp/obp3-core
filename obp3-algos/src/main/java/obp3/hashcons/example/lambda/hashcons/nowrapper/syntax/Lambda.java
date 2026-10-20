@@ -1,11 +1,12 @@
 package obp3.hashcons.example.lambda.hashcons.nowrapper.syntax;
 
+import obp3.hashcons.Arena;
 import obp3.hashcons.HashConsed;
 
 import java.util.Objects;
 
 public class Lambda implements Term {
-    Term body; int tag = -1; int hashKey = -1;
+    Term body; Arena arena; int tag = -1; int hashKey = -1;
     public Lambda(Term body) {
         this.body = body;
     }
@@ -15,15 +16,22 @@ public class Lambda implements Term {
     }
 
     @Override
-    public HashConsed<Term> toHashCons(int tag, int hashKey) {
-        this.tag = tag;
-        this.hashKey = hashKey;
-        return this;
+    public HashConsed<Term> toHashCons(Arena arena, int tag, int hashKey) {
+        var copy = new Lambda(body);
+        copy.arena = arena;
+        copy.tag = tag;
+        copy.hashKey = hashKey;
+        return copy;
     }
 
     @Override
     public Term node() {
         return this;
+    }
+
+    @Override
+    public Arena arena() {
+        return arena;
     }
 
     @Override
@@ -46,14 +54,14 @@ public class Lambda implements Term {
         if (this == o) return true;
         if (!(o instanceof Lambda lambda)) return false;
         //if hashConsed use the hashCons tag
-        if (tag > 0 && lambda.tag > 0) return tag == lambda.tag;
+        if (HashConsed.sameArena(this, lambda)) return tag == lambda.tag;
         //otherwise default to structural equality
         return Objects.equals(body, lambda.body);
     }
 
     @Override
     public int hashCode() {
-        if (hashKey > 0) return hashKey;
+        if (isHashConsed()) return hashKey;
         return Objects.hash(body);
     }
 

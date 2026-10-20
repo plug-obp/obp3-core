@@ -20,7 +20,7 @@ The central implementation module. It depends on `obp3-runtime` and owns graph t
 - `obp3.unification`: term unification, answer values, occurs checking, and substitution. Syntactically identical equations such as `X = X` impose no binding and are discarded, including identities exposed by structural decomposition. Syntax types are in `unification/syntax/`.
 - `obp3.uslg.syntax`: substitutions, rules, answer sets, alpha-equivalence, and the tabled SLG solver.
 - `obp3.datastructures.collections.linearscan`: linear-probing set/map and shared tombstone/growth logic.
-- `obp3.hashcons`: hash-consing abstractions and lambda-term examples, including wrapper/no-wrapper/expando approaches.
+- `obp3.hashcons`: hash-consing abstractions and lambda-term examples, including wrapper/no-wrapper/expando approaches. Each `HashConsTable` owns an `Arena` (tag allocator + identity); tag equality only holds within one arena, foreign values are re-interned, and the seeded constructor copies. See `docs/design-notes/hashcons-arena-ownership.md`.
 - `obp3.utils`: `Either`, `PeekableIterator`, and [`Hashable`](../obp3-algos/src/main/java/obp3/utils/Hashable.java).
 - `obp3.things`: sample/generated graphs and a small runnable traversal entry point. `obp3.Execution` supports the experiments UI.
 
